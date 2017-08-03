@@ -1,8 +1,9 @@
 {
-  "name": "with-create-react-app",
+  "name": "Dragoman",
   "version": "0.1.0",
   "private": true,
-  "description": "An example usage of react-md and create-react-app.",
+  "description": "Dragoman, a GUI for polyglot.",
+  "homepage": "./",
   "dependencies": {
     "node-sass": "^4.5.2",
     "npm-run-all": "^4.0.2",
@@ -11,6 +12,7 @@
     "react-addons-css-transition-group": "^15.5.2",
     "react-addons-transition-group": "^15.5.2",
     "react-dom": "^15.5.4",
+    "react-dropzone": "^3.13.4",
     "react-md": "*",
     "types": "^0.1.1",
     "webfontloader": "^1.6.27"

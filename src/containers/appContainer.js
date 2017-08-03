@@ -1,67 +1,213 @@
 import React, { Component } from 'react';
-import { Header } from '../components/header';
-import { Main } from '../components//main';
-import NavigationDrawer from 'react-md/lib/NavigationDrawers';
+
+import Toolbar from 'react-md/lib/Toolbars';
+
+import { SideBar } from '../components/sideBar';
+import { RequestBuilder } from '../components/requestBuilder';
+import { ResponseViewer } from '../components/responseViewer';
+
+//TODO: Add option to get information about service, eg whether it is streaming or unary, display in UI
 
 export class AppContainer extends Component {
   constructor(props){
     super(props);
+
     this.state = {
-      services : 
-      [
-        {"name": "TestService1", "methods": [{"name":"method1.1"}, {"name":"method1.2"} , {"name":"method1.3"}]}, 
-        {"name": "TestService2", "methods": [{"name":"method2.1"}, {"name":"method2.2"} , {"name":"method2.3"}]},
-        {"name": "TestService3", "methods": [{"name":"method3.1"}, {"name":"method3.2"} , {"name":"method3.3"}]}, 
-        {"name": "TestService4", "methods": [{"name":"method4.1"}, {"name":"method4.2"} , {"name":"method4.3"}]},
-        {"name": "TestService5", "methods": [{"name":"method5.1"}, {"name":"method5.2"} , {"name":"method5.3"}]}, 
-        {"name": "TestService6", "methods": [{"name":"method6.1"}, {"name":"method6.2"} , {"name":"method6.3"}]},
-        {"name": "TestService7", "methods": [{"name":"method7.1"}, {"name":"method7.2"} , {"name":"method7.3"}]}, 
-        {"name": "TestService8", "methods": [{"name":"method8.1"}, {"name":"method8.2"} , {"name":"method8.3"}]}
-      ],
-      data: {
-        "TestService6": {
-          "method6.1": {
-            "input": "inputExample6.1",
-            "output":"outputExample6.1"
-          },
-          "method6.2": {
-            "input": "inputExample6.2",
-            "output":"outputExample6.2"
-          },
-          "method6.3": {
-            "input": "inputExample6.3",
-            "output":"outputExample6.1"
-          }
-        }
-      },
-      currentService: '',
-      currentMethod: '',
-    };
-    this.onMethodClick = this.onMethodClick.bind(this);
+      services : [],
+      fullMethod: 'Service/Method',
+      request: "",
+      response: "",
+      previousProtoDiscoveryRoot: "/Users/peteboothroyd/Projects/intern-tech-onboarding/go/src/dict_dash/dictdas",
+      currentProtoDiscoveryRoot: "/Users/peteboothroyd/Projects/intern-tech-onboarding/go/src/dict_dash/dictdash",
+      serviceFilter: "",
+      methodFilter: "",
+      endpoint: "127.0.0.1:5050",
+      settingsOpen: true,
+      endpointRequired: false,
+      endpointError: false,
+      };
+
+    this.registerListeners = this.registerListeners.bind(this);
+    this.handleMethodClick = this.handleMethodClick.bind(this);
+    this.listServices = this.listServices.bind(this);
+    this.callService = this.callService.bind(this);
+    this.handleProtoPathTextChange = this.handleProtoPathTextChange.bind(this);
+    this.handleProtoPathBlur = this.handleProtoPathBlur.bind(this);
+    this.handleEndpointChange = this.handleEndpointChange.bind(this);
+    this.handleSettingsClick = this.handleSettingsClick.bind(this);
+    this.handleRunClick = this.handleRunClick.bind(this);
+    this.handleRequestChange = this.handleRequestChange.bind(this);
+
+    this.registerListeners(this.props.ipcRenderer);
   }
-  
-  onMethodClick(serviceName, methodName){
-    try{
-      console.log(serviceName + "/" + methodName + ":" + this.state.data[serviceName][methodName]["input"] + "," + this.state.data[serviceName][methodName]["output"]);
+
+  listServices(){
+    //Don't waste time getting the same request again and again
+    if (this.state.currentProtoDiscoveryRoot !== this.state.previousProtoDiscoveryRoot) {
+      this.props.ipcRenderer.send(
+        "list-services",
+        this.state.currentProtoDiscoveryRoot, 
+        this.state.serviceFilter,
+        this.state.methodFilter
+      );
+      this.setState({previousProtoDiscoveryRoot: this.state.currentProtoDiscoveryRoot});
     }
-    catch (e){
-      if (e instanceof TypeError){
-        console.log("TypeError, likely can't find service and method:" + serviceName + "/" + methodName);
+  }
+
+  callService(){
+    const jsonInput = this.state.request;
+    const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
+    
+    //Checking that the request can be parsed properly. If not this can cause polyglot problems.
+    try {
+      JSON.parse(redactedJsonInput);
+    } catch(e) {
+      if(!confirm("Error parsing request. Do you want to proceed anyway?")) {
+        return;
       }
     }
-    
 
-    this.setState({
-      currentService: serviceName,
-      currentMethod: methodName,
+   this.props.ipcRenderer.send(
+      "call-service",
+      this.state.currentProtoDiscoveryRoot,
+      redactedJsonInput,
+      this.state.endpoint,
+      this.state.fullMethod
+    )
+  }
+
+  //Asynchronous callbacks from the main process. These return polyglot's 
+  //responses to list and call services
+  registerListeners(ipcRenderer){
+    ipcRenderer.on('list-services-reply', (event, err, reply) => {
+      if (!err){
+        try{
+          const parsedResponse = JSON.parse(reply);
+          this.setState({services: parsedResponse});
+        } catch(e) {
+          console.log("Error parsing list-services response, error: ", e);
+        }
+      } else {
+        alert("Error listing services, inspect console for polyglot's response.");
+        console.log(reply);
+      }
     });
+
+    ipcRenderer.on('call-service-reply', (event, err, reply) => {
+      if (!err){
+        const trimmedReply = reply.trim();
+        this.setState({response: trimmedReply});
+      }
+    });
+  }
+
+  handleRequestChange(newValue){
+    this.setState({request: newValue});
+  }
+
+  handleRunClick(){
+    //Up until this point the endpoint did not need to be filled in.
+    if(this.state.endpointError === ""){ 
+      this.setState({settingsOpen: true, endpointError: true, endpointRequired:true});
+    } else {
+      this.callService();
+    }
+  }
+
+  handleSettingsClick(){
+    this.setState({settingsOpen: !this.state.settingsOpen});
+  }
+
+  //Should we validate that this is a valid path? This would have to deal
+  //with the various different platforms
+  handleProtoPathTextChange(newPath){
+    this.setState({currentProtoDiscoveryRoot: newPath});
+  }
+
+  handleProtoPathBlur(){
+    this.listServices();
+  }
+
+  handleEndpointChange(newEndpoint){
+    const newEndPointError = this.validateEndpoint(newEndpoint);
+    this.setState({endpoint: newEndpoint, endpointError: newEndPointError});
+  }
+
+  //Are there other potential values other than IPv4 addresses? e.g. IPv6?
+  validateEndpoint(newEndpoint){
+    const matchesIPPattern = /([0-9]+.[0-9]+.[0-9]+.[0-9]+|localhost):[0-9]+/.test(newEndpoint);
+    return !matchesIPPattern;
+  }
+  
+  handleMethodClick(serviceName, methodName){
+    try{
+      const clickedService = this.state.services.find((service) => {
+        return service["name"] === serviceName;
+      });
+      const clickedMethod = clickedService["methods"].find((method) => {
+        return method["name"] === methodName;
+      });
+
+      //Initially pretty print the templates to make it easy for users to view the templates.
+      //Store and display as simple strings to make subsequent editing easier.
+      const parsedRequestTemplate = JSON.parse(clickedMethod["requestMessage"]);
+      const prettyPrintedRequestTemplate= JSON.stringify(parsedRequestTemplate, null, 2);
+
+      const parsedResponseTemplate = JSON.parse(clickedMethod["responseMessage"]);
+      const prettyPrintedResponseTemplate= JSON.stringify(parsedResponseTemplate, null, 2);
+      
+      this.setState({
+      fullMethod: serviceName + "/" + methodName,
+      request: prettyPrintedRequestTemplate,
+      response: prettyPrintedResponseTemplate,
+    });
+    }
+    catch (e) {
+      console.log(e);
+    }
   }
 
   render() {
     return (
       <div>
-        <Header />
-        <Main services={this.state.services} onMethodClick={this.onMethodClick}/>
+        <Toolbar
+          title="Dragoman"
+          className="md-toolbar--fixed"
+          colored={true}
+        />
+        <div>
+          <SideBar 
+          //******** Service & Method List ********//
+          services={this.state.services} 
+          onMethodClick={this.handleMethodClick}
+          //**************************************//
+
+          //************** Settings **************//
+          settingsOpen={this.state.settingsOpen}
+          handleSettingsClick={this.handleSettingsClick}
+          protoPath={this.state.currentProtoDiscoveryRoot}
+          handleProtoPathTextChange={this.handleProtoPathTextChange}
+          handleProtoPathBlur={this.handleProtoPathBlur}
+          endpoint={this.state.endpoint}
+          handleEndpointChange={this.handleEndpointChange}
+          endpointError={this.state.endpointError}
+          endpointRequired={this.state.endpointRequired}
+          //**************************************//
+          />
+          <div 
+          style={{display:"flex"}} 
+          className={"md-navigation-drawer-content md-navigation-drawer-content--prominent-offset" +
+          "md-transition--decceleration md-drawer-relative md-toolbar-relative"}>
+            <RequestBuilder 
+            request={this.state.request}
+            serviceMethodIdentifier={this.state.fullMethod}
+            handleRunClick={this.handleRunClick}
+            handleRequestChange={this.handleRequestChange}/>
+            <ResponseViewer 
+            response={this.state.response}
+            serviceMethodIdentifier={this.state.fullMethod}/>
+          </div>
+        </div>
       </div>
     );
   }
