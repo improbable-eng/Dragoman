@@ -3,10 +3,6 @@ const electron = require('electron');
 const app = electron.app;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
-//Module to handle asynchronous requests
-const ipcMain = electron.ipcMain;
-//Module to allow execution of command line processes
-const { exec } = require('child_process');
 
 const path = require('path');
 const url = require('url');
@@ -20,15 +16,14 @@ function createWindow () {
   mainWindow = new BrowserWindow({width: 1600, height: 800});
 
   // and load the index.html of the app.
-  // mainWindow.loadURL('http://localhost:3000');
   mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, '/../build/index.html'),
+    pathname: path.join(__dirname, '/index.html'),
     protocol: 'file:',
     slashes: true
   }));
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -37,6 +32,8 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null;
   });
+
+  setUpMenu();
 }
 
 // This method will be called when Electron has finished
@@ -61,11 +58,15 @@ app.on('activate', function () {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+//*** Calling polyglot and returning results to browser window ***//
 
-//TODO: Run polyglot on separate thread? It then doesn't need to kill our process when it freezes.
-const pathToPolyglotBinary = "~/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/dinowernli/grpc/polyglot/polyglot";
+//Module to handle asynchronous requests
+const ipcMain = electron.ipcMain;
+//Module to allow execution of command line processes
+const { exec } = require('child_process');
+
+const pathToPolyglotBinary = path.join(__dirname, "polyglot", "polyglot").replace('app.asar', 'app.asar.unpacked');
+
 ipcMain.on('list-services', (event, protoDiscoveryRoot, serviceFilter, methodFilter) => {
     const com = pathToPolyglotBinary + " --command=list_services --with_message=true --json_output=true " + 
     "--proto_discovery_root=" + protoDiscoveryRoot + " " +  " --service_filter=" + serviceFilter + 
@@ -95,3 +96,87 @@ ipcMain.on('call-service', (event, protoDiscoveryRoot, jsonRequest, endpoint, fu
     }
   );
 });
+
+//****************************************************************//
+
+function setUpMenu() {
+  //*** Setting up menu ***//
+  const Menu = electron.Menu;
+
+  const template = [
+    {
+      label: 'Edit',
+      submenu: [
+        // {role: 'undo'},
+        // {role: 'redo'},
+        // {type: 'separator'},
+        {role: 'cut'},
+        {role: 'copy'},
+        {role: 'paste'},
+        {role: 'delete'},
+        {role: 'selectall'}
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        {role: 'reload'},
+        {role: 'forcereload'},
+        {role: 'toggledevtools'},
+        {type: 'separator'},
+        {role: 'resetzoom'},
+        {role: 'zoomin'},
+        {role: 'zoomout'},
+        {type: 'separator'},
+        {role: 'togglefullscreen'}
+      ]
+    },
+    {
+      role: 'window',
+      submenu: [
+        {role: 'minimize'},
+        {role: 'close'}
+      ]
+    },
+    {
+      role: 'help',
+      submenu: [
+        {
+          label: 'Learn More',
+          //TODO: Update this link to point to the dragoman github page
+          click () { require('electron').shell.openExternal('https://electron.atom.io') }
+        }
+      ]
+    }
+  ]
+
+  if (process.platform === 'darwin') {
+    template.unshift({
+      label: app.getName(),
+      submenu: [
+        {role: 'about'},
+        {type: 'separator'},
+        {role: 'services', submenu: []},
+        {type: 'separator'},
+        {role: 'hide'},
+        {role: 'hideothers'},
+        {role: 'unhide'},
+        {type: 'separator'},
+        {role: 'quit'}
+      ]
+    })
+
+    // Window menu
+    template[3].submenu = [
+      {role: 'close'},
+      {role: 'minimize'},
+      {role: 'zoom'},
+      {type: 'separator'},
+      {role: 'front'}
+    ]
+  }
+
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+}
+//****************************************************************//

@@ -3,8 +3,6 @@ import React from 'react';
 import List from 'react-md/lib/Lists/List';
 import ListItem from 'react-md/lib/Lists/ListItem';
 import Subheader from 'react-md/lib/Subheaders';
-import Divider from 'react-md/lib/Dividers';
-import { ExpansionPanel } from 'react-md/lib/ExpansionPanels';
 
 import { Service } from './service';
 import { Settings } from './settings';

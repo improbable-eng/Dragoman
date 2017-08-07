@@ -1,7 +1,6 @@
 import React from 'react';
 
 import TextField from 'react-md/lib/TextFields';
-import Button from 'react-md/lib/Buttons/Button';
 
 export class ProtoSelector extends React.Component {
     render(){

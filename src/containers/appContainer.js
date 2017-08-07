@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import Toolbar from 'react-md/lib/Toolbars';
+import Dialog from 'react-md/lib/Dialogs';
 
 import { SideBar } from '../components/sideBar';
 import { RequestBuilder } from '../components/requestBuilder';
@@ -17,14 +18,15 @@ export class AppContainer extends Component {
       fullMethod: 'Service/Method',
       request: "",
       response: "",
-      previousProtoDiscoveryRoot: "/Users/peteboothroyd/Projects/intern-tech-onboarding/go/src/dict_dash/dictdas",
-      currentProtoDiscoveryRoot: "/Users/peteboothroyd/Projects/intern-tech-onboarding/go/src/dict_dash/dictdash",
+      previousProtoDiscoveryRoot: "",
+      currentProtoDiscoveryRoot: "",
       serviceFilter: "",
       methodFilter: "",
-      endpoint: "127.0.0.1:5050",
+      endpoint: "",
       settingsOpen: true,
       endpointRequired: false,
       endpointError: false,
+      dialogVisible: false,
       };
 
     this.registerListeners = this.registerListeners.bind(this);
@@ -37,6 +39,9 @@ export class AppContainer extends Component {
     this.handleSettingsClick = this.handleSettingsClick.bind(this);
     this.handleRunClick = this.handleRunClick.bind(this);
     this.handleRequestChange = this.handleRequestChange.bind(this);
+
+    this.closeDialog = this.closeDialog.bind(this);
+    this.openDialog = this.openDialog.bind(this);
 
     this.registerListeners(this.props.ipcRenderer);
   }
@@ -54,16 +59,17 @@ export class AppContainer extends Component {
     }
   }
 
-  callService(){
+  callService(validateRequest){
+    console.log(`Calling service with validation ${validateRequest}`);
     const jsonInput = this.state.request;
     const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
     
-    //Checking that the request can be parsed properly. If not this can cause polyglot problems.
-    try {
-      JSON.parse(redactedJsonInput);
-    } catch(e) {
-      if(!confirm("Error parsing request. Do you want to proceed anyway?")) {
-        return;
+    if(validateRequest){
+      //Checking that the request can be parsed properly. If not this can cause polyglot problems.
+      try {
+        JSON.parse(redactedJsonInput);
+      } catch(e) {
+        this.openDialog();
       }
     }
 
@@ -85,7 +91,7 @@ export class AppContainer extends Component {
           const parsedResponse = JSON.parse(reply);
           this.setState({services: parsedResponse});
         } catch(e) {
-          console.log("Error parsing list-services response, error: ", e);
+          console.log("Error parsing list-services response, error: ", e, ". Reply: ", reply);
         }
       } else {
         alert("Error listing services, inspect console for polyglot's response.");
@@ -101,6 +107,17 @@ export class AppContainer extends Component {
     });
   }
 
+  closeDialog(accepted){
+    if (accepted){
+      this.callService(false);
+    }
+    this.setState({dialogVisible: false});
+  }
+
+  openDialog(){
+    this.setState({dialogVisible: true});
+  }
+
   handleRequestChange(newValue){
     this.setState({request: newValue});
   }
@@ -110,7 +127,7 @@ export class AppContainer extends Component {
     if(this.state.endpointError === ""){ 
       this.setState({settingsOpen: true, endpointError: true, endpointRequired:true});
     } else {
-      this.callService();
+      this.callService(true);
     }
   }
 
@@ -135,8 +152,9 @@ export class AppContainer extends Component {
 
   //Are there other potential values other than IPv4 addresses? e.g. IPv6?
   validateEndpoint(newEndpoint){
-    const matchesIPPattern = /([0-9]+.[0-9]+.[0-9]+.[0-9]+|localhost):[0-9]+/.test(newEndpoint);
-    return !matchesIPPattern;
+    // const matchesIPPattern = /([0-9]+.[0-9]+.[0-9]+.[0-9]+|localhost):[0-9]+/.test(newEndpoint);
+    // return !matchesIPPattern;
+    return newEndpoint !== "";
   }
   
   handleMethodClick(serviceName, methodName){
@@ -208,6 +226,24 @@ export class AppContainer extends Component {
             serviceMethodIdentifier={this.state.fullMethod}/>
           </div>
         </div>
+        <Dialog
+          id="speedBoost"
+          visible={this.state.dialogVisible}
+          title="Error parsing request. Do you want to proceed anyway?"
+          onHide={() => this.closeDialog(false)}
+          modal
+          actions={[{
+            onClick: () => this.closeDialog(true),
+            primary: true,
+            label: 'Yes',
+          }, {
+            onClick: () => this.closeDialog(false),
+            primary: true,
+            label: 'Cancel',
+          }]}
+        >
+        <p>Submitting a request which cannot be parsed to JSON can cause polyglot problems</p>
+        </Dialog>
       </div>
     );
   }

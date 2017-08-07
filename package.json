@@ -1,27 +1,32 @@
 {
-  "name": "Dragoman",
+  "name": "dragoman",
   "version": "0.1.0",
   "private": true,
+  "author": "Pete Boothroyd",
   "description": "Dragoman, a GUI for polyglot.",
   "homepage": "./",
+  "license": "MIT",
   "dependencies": {
-    "node-sass": "^4.5.2",
+    "asar": "^0.13.0",
+    "node-sass": "^4.5.3",
     "npm-run-all": "^4.0.2",
     "prop": "^0.1.1",
-    "react": "^15.5.4",
+    "react": "^15.6.1",
+    "react-ace": "^5.1.2",
     "react-addons-css-transition-group": "^15.5.2",
     "react-addons-transition-group": "^15.5.2",
-    "react-dom": "^15.5.4",
+    "react-dom": "^15.6.1",
     "react-dropzone": "^3.13.4",
-    "react-md": "*",
+    "react-md": "^1.0.18",
     "types": "^0.1.1",
-    "webfontloader": "^1.6.27"
+    "webfontloader": "^1.6.28"
   },
   "devDependencies": {
     "electron": "^1.6.11",
+    "electron-builder": "^19.19.1",
     "react-scripts": "0.9.5"
   },
-  "main": "src/electron-starter.js",
+  "main": "public/electron.js",
   "scripts": {
     "build-css": "node-sass src/ -o src/",
     "watch-css": "npm run build-css && node-sass src/ -o src/ --watch --recursive",
@@ -30,6 +35,24 @@
     "build": "npm run build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "electron": "electron ."
+    "electron": "electron .",
+    "electron-pack": "build --em.main=build/electron.js",
+    "preelectron-pack": "yarn build"
+  },
+  "build": {
+    "appId": "io.improbable.dragoman",
+    "productName": "Dragoman",
+    "asarUnpack": ["**/polyglot/**"],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "type": "distribution"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
   }
 }

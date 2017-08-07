@@ -1,10 +1,8 @@
 import React from 'react';
 
-import {MethodList} from './methodList'
+import { MethodList } from './methodList'
 
 import ListItem from 'react-md/lib/Lists/ListItem';
-import Divider from 'react-md/lib/Dividers';
-import Collapse from 'react-md/lib/Helpers/Collapse';
 
 export class Service extends React.Component{
     constructor(props){

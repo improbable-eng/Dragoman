@@ -36,7 +36,7 @@ export class RequestBuilder extends React.Component{
                     />
                 </Card>
                 <Button 
-                raised 
+                flat 
                 label="Run" 
                 style={{"marginTop":20}} 
                 className="md-block-centered"
