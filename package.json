@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "asar": "^0.13.0",
+    "electron-is-dev": "^0.3.0",
     "node-sass": "^4.5.3",
     "npm-run-all": "^4.0.2",
     "prop": "^0.1.1",
@@ -18,6 +19,7 @@
     "react-dom": "^15.6.1",
     "react-dropzone": "^3.13.4",
     "react-md": "^1.0.18",
+    "react-progress-button": "^5.0.4",
     "types": "^0.1.1",
     "webfontloader": "^1.6.28"
   },
@@ -26,7 +28,7 @@
     "electron-builder": "^19.19.1",
     "react-scripts": "0.9.5"
   },
-  "main": "public/electron.js",
+  "main": "build/electron.js",
   "scripts": {
     "build-css": "node-sass src/ -o src/",
     "watch-css": "npm run build-css && node-sass src/ -o src/ --watch --recursive",
@@ -35,14 +37,16 @@
     "build": "npm run build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "electron": "electron .",
+    "electron": "ELECTRON_ENV=dev electron .",
     "electron-pack": "build --em.main=build/electron.js",
     "preelectron-pack": "yarn build"
   },
   "build": {
     "appId": "io.improbable.dragoman",
     "productName": "Dragoman",
-    "asarUnpack": ["**/polyglot/**"],
+    "asarUnpack": [
+      "**/polyglot_deploy.jar"
+    ],
     "mac": {
       "category": "public.app-category.developer-tools",
       "type": "distribution"

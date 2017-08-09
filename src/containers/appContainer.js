@@ -18,36 +18,47 @@ export class AppContainer extends Component {
       fullMethod: 'Service/Method',
       request: "",
       response: "",
-      previousProtoDiscoveryRoot: "",
-      currentProtoDiscoveryRoot: "",
       serviceFilter: "",
       methodFilter: "",
+      errorDialogVisible: false,
+
+      //Settings
+      previousProtoDiscoveryRoot: "",
+      currentProtoDiscoveryRoot: "",
       endpoint: "",
       settingsOpen: true,
       endpointRequired: false,
       endpointError: false,
-      dialogVisible: false,
+      configSetPath: "",
+      addProtocIncludes: "",
+      callRequestInProgress: false,
+      configName: "",
+      tlsCaCertPath: "",
+      deadlineMs: "",
       };
 
     this.registerListeners = this.registerListeners.bind(this);
     this.handleMethodClick = this.handleMethodClick.bind(this);
     this.listServices = this.listServices.bind(this);
     this.callService = this.callService.bind(this);
-    this.handleProtoPathTextChange = this.handleProtoPathTextChange.bind(this);
+    this.handleTextChange = this.handleTextChange.bind(this);
     this.handleProtoPathBlur = this.handleProtoPathBlur.bind(this);
     this.handleEndpointChange = this.handleEndpointChange.bind(this);
+    this.validateEndpoint = this.validateEndpoint.bind(this);
     this.handleSettingsClick = this.handleSettingsClick.bind(this);
     this.handleRunClick = this.handleRunClick.bind(this);
     this.handleRequestChange = this.handleRequestChange.bind(this);
 
-    this.closeDialog = this.closeDialog.bind(this);
-    this.openDialog = this.openDialog.bind(this);
+    this.closeErrorDialog = this.closeErrorDialog.bind(this);
+    this.openErrorDialog = this.openErrorDialog.bind(this);
+    this.openJsonParseErrorDialog = this.openJsonParseErrorDialog.bind(this);
 
     this.registerListeners(this.props.ipcRenderer);
   }
 
   listServices(){
-    //Don't waste time getting the same request again and again
+    //Don't waste time listing services with the same discovery root
+    //TODO: Maybe give manual control of this to allow override
     if (this.state.currentProtoDiscoveryRoot !== this.state.previousProtoDiscoveryRoot) {
       this.props.ipcRenderer.send(
         "list-services",
@@ -55,22 +66,21 @@ export class AppContainer extends Component {
         this.state.serviceFilter,
         this.state.methodFilter
       );
-      this.setState({previousProtoDiscoveryRoot: this.state.currentProtoDiscoveryRoot});
+      this.setState({previousProtoDiscoveryRoot: this.state.currentProtoDiscoveryRoot, 
+        request: "", response: "", services: []});
     }
   }
 
-  callService(validateRequest){
-    console.log(`Calling service with validation ${validateRequest}`);
+  callService(){
     const jsonInput = this.state.request;
+    //Remove the annotations eg. [<optional> <repeated>] from the request. 
+    //Note (Edge Case): If the actual JSON body contains these strings they will be removed.
     const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
     
-    if(validateRequest){
-      //Checking that the request can be parsed properly. If not this can cause polyglot problems.
-      try {
-        JSON.parse(redactedJsonInput);
-      } catch(e) {
-        this.openDialog();
-      }
+    try {
+      JSON.parse(redactedJsonInput);
+    } catch(e) {
+      this.openJsonParseErrorDialog();
     }
 
    this.props.ipcRenderer.send(
@@ -91,31 +101,42 @@ export class AppContainer extends Component {
           const parsedResponse = JSON.parse(reply);
           this.setState({services: parsedResponse});
         } catch(e) {
-          console.log("Error parsing list-services response, error: ", e, ". Reply: ", reply);
+          this.openErrorDialog("Error parsing list-services response:", 
+          "Check console for full log \n(Console can be reached from View -> Developer Tools -> Console)");
+          console.log(`Error ${e}\nReply ${reply}`);
         }
       } else {
-        alert("Error listing services, inspect console for polyglot's response.");
-        console.log(reply);
+        this.openErrorDialog("Error listing services: ", 
+        "Check console for full log \n(Console can be reached from View -> Developer Tools -> Console)");
+        console.log(`Error ${err}\nReply ${reply}`);
       }
     });
 
     ipcRenderer.on('call-service-reply', (event, err, reply) => {
       if (!err){
         const trimmedReply = reply.trim();
-        this.setState({response: trimmedReply});
+        this.setState({response: trimmedReply, callRequestInProgress: false});
+      } else {
+        this.setState({callRequestInProgress: false});
+        this.openErrorDialog("Error calling service: ", reply);
       }
     });
   }
 
-  closeDialog(accepted){
-    if (accepted){
-      this.callService(false);
-    }
-    this.setState({dialogVisible: false});
+  openJsonParseErrorDialog(){
+    this.openErrorDialog("Error parsing request", "Ensure that the request is valid JSON");
   }
 
-  openDialog(){
-    this.setState({dialogVisible: true});
+  closeErrorDialog(){
+    this.setState({errorDialogVisible: false});
+  }
+
+  openErrorDialog(title, explanation){
+    this.setState({
+      errorDialogVisible: true, 
+      errorDialogTitle: title, 
+      errorDialogExplanation: explanation
+    });
   }
 
   handleRequestChange(newValue){
@@ -124,10 +145,11 @@ export class AppContainer extends Component {
 
   handleRunClick(){
     //Up until this point the endpoint did not need to be filled in.
-    if(this.state.endpointError === ""){ 
-      this.setState({settingsOpen: true, endpointError: true, endpointRequired:true});
+    if(this.state.endpoint === ""){ 
+      this.setState({settingsOpen: true, endpointError: true, endpointRequired: true});
     } else {
-      this.callService(true);
+      this.setState({endpointRequired: true, callRequestInProgress: true});
+      this.callService();
     }
   }
 
@@ -137,10 +159,14 @@ export class AppContainer extends Component {
 
   //Should we validate that this is a valid path? This would have to deal
   //with the various different platforms
-  handleProtoPathTextChange(newPath){
-    this.setState({currentProtoDiscoveryRoot: newPath});
+  handleTextChange(stateId, newText){
+    if (stateId === "endpoint"){
+      this.handleEndpointChange(newText)
+    }
+    this.setState({[stateId]: newText});
   }
 
+  //TODO: Replace this with a list services button
   handleProtoPathBlur(){
     this.listServices();
   }
@@ -150,11 +176,8 @@ export class AppContainer extends Component {
     this.setState({endpoint: newEndpoint, endpointError: newEndPointError});
   }
 
-  //Are there other potential values other than IPv4 addresses? e.g. IPv6?
   validateEndpoint(newEndpoint){
-    // const matchesIPPattern = /([0-9]+.[0-9]+.[0-9]+.[0-9]+|localhost):[0-9]+/.test(newEndpoint);
-    // return !matchesIPPattern;
-    return newEndpoint !== "";
+    return newEndpoint === "";
   }
   
   handleMethodClick(serviceName, methodName){
@@ -204,12 +227,17 @@ export class AppContainer extends Component {
           settingsOpen={this.state.settingsOpen}
           handleSettingsClick={this.handleSettingsClick}
           protoPath={this.state.currentProtoDiscoveryRoot}
-          handleProtoPathTextChange={this.handleProtoPathTextChange}
           handleProtoPathBlur={this.handleProtoPathBlur}
+          handleTextChange={this.handleTextChange}
+          configSetPath={this.state.configSetPath}
           endpoint={this.state.endpoint}
           handleEndpointChange={this.handleEndpointChange}
           endpointError={this.state.endpointError}
           endpointRequired={this.state.endpointRequired}
+          addProtocIncludes={this.state.addProtocIncludes}
+          configName={this.state.configName}
+          tlsCaCertPath={this.state.tlsCaCertPath}
+          deadlineMs={this.state.deadlineMs}
           //**************************************//
           />
           <div 
@@ -220,29 +248,25 @@ export class AppContainer extends Component {
             request={this.state.request}
             serviceMethodIdentifier={this.state.fullMethod}
             handleRunClick={this.handleRunClick}
-            handleRequestChange={this.handleRequestChange}/>
+            handleRequestChange={this.handleRequestChange}
+            callRequestInProgress={this.state.callRequestInProgress}/>
             <ResponseViewer 
             response={this.state.response}
             serviceMethodIdentifier={this.state.fullMethod}/>
           </div>
         </div>
         <Dialog
-          id="speedBoost"
-          visible={this.state.dialogVisible}
-          title="Error parsing request. Do you want to proceed anyway?"
-          onHide={() => this.closeDialog(false)}
+          id="errorDialog"
+          visible={this.state.errorDialogVisible}
+          title={this.state.errorDialogTitle}
           modal
           actions={[{
-            onClick: () => this.closeDialog(true),
+            onClick: this.closeErrorDialog,
             primary: true,
-            label: 'Yes',
-          }, {
-            onClick: () => this.closeDialog(false),
-            primary: true,
-            label: 'Cancel',
+            label: 'Ok',
           }]}
+          children={<p>{this.state.errorDialogExplanation}</p>}
         >
-        <p>Submitting a request which cannot be parsed to JSON can cause polyglot problems</p>
         </Dialog>
       </div>
     );

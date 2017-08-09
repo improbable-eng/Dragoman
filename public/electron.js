@@ -23,7 +23,12 @@ function createWindow () {
   }));
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+  if (process.env.ELECTRON_ENV && process.env.ELECTRON_ENV === "dev") {
+    console.log('Running in development');
+    mainWindow.webContents.openDevTools();
+  } else {
+    console.log('Running in production');
+  }
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -65,17 +70,23 @@ const ipcMain = electron.ipcMain;
 //Module to allow execution of command line processes
 const { exec } = require('child_process');
 
-const pathToPolyglotBinary = path.join(__dirname, "polyglot", "polyglot").replace('app.asar', 'app.asar.unpacked');
+const pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
+const devpathToPolyglotBinary = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/"
+  + "dinowernli/grpc/polyglot/polyglot_deploy.jar";
 
 ipcMain.on('list-services', (event, protoDiscoveryRoot, serviceFilter, methodFilter) => {
-    const com = pathToPolyglotBinary + " --command=list_services --with_message=true --json_output=true " + 
-    "--proto_discovery_root=" + protoDiscoveryRoot + " " +  " --service_filter=" + serviceFilter + 
+    const command = "java -jar " + devpathToPolyglotBinary + " --command=list_services --with_message=true --json_output=true " + 
+    "--proto_discovery_root=" + protoDiscoveryRoot +  " --service_filter=" + serviceFilter + 
     " --method_filter=" + methodFilter;
-    exec(com,
+    console.log("Command: ", command);
+    exec(command,
     (err, stdout, stderr) => {
-      if(err){
+      console.log("err: ", err, "\nstdout: ", stdout, "\nstderr: ", stderr);
+      if (err) {
+        console.log("ERROR");
         event.sender.send('list-services-reply', err, stderr);
       } else {
+        console.log("FINE");
         event.sender.send('list-services-reply', err, stdout);
       }
     }
@@ -83,11 +94,13 @@ ipcMain.on('list-services', (event, protoDiscoveryRoot, serviceFilter, methodFil
 });
 
 ipcMain.on('call-service', (event, protoDiscoveryRoot, jsonRequest, endpoint, fullMethod) => {
-    const command = "echo \"" + jsonRequest + "\" | " + pathToPolyglotBinary +
+    const command = "echo \"" + jsonRequest + "\" | java -jar " + devpathToPolyglotBinary +
       " --command=call --proto_discovery_root=" + protoDiscoveryRoot + " --endpoint=" + endpoint + 
       " --full_method=" + fullMethod;
+    console.log("Command: ", command);
     exec(command,
     (err, stdout, stderr) => {
+      console.log("err: ", err, "\nstdout: ", stdout, "\nstderr: ", stderr);
       if(err){
         event.sender.send('call-service-reply', err, stderr);
       } else {

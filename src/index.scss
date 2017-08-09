@@ -2,6 +2,11 @@
 
 @include react-md-everything;
 
+.list-subheader div div {
+  font-weight: 500;
+  font-size: 14px;
+}
+
 body {
   margin: 0;
 }

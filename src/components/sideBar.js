@@ -23,9 +23,14 @@ export class SideBar extends React.Component {
                 handleEndpointChange ={this.props.handleEndpointChange}
                 endpointRequired={this.props.endpointRequired}
                 protoPath={this.props.protoPath}
-                handleProtoPathTextChange={this.props.handleProtoPathTextChange}
+                handleTextChange={this.props.handleTextChange}
                 handleProtoPathBlur={this.props.handleProtoPathBlur}
-                listServices={this.props.listServices} />
+                listServices={this.props.listServices} 
+                configSetPath={this.props.configSetPath}
+                addProtocIncludes={this.props.addProtocIncludes}
+                configName={this.props.configName}
+                tlsCaCertPath={this.props.tlsCaCertPath}
+                deadlineMs={this.props.deadlineMs}/>
             </div>
         );
         return(
@@ -36,8 +41,9 @@ export class SideBar extends React.Component {
                 "md-drawer md-drawer--left md-drawer--fixed md-drawer--active " + 
                 "md-transition--decceleration md-background--card"}>
                     <Subheader 
-                    primaryText="Services" 
-                    style={{"color":"#212121", "font-family":"Roboto", "font-weight":"400"}} />
+                    primaryText="Services"
+                    primary
+                    />
                     <div className="md-list--drawer">
                         {services}
                     </div>
@@ -45,7 +51,9 @@ export class SideBar extends React.Component {
                     primaryText="Settings"
                     nestedItems={settings}
                     isOpen={this.props.settingsOpen}
-                    onClick={this.props.handleSettingsClick} />
+                    onClick={this.props.handleSettingsClick}
+                    tileClassName="list-subheader"
+                    />
                 </List>
             </div>
         );
