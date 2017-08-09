@@ -7,6 +7,9 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
 const url = require('url');
 
+//Module to allow execution of command line processes
+const { exec } = require('child_process');
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -23,7 +26,7 @@ function createWindow () {
   }));
 
   // Open the DevTools.
-  if (process.env.ELECTRON_ENV && process.env.ELECTRON_ENV === "dev") {
+  if (process.env.ELECTRON_ENV === "dev") {
     console.log('Running in development');
     mainWindow.webContents.openDevTools();
   } else {
@@ -65,55 +68,74 @@ app.on('activate', function () {
 
 //*** Calling polyglot and returning results to browser window ***//
 
-//Module to handle asynchronous requests
-const ipcMain = electron.ipcMain;
-//Module to allow execution of command line processes
-const { exec } = require('child_process');
+var pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
 
-const pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
-const devpathToPolyglotBinary = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/"
-  + "dinowernli/grpc/polyglot/polyglot_deploy.jar";
+if (process.env.ELECTRON_ENV === "dev") {
+  pathToPolyglotBinary = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
+                         "dinowernli/grpc/polyglot/polyglot_deploy.jar";
+}
 
-ipcMain.on('list-services', (event, protoDiscoveryRoot, serviceFilter, methodFilter) => {
-    const command = "java -jar " + devpathToPolyglotBinary + " --command=list_services --with_message=true --json_output=true " + 
-    "--proto_discovery_root=" + protoDiscoveryRoot +  " --service_filter=" + serviceFilter + 
-    " --method_filter=" + methodFilter;
-    console.log("Command: ", command);
-    exec(command,
-    (err, stdout, stderr) => {
-      console.log("err: ", err, "\nstdout: ", stdout, "\nstderr: ", stderr);
-      if (err) {
-        console.log("ERROR");
-        event.sender.send('list-services-reply', err, stderr);
-      } else {
-        console.log("FINE");
-        event.sender.send('list-services-reply', err, stdout);
-      }
+//TODO: Update to reflect change of output flag
+exports.listServices = (protoDiscoveryRoot, serviceFilter, methodFilter, configSetPath, 
+  configName, addProtocIncludes, deadlineMs, tlsCaCertPath,callback) => {
+  const command = "java -jar " + pathToPolyglotBinary + " --command=list_services --with_message=true --json_output=true " + 
+    (protoDiscoveryRoot === "" ? "" : " --proto_discovery_root=" + protoDiscoveryRoot) +  
+    (serviceFilter === "" ? "" :" --service_filter=" + serviceFilter) + 
+    (methodFilter === "" ? "": " --method_filter=" + methodFilter) + 
+    (configSetPath === "" ? "" : " --config_set_path=" + configSetPath) +
+    (configName === "" ? "" : " --config_name=" + configName) + 
+    (addProtocIncludes === "" ? "" : " --add_protoc_includes=" + addProtocIncludes) +
+    (deadlineMs === "" ? "" : " --deadline_ms=" + deadlineMs) +
+    (tlsCaCertPath === "" ? "": " --tls_ca_certificate=" + tlsCaCertPath);
+
+  console.log("Command: ", command);
+
+  exec(command,
+  (err, stdout, stderr) => {
+    if (err) {
+      callback(err, stderr);
+    } else {
+      callback(err, stdout);
     }
-  );
-});
+  });
+}
 
-ipcMain.on('call-service', (event, protoDiscoveryRoot, jsonRequest, endpoint, fullMethod) => {
-    const command = "echo \"" + jsonRequest + "\" | java -jar " + devpathToPolyglotBinary +
-      " --command=call --proto_discovery_root=" + protoDiscoveryRoot + " --endpoint=" + endpoint + 
-      " --full_method=" + fullMethod;
-    console.log("Command: ", command);
-    exec(command,
-    (err, stdout, stderr) => {
-      console.log("err: ", err, "\nstdout: ", stdout, "\nstderr: ", stderr);
-      if(err){
-        event.sender.send('call-service-reply', err, stderr);
-      } else {
-        event.sender.send('call-service-reply', err, stdout);
+exports.callService = (protoDiscoveryRoot, 
+  jsonRequest, endpoint, fullMethod, configSetPath, 
+  configName, addProtocIncludes, deadlineMs, 
+  tlsCaCertPath, callback) => {
+
+  var command = "echo \"" + jsonRequest + "\" | java -jar " + pathToPolyglotBinary +
+    " --command=call --proto_discovery_root=" + protoDiscoveryRoot + " --endpoint=" + endpoint + 
+    " --full_method=" + fullMethod + "--config_name=" +
+    (configSetPath === "" ? "" : " --config_set_path=" + configSetPath) +
+    (configName === "" ? "" : " --config_name=" + configName) + 
+    (addProtocIncludes === "" ? "" : " --add_protoc_includes=" + addProtocIncludes) +
+    (deadlineMs === "" ? "" : " --deadline_ms=" + deadlineMs) +
+    (tlsCaCertPath === "" ? "": " --tls_ca_certificate=" + tlsCaCertPath);
+
+  console.log("Command: ", command);
+  
+  exec(command,
+  (err, stdout, stderr) => {
+    // console.log("err: ", err, "\nstdout: ", stdout, "\nstderr: ", stderr);
+    if(err){
+      callback(err, stderr);
+    } else {
+      // TODO: Investigate, when polyglot gets an error and err = nil how best to test for this and
+      // report to users?
+      if(stdout==="" && stderr !== ""){
+        callback(true, stderr);
       }
+      callback(err, stdout);
     }
-  );
-});
+  });
+}
 
 //****************************************************************//
 
+//*********************** Setting up menu ************************//
 function setUpMenu() {
-  //*** Setting up menu ***//
   const Menu = electron.Menu;
 
   const template = [

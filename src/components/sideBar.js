@@ -30,7 +30,8 @@ export class SideBar extends React.Component {
                 addProtocIncludes={this.props.addProtocIncludes}
                 configName={this.props.configName}
                 tlsCaCertPath={this.props.tlsCaCertPath}
-                deadlineMs={this.props.deadlineMs}/>
+                deadlineMs={this.props.deadlineMs}
+                handlePathDoubleClick={this.props.handlePathDoubleClick}/>
             </div>
         );
         return(

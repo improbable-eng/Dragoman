@@ -9,13 +9,14 @@ export class SingleLineTextEntry extends React.Component {
                 <TextField 
                 id={this.props.id}
                 label={this.props.label}
-                value={this.props.path}
+                value={this.props.value}
                 placeholder={this.props.placeholder ? this.props.placeholder : ""}
                 required={this.props.required ? this.props.required : false}
                 error={this.props.error ? this.props.error : false}
                 errorText={this.props.errorText ? this.props.errorText : ""}
                 onChange={(newValue) => this.props.handleChange(this.props.id, newValue)}
                 onBlur={this.props.handleBlur}
+                onDoubleClick={this.props.handleDoubleClick}
                 style={{"flex":"1", "margin":"0px 8px 0px 8px"}}
                 lineDirection="center"
                 className="md-cell md-cell--bottom"

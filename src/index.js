@@ -8,12 +8,10 @@ import './ace.css';
 
 import WebFontLoader from 'webfontloader';
 
-const {ipcRenderer} = window.require('electron');
-
 WebFontLoader.load({
   google: {
     families: ['Roboto:300,400,500,700', 'Material Icons'],
   },
 });
 
-ReactDOM.render(<AppContainer ipcRenderer={ipcRenderer}/>, document.getElementById('root'));
+ReactDOM.render(<AppContainer/>, document.getElementById('root'));

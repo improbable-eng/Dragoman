@@ -7,7 +7,13 @@ import { SideBar } from '../components/sideBar';
 import { RequestBuilder } from '../components/requestBuilder';
 import { ResponseViewer } from '../components/responseViewer';
 
+const { ipcRenderer, remote } = window.require('electron');
+const dialog = remote.dialog;
+const mainProcess = remote.require('../public/electron');
+
 //TODO: Add option to get information about service, eg whether it is streaming or unary, display in UI
+const checkConsoleErrorMessage = "Check console for full log (Console can be reached from View" +
+                                 " -> Toggle Developer Tools -> Console)";
 
 export class AppContainer extends Component {
   constructor(props){
@@ -36,39 +42,64 @@ export class AppContainer extends Component {
       tlsCaCertPath: "",
       deadlineMs: "",
       };
+    
+    const functionsToBind = ["showDirectoryDialog", "handleMethodClick", "listServices", "listServicesReply", 
+    "callService", "callServiceReply", "handleTextChange", "handleProtoPathBlur", "handleEndpointChange", 
+    "validateEndpoint", "handleSettingsClick", "handleRunClick", "handleRequestChange", "closeErrorDialog", 
+    "openErrorDialog", "openJsonParseErrorDialog"];
 
-    this.registerListeners = this.registerListeners.bind(this);
-    this.handleMethodClick = this.handleMethodClick.bind(this);
-    this.listServices = this.listServices.bind(this);
-    this.callService = this.callService.bind(this);
-    this.handleTextChange = this.handleTextChange.bind(this);
-    this.handleProtoPathBlur = this.handleProtoPathBlur.bind(this);
-    this.handleEndpointChange = this.handleEndpointChange.bind(this);
-    this.validateEndpoint = this.validateEndpoint.bind(this);
-    this.handleSettingsClick = this.handleSettingsClick.bind(this);
-    this.handleRunClick = this.handleRunClick.bind(this);
-    this.handleRequestChange = this.handleRequestChange.bind(this);
-
-    this.closeErrorDialog = this.closeErrorDialog.bind(this);
-    this.openErrorDialog = this.openErrorDialog.bind(this);
-    this.openJsonParseErrorDialog = this.openJsonParseErrorDialog.bind(this);
-
-    this.registerListeners(this.props.ipcRenderer);
+    functionsToBind.forEach((func) => {
+      this[func] = this[func].bind(this);
+    });
   }
 
   listServices(){
     //Don't waste time listing services with the same discovery root
     //TODO: Maybe give manual control of this to allow override
+    //TODO: Validate input is in correct formats
     if (this.state.currentProtoDiscoveryRoot !== this.state.previousProtoDiscoveryRoot) {
-      this.props.ipcRenderer.send(
-        "list-services",
-        this.state.currentProtoDiscoveryRoot, 
-        this.state.serviceFilter,
-        this.state.methodFilter
-      );
+      mainProcess.listServices(
+        this.state.currentProtoDiscoveryRoot, this.state.serviceFilter, this.state.methodFilter,
+        this.state.configSetPath, this.state.configName, this.state.addProtocIncludes,
+        this.state.deadlineMs, this.state.tlsCaCertPath ,this.listServicesReply);
+
       this.setState({previousProtoDiscoveryRoot: this.state.currentProtoDiscoveryRoot, 
         request: "", response: "", services: []});
     }
+  }
+
+  listServicesReply(err, reply){
+    if (!err){
+      try{
+        const parsedResponse = JSON.parse(reply);
+        this.setState({services: parsedResponse});
+      } catch(e) {
+        this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
+        console.log(`Error ${e}\n${reply}`);
+      }
+    } else {
+      this.openErrorDialog("Error listing services: ", checkConsoleErrorMessage);
+      console.log(`Error ${err}\n${reply}`);
+    }
+  }
+
+  showDirectoryDialog(id, macMessage, multiSelection){
+    var customProperties = ['openDirectory', 'openFile', 'showHiddenFiles'];
+    if (multiSelection) {
+      customProperties.push('multiSelections');
+    }
+    console.log(customProperties)
+    var path = dialog.showOpenDialog({
+        properties: customProperties,
+        message: macMessage
+      });
+    console.log(path);
+    if(path instanceof Array){
+      path = path.join(",\n");
+    }
+    console.log(path);
+    this.setState({[id]: path});
+    console.log(this.state);
   }
 
   callService(){
@@ -81,46 +112,35 @@ export class AppContainer extends Component {
       JSON.parse(redactedJsonInput);
     } catch(e) {
       this.openJsonParseErrorDialog();
+      this.setState({callRequestInProgress: false});
     }
 
-   this.props.ipcRenderer.send(
-      "call-service",
+  //  this.props.ipcRenderer.send(
+  //     "call-service",
+  //     this.state.currentProtoDiscoveryRoot,
+  //     redactedJsonInput,
+  //     this.state.endpoint,
+  //     this.state.fullMethod
+  //   )
+
+    mainProcess.callService(
       this.state.currentProtoDiscoveryRoot,
       redactedJsonInput,
       this.state.endpoint,
-      this.state.fullMethod
-    )
+      this.state.fullMethod,
+      this.callServiceReply
+    );
   }
 
-  //Asynchronous callbacks from the main process. These return polyglot's 
-  //responses to list and call services
-  registerListeners(ipcRenderer){
-    ipcRenderer.on('list-services-reply', (event, err, reply) => {
-      if (!err){
-        try{
-          const parsedResponse = JSON.parse(reply);
-          this.setState({services: parsedResponse});
-        } catch(e) {
-          this.openErrorDialog("Error parsing list-services response:", 
-          "Check console for full log \n(Console can be reached from View -> Developer Tools -> Console)");
-          console.log(`Error ${e}\nReply ${reply}`);
-        }
-      } else {
-        this.openErrorDialog("Error listing services: ", 
-        "Check console for full log \n(Console can be reached from View -> Developer Tools -> Console)");
-        console.log(`Error ${err}\nReply ${reply}`);
-      }
-    });
-
-    ipcRenderer.on('call-service-reply', (event, err, reply) => {
-      if (!err){
+  callServiceReply(err, reply) {
+    if (!err){
         const trimmedReply = reply.trim();
         this.setState({response: trimmedReply, callRequestInProgress: false});
       } else {
         this.setState({callRequestInProgress: false});
-        this.openErrorDialog("Error calling service: ", reply);
+        this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
+        console.log(`Error ${err}\n${reply}`);
       }
-    });
   }
 
   openJsonParseErrorDialog(){
@@ -238,6 +258,7 @@ export class AppContainer extends Component {
           configName={this.state.configName}
           tlsCaCertPath={this.state.tlsCaCertPath}
           deadlineMs={this.state.deadlineMs}
+          handlePathDoubleClick={this.showDirectoryDialog}
           //**************************************//
           />
           <div 
@@ -265,7 +286,7 @@ export class AppContainer extends Component {
             primary: true,
             label: 'Ok',
           }]}
-          children={<p>{this.state.errorDialogExplanation}</p>}
+          children={this.state.errorDialogExplanation}
         >
         </Dialog>
       </div>
