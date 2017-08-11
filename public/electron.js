@@ -106,8 +106,8 @@ exports.callService = (protoDiscoveryRoot,
   tlsCaCertPath, callback) => {
 
   var command = "echo \"" + jsonRequest + "\" | java -jar " + pathToPolyglotBinary +
-    " --command=call --proto_discovery_root=" + protoDiscoveryRoot + " --endpoint=" + endpoint + 
-    " --full_method=" + fullMethod + "--config_name=" +
+    " --command=call " + " --endpoint=" + endpoint + " --full_method=" + fullMethod +
+    (protoDiscoveryRoot === "" ? "" : " --proto_discovery_root=" + protoDiscoveryRoot) +
     (configSetPath === "" ? "" : " --config_set_path=" + configSetPath) +
     (configName === "" ? "" : " --config_name=" + configName) + 
     (addProtocIncludes === "" ? "" : " --add_protoc_includes=" + addProtocIncludes) +
@@ -142,9 +142,6 @@ function setUpMenu() {
     {
       label: 'Edit',
       submenu: [
-        // {role: 'undo'},
-        // {role: 'redo'},
-        // {type: 'separator'},
         {role: 'cut'},
         {role: 'copy'},
         {role: 'paste'},

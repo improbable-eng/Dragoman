@@ -15,7 +15,6 @@ export class SingleLineTextEntry extends React.Component {
                 error={this.props.error ? this.props.error : false}
                 errorText={this.props.errorText ? this.props.errorText : ""}
                 onChange={(newValue) => this.props.handleChange(this.props.id, newValue)}
-                onBlur={this.props.handleBlur}
                 onDoubleClick={this.props.handleDoubleClick}
                 style={{"flex":"1", "margin":"0px 8px 0px 8px"}}
                 lineDirection="center"

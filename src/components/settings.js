@@ -2,25 +2,11 @@ import React from 'react';
 
 import { SingleLineTextEntry } from './singleLineTextEntry';
 import { MultiLineTextEntry } from './multiLineTextEntry';
-// import Button from 'react-md/lib/Buttons/Button';
 
 export class Settings extends React.Component{
     render(){
         return (
             <div>
-                 <SingleLineTextEntry
-                id="currentProtoDiscoveryRoot"
-                value={this.props.protoPath}
-                handleChange={this.props.handleTextChange}
-                handleBlur={this.props.handleProtoPathBlur} 
-                label="Proto Root Path"
-                placeholder="/path/to/protoRoot"
-                errorText="Proto Root Path Required"
-                required={true}
-                handleDoubleClick={() => {
-                this.props.handlePathDoubleClick("currentProtoDiscoveryRoot", 
-                "Select Proto Discovery Root", false)}
-                } /> 
                 <SingleLineTextEntry 
                 id="endpoint"
                 label="gRPC Endpoint"
@@ -30,6 +16,17 @@ export class Settings extends React.Component{
                 handleChange={this.props.handleTextChange}
                 required={this.props.endpointRequired}
                 error={this.props.endpointError} />
+                 <SingleLineTextEntry
+                id="currentProtoDiscoveryRoot"
+                value={this.props.protoPath}
+                handleChange={this.props.handleTextChange}
+                label="Proto Root Path"
+                placeholder="/path/to/protoRoot"
+                errorText="Proto Root Path Required"
+                handleDoubleClick={() => {
+                this.props.handlePathDoubleClick("currentProtoDiscoveryRoot", 
+                "Select Proto Discovery Root", false)}
+                } /> 
                 <SingleLineTextEntry
                 id="configSetPath"
                 value={this.props.configSetPath}
@@ -72,13 +69,6 @@ export class Settings extends React.Component{
                 this.props.handlePathDoubleClick("addProtocIncludes", 
                 "Add Protoc Include Paths", true)}
                 } />
-                {/* <div style={{"display":"flex", "padding":"0px 10px 0px 10px"}}>
-                    <Button 
-                    label="List Services"
-                    raised
-                    flat
-                    style={{margin:"5px auto 5px auto", background:"md-tertiary-color"}}/>
-                </div> */}
             </div>
         )
     }

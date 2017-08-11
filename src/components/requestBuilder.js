@@ -35,8 +35,8 @@ export class RequestBuilder extends React.Component{
                         secondary
                         onClick={this.props.handleRunClick} 
                         style={{marginRight:"auto"}}
-                        tooltipLabel="Make Request"
-                        tooltipPosition="bottom">
+                        tooltipLabel="Send Request"
+                        tooltipPosition="right">
                             play_arrow
                         </Button>
                         :

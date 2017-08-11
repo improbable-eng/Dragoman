@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import  React, { Component } from 'react';
 
 import Toolbar from 'react-md/lib/Toolbars';
 import Dialog from 'react-md/lib/Dialogs';
@@ -7,7 +7,7 @@ import { SideBar } from '../components/sideBar';
 import { RequestBuilder } from '../components/requestBuilder';
 import { ResponseViewer } from '../components/responseViewer';
 
-const { ipcRenderer, remote } = window.require('electron');
+const { remote } = window.require('electron');
 const dialog = remote.dialog;
 const mainProcess = remote.require('../public/electron');
 
@@ -21,7 +21,7 @@ export class AppContainer extends Component {
 
     this.state = {
       services : [],
-      fullMethod: 'Service/Method',
+      fullMethod: '',
       request: "",
       response: "",
       serviceFilter: "",
@@ -29,8 +29,7 @@ export class AppContainer extends Component {
       errorDialogVisible: false,
 
       //Settings
-      previousProtoDiscoveryRoot: "",
-      currentProtoDiscoveryRoot: "",
+      protoDiscoveryRoot: "",
       endpoint: "",
       settingsOpen: true,
       endpointRequired: false,
@@ -44,7 +43,7 @@ export class AppContainer extends Component {
       };
     
     const functionsToBind = ["showDirectoryDialog", "handleMethodClick", "listServices", "listServicesReply", 
-    "callService", "callServiceReply", "handleTextChange", "handleProtoPathBlur", "handleEndpointChange", 
+    "callService", "callServiceReply", "handleTextChange", "handleListServicesClick", "handleEndpointChange", 
     "validateEndpoint", "handleSettingsClick", "handleRunClick", "handleRequestChange", "closeErrorDialog", 
     "openErrorDialog", "openJsonParseErrorDialog"];
 
@@ -55,17 +54,13 @@ export class AppContainer extends Component {
 
   listServices(){
     //Don't waste time listing services with the same discovery root
-    //TODO: Maybe give manual control of this to allow override
     //TODO: Validate input is in correct formats
-    if (this.state.currentProtoDiscoveryRoot !== this.state.previousProtoDiscoveryRoot) {
-      mainProcess.listServices(
-        this.state.currentProtoDiscoveryRoot, this.state.serviceFilter, this.state.methodFilter,
-        this.state.configSetPath, this.state.configName, this.state.addProtocIncludes,
-        this.state.deadlineMs, this.state.tlsCaCertPath ,this.listServicesReply);
+    mainProcess.listServices(
+      this.state.protoDiscoveryRoot, this.state.serviceFilter, this.state.methodFilter,
+      this.state.configSetPath, this.state.configName, this.state.addProtocIncludes,
+      this.state.deadlineMs, this.state.tlsCaCertPath ,this.listServicesReply);
 
-      this.setState({previousProtoDiscoveryRoot: this.state.currentProtoDiscoveryRoot, 
-        request: "", response: "", services: []});
-    }
+    this.setState({request: "", response: "", services: []});
   }
 
   listServicesReply(err, reply){
@@ -115,19 +110,10 @@ export class AppContainer extends Component {
       this.setState({callRequestInProgress: false});
     }
 
-  //  this.props.ipcRenderer.send(
-  //     "call-service",
-  //     this.state.currentProtoDiscoveryRoot,
-  //     redactedJsonInput,
-  //     this.state.endpoint,
-  //     this.state.fullMethod
-  //   )
-
     mainProcess.callService(
-      this.state.currentProtoDiscoveryRoot,
-      redactedJsonInput,
-      this.state.endpoint,
-      this.state.fullMethod,
+      this.state.protoDiscoveryRoot, redactedJsonInput, this.state.endpoint,
+      this.state.fullMethod, this.state.configSetPath, this.state.configName, 
+      this.state.addProtocIncludes, this.state.deadlineMs, this.state.tlsCaCertPath,
       this.callServiceReply
     );
   }
@@ -186,8 +172,8 @@ export class AppContainer extends Component {
     this.setState({[stateId]: newText});
   }
 
-  //TODO: Replace this with a list services button
-  handleProtoPathBlur(){
+  handleListServicesClick(){
+    console.log("Listing Services");
     this.listServices();
   }
 
@@ -246,8 +232,8 @@ export class AppContainer extends Component {
           //************** Settings **************//
           settingsOpen={this.state.settingsOpen}
           handleSettingsClick={this.handleSettingsClick}
-          protoPath={this.state.currentProtoDiscoveryRoot}
-          handleProtoPathBlur={this.handleProtoPathBlur}
+          protoPath={this.state.protoDiscoveryRoot}
+          handleListServicesClick={this.handleListServicesClick}
           handleTextChange={this.handleTextChange}
           configSetPath={this.state.configSetPath}
           endpoint={this.state.endpoint}
