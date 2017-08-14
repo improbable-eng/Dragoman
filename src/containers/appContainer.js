@@ -9,7 +9,17 @@ import { ResponseViewer } from '../components/responseViewer';
 
 const { remote } = window.require('electron');
 const dialog = remote.dialog;
-const mainProcess = remote.require('../public/electron');
+
+var mainProcess = undefined;
+
+// Open the DevTools.
+if (process.env.ELECTRON_ENV === "dev") {
+  console.log('Running in development');
+  mainProcess = remote.require('../public/electron'); 
+} else {
+  console.log('Running in production');
+  mainProcess = remote.require('../build/electron');
+}
 
 //TODO: Add option to get information about service, eg whether it is streaming or unary, display in UI
 const checkConsoleErrorMessage = "Check console for full log (Console can be reached from View" +
@@ -83,17 +93,24 @@ export class AppContainer extends Component {
     if (multiSelection) {
       customProperties.push('multiSelections');
     }
+
     console.log(customProperties)
+
     var path = dialog.showOpenDialog({
         properties: customProperties,
         message: macMessage
       });
+
     console.log(path);
+
     if(path instanceof Array){
       path = path.join(",\n");
     }
+
     console.log(path);
+
     this.setState({[id]: path});
+    
     console.log(this.state);
   }
 

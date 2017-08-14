@@ -17,14 +17,14 @@ export class Settings extends React.Component{
                 required={this.props.endpointRequired}
                 error={this.props.endpointError} />
                  <SingleLineTextEntry
-                id="currentProtoDiscoveryRoot"
+                id="protoDiscoveryRoot"
                 value={this.props.protoPath}
                 handleChange={this.props.handleTextChange}
                 label="Proto Root Path"
                 placeholder="/path/to/protoRoot"
                 errorText="Proto Root Path Required"
                 handleDoubleClick={() => {
-                this.props.handlePathDoubleClick("currentProtoDiscoveryRoot", 
+                this.props.handlePathDoubleClick("protoDiiscoveryRoot", 
                 "Select Proto Discovery Root", false)}
                 } /> 
                 <SingleLineTextEntry
