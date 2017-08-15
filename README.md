@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/peteboothroyd/dragoman/master/resources/dragoman-logo.png" height="64">
-  <h3 align="center">dragoman</h3>
-  <p align="center">an open source gui for polyglot, a universal grpc client<p>
+  <img src="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.png" height="64">
+  <h3 align="center">Dragoman</h3>
+  <p align="center">An open source GUI for polyglot, a universal gRPC client<p>
 </p>
-#Dragoman getting started
+# Getting Started
