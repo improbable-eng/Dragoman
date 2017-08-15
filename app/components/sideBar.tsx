@@ -1,14 +1,14 @@
-import * as React from 'react';
-import * as ReactMD from 'react-md';
+import * as React from "react";
+import * as ReactMD from "react-md";
 
-import ServiceListItem from './serviceListItem';
-import Settings  from './settings';
-import { Service, PolyglotSettings, SettingsUIState } from '../types/index';
+import ServiceListItem from "./serviceListItem";
+import Settings from "./settings";
+import { IService, IPolyglotSettings, ISettingsUIState } from "../types/index";
 
-export interface SideBarProps {
-    services: Service[];
-    polyglotSettings: PolyglotSettings;
-    settingsUIState: SettingsUIState;
+export interface ISideBarProps {
+    services?: IService[];
+    polyglotSettings: IPolyglotSettings;
+    settingsUIState: ISettingsUIState;
     handleMethodClick: (serviceName: string, methodName: string) => void;
     handleListServicesClick: () => void;
     handleSettingsClick: () => void;
@@ -17,16 +17,15 @@ export interface SideBarProps {
     handleEndpointChange: (newValue: string) => void;
 }
 
-function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick, 
-                   handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange, 
-                   handleEndpointChange}: SideBarProps) {
-    const serviceList = services.map(service =>
+function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick,
+                   handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange,
+                   handleEndpointChange}: ISideBarProps) {
+    const serviceList = services && services.map((service) =>
         (<ServiceListItem
             service={service}
             key={service.name}
             onMethodClick={handleMethodClick}
-        />)
-    );
+        />));
 
     const settings = (
         <div>
@@ -35,17 +34,17 @@ function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClic
                 settingsUIState={settingsUIState}
                 handleTextFieldInputChange={handleTextFieldInputChange}
                 handleListServicesClick={handleListServicesClick}
-                handlePathDoubleClick={handlePathDoubleClick} 
+                handlePathDoubleClick={handlePathDoubleClick}
             />
         </div>
     );
     return (
         <div>
             <ReactMD.List
-                style={{ display: 'flex', flexFlow: 'column', paddingTop: 0 }}
-                className={'md-toolbar-relative md-paper md-paper--1 ' +
-                    'md-drawer md-drawer--left md-drawer--fixed md-drawer--active ' +
-                    'md-transition--decceleration md-background--card'}
+                style={{ display: "flex", flexFlow: "column", paddingTop: 0 }}
+                className={"md-toolbar-relative md-paper md-paper--1 " +
+                    "md-drawer md-drawer--left md-drawer--fixed md-drawer--active " +
+                    "md-transition--decceleration md-background--card"}
             >
                 <ReactMD.ListItem
                     key="listServicesButton"
@@ -59,7 +58,7 @@ function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClic
                             swapTheming={true}
                             children={"List Services"}
                             onClick={handleListServicesClick}
-                            style={{ 'width': '100%', 'height': '100%' }} 
+                            style={{ width: "100%", height: "100%" }}
                         />}
                 />
                 <div className="md-list--drawer" key="services">

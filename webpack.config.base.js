@@ -2,23 +2,30 @@
  * Base webpack config used across other specific configs
  */
 
- // TODO: Is this webpack v1? Should we move to v2?
-
 const path = require('path');
 const {
   dependencies: externals
 } = require('./app/package.json');
 
 module.exports = {
-  module: {
-    loaders: [{
-      test: /\.tsx?$/,
-      loaders: ['react-hot-loader/webpack', 'ts-loader'],
-      exclude: /node_modules/
-    }, {
-      test: /\.json$/,
-      loader: 'json-loader'
-    }]
+   module: {
+    rules: [
+      {
+        enforce: "pre",
+        test: /\.tsx?/,
+        loader: 'tslint-loader',
+        exclude: /(node_modules)/,
+      },
+      {
+        test: /\.tsx?/,
+        loader: ['react-hot-loader/webpack', 'ts-loader'],
+        exclude: /(node_modules)/,
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader' 
+      }
+    ]
   },
 
   output: {

@@ -1,17 +1,17 @@
-import * as React from 'react';
-import * as ReactMD from 'react-md';
+import * as React from "react";
+import * as ReactMD from "react-md";
 
-import AceEditor from 'react-ace';
-import 'brace/theme/xcode';
+import AceEditor from "react-ace";
+import "brace/theme/xcode";
 
-export interface ResponseViewerProps {
-    response: string;
+export interface IResponseViewerProps {
+    response?: string;
     serviceMethodIdentifier?: string;
 }
 
-export function ResponseViewer({response, serviceMethodIdentifier}: ResponseViewerProps) {
+export function ResponseViewer({response, serviceMethodIdentifier}: IResponseViewerProps) {
     return (
-        <ReactMD.Card style={{ width: '50%', padding: '20px' }}>
+        <ReactMD.Card style={{ width: "50%", padding: "20px" }}>
             <ReactMD.CardTitle
                 title="Response Viewer"
                 subtitle={serviceMethodIdentifier}

@@ -1,22 +1,22 @@
-import * as React from 'react';
+import * as React from "react";
 
-import { PolyglotSettings, SettingsUIState } from '../types/index';
+import { IPolyglotSettings, ISettingsUIState } from "../types/index";
 
-import SingleLineTextEntry from './singleLineTextEntry';
-import MultiLineTextEntry from './multiLineTextEntry';
+import SingleLineTextEntry from "./singleLineTextEntry";
+import MultiLineTextEntry from "./multiLineTextEntry";
 
-//TODO: Change to using local .scss files?
+// TODO: Change to using local .scss files?
 
-export interface SettingsProps {
-    polyglotSettings: PolyglotSettings;
-    settingsUIState: SettingsUIState;
+export interface ISettingsProps {
+    polyglotSettings: IPolyglotSettings;
+    settingsUIState: ISettingsUIState;
     handleTextFieldInputChange: (settingStateId: string, newValue: string | number) => void;
     handleListServicesClick: () => void;
     handlePathDoubleClick: (stateId: string, message: string, allowMultiSelect: boolean) => void;
 }
 
-function Settings({ polyglotSettings, settingsUIState, 
-    handleTextFieldInputChange, handlePathDoubleClick, handleListServicesClick }: SettingsProps) {
+function Settings({ polyglotSettings, settingsUIState,
+    handleTextFieldInputChange, handlePathDoubleClick, handleListServicesClick }: ISettingsProps) {
     return (
         <div>
             <SingleLineTextEntry
@@ -37,9 +37,9 @@ function Settings({ polyglotSettings, settingsUIState,
                 placeholder="/path/to/protoRoot"
                 errorText="Proto Root Path Required"
                 handleDoubleClick={() =>
-                    handlePathDoubleClick('protoDiscoveryRoot',
-                                          'Select Proto Discovery Root', 
-                                          false)} 
+                    handlePathDoubleClick("protoDiscoveryRoot",
+                                          "Select Proto Discovery Root",
+                                          false)}
             />
             <SingleLineTextEntry
                 id="configSetPath"
@@ -48,16 +48,16 @@ function Settings({ polyglotSettings, settingsUIState,
                 label="Config Path"
                 placeholder="/path/to/config.pb.json"
                 handleDoubleClick={() =>
-                    handlePathDoubleClick('configSetPath',
-                                          'Select Config Path', 
-                                          false)} 
+                    handlePathDoubleClick("configSetPath",
+                                          "Select Config Path",
+                                          false)}
             />
             <SingleLineTextEntry
                 id="configName"
                 value={polyglotSettings.configName}
                 handleChange={handleTextFieldInputChange}
                 label="Config Name"
-                placeholder="development" 
+                placeholder="development"
             />
             <SingleLineTextEntry
                 id="tlsCaCertPath"
@@ -65,17 +65,17 @@ function Settings({ polyglotSettings, settingsUIState,
                 handleChange={handleTextFieldInputChange}
                 label="TLS CA Certificate Path"
                 placeholder="/path/to/tlsCaCertificate"
-                handleDoubleClick={() => 
-                    handlePathDoubleClick('tlsCaCertPath',
-                                          'Select TLS CA Certificate Path', 
-                                          false)} 
+                handleDoubleClick={() =>
+                    handlePathDoubleClick("tlsCaCertPath",
+                                          "Select TLS CA Certificate Path",
+                                          false)}
             />
             <SingleLineTextEntry
                 id="deadlineMs"
                 value={polyglotSettings.deadlineMs}
                 handleChange={handleTextFieldInputChange}
                 label="Deadline (milliseconds)"
-                placeholder="5000" 
+                placeholder="5000"
             />
             <MultiLineTextEntry
                 id="addProtocIncludes"
@@ -83,10 +83,10 @@ function Settings({ polyglotSettings, settingsUIState,
                 handleChange={handleTextFieldInputChange}
                 label="Add Protoc Includes"
                 placeholder="<path1>,<path2>"
-                handleDoubleClick={() => 
-                    handlePathDoubleClick('addProtocIncludes',
-                                          'Add Protoc Include Paths', 
-                                          true)} 
+                handleDoubleClick={() =>
+                    handlePathDoubleClick("addProtocIncludes",
+                                          "Add Protoc Include Paths",
+                                          true)}
             />
         </div>);
 }

@@ -24,14 +24,7 @@ module.exports = merge(baseConfig, {
   },
 
   module: {
-    // preLoaders: [
-    //   {
-    //     test: /\.js$/,
-    //     loader: 'eslint-loader',
-    //     exclude: /node_modules/
-    //   }
-    // ],
-    loaders: [
+    rules: [
       {
         test: /\.global\.css$/,
         loaders: [

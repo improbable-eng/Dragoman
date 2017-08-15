@@ -1,22 +1,22 @@
-import * as React from 'react';
-import * as ReactMD from 'react-md';
+import * as React from "react";
+import * as ReactMD from "react-md";
 
-import { AppUIState } from '../types/index';
+import { IAppUIState } from "../types/index";
 
-import AceEditor from 'react-ace';
-import 'brace/mode/json';
-import 'brace/theme/xcode';
+import AceEditor from "react-ace";
+import "brace/mode/json";
+import "brace/theme/xcode";
 
-export interface RequestBuilderProps {
-    request: string;
+export interface IRequestBuilderProps {
+    request?: string;
     serviceMethodIdentifier?: string;
-    appUIState: AppUIState;
+    appUIState: IAppUIState;
     handleRunClick: () => void;
     handleRequestChange: (newValue: string) => void;
 }
 
-class RequestBuilder extends React.Component<RequestBuilderProps> {
-    // Checking that we aren't needlessly updating the editor. TODO: Is this necessary?
+class RequestBuilder extends React.Component<IRequestBuilderProps> {
+    // Checking that we aren"t needlessly updating the editor. TODO: Is this necessary?
     // shouldComponentUpdate(nextProps: RequestBuilderProps, nextState: object) {
     //     const propsAreSame = (this.props.request === nextProps.request
     //         && this.props.serviceMethodIdentifier === nextProps.serviceMethodIdentifier
@@ -24,16 +24,16 @@ class RequestBuilder extends React.Component<RequestBuilderProps> {
     //     return !propsAreSame;
     // }
 
-    render() {
+    public render() {
         return (
-            <ReactMD.Card style={{ width: '50%', padding: '20px' }} >
-                <div style={{ 'display': 'flex' }}>
+            <ReactMD.Card style={{ width: "50%", padding: "20px" }} >
+                <div style={{ display: "flex" }}>
                     <ReactMD.CardTitle
                         title="Request Builder"
                         subtitle={this.props.serviceMethodIdentifier}
                     />
                     <ReactMD.CardActions
-                        style={{ 'flexGrow': 1 }}
+                        style={{ flexGrow: 1 }}
                     >
                         {!this.props.appUIState.callRequestInProgress ?
                             <ReactMD.Button
@@ -41,7 +41,7 @@ class RequestBuilder extends React.Component<RequestBuilderProps> {
                                 secondary={true}
                                 swapTheming={true}
                                 onClick={this.props.handleRunClick}
-                                style={{ marginRight: 'auto' }}
+                                style={{ marginRight: "auto" }}
                                 tooltipLabel="Send Request"
                                 tooltipPosition="right"
                             >
@@ -50,7 +50,7 @@ class RequestBuilder extends React.Component<RequestBuilderProps> {
                             :
                             <ReactMD.CircularProgress
                                 id="requestProgress"
-                                style={{ marginLeft: 10 }} 
+                                style={{ marginLeft: 10 }}
                             />}
                     </ReactMD.CardActions>
                 </div>
