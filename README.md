@@ -1,6 +1,5 @@
 <p align="center">
-  <object type="image/svg+xml" data="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.svg"/>
-  <img src="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.svg" height="64">
+  <img src="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.png" height="64">
   <h3 align="center">Dragoman</h3>
   <p align="center">An open source GUI for polyglot, a universal gRPC client<p>
 </p>
