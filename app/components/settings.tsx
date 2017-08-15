@@ -72,7 +72,7 @@ function Settings({ polyglotSettings, settingsUIState,
             />
             <SingleLineTextEntry
                 id="deadlineMs"
-                value={polyglotSettings.deadlineMs}
+                value={polyglotSettings.deadlineMs <= 0 ? undefined : polyglotSettings.deadlineMs}
                 handleChange={handleTextFieldInputChange}
                 label="Deadline (milliseconds)"
                 placeholder="5000"

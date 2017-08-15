@@ -1,11 +1,17 @@
 // VSCode tslint config
-
 {
   "extends": "tslint:recommended",
   "rules": {
-  "ordered-imports": false,
-  "object-literal-sort-keys": false,
-  "no-console": [true, "assert"],
-  "trailing-comma": false
+    "ordered-imports": [
+      false
+    ],
+    "object-literal-sort-keys": false,
+    "no-console": [
+      true,
+      "assert"
+    ],
+    "trailing-comma": [
+      false
+    ]
   }
 }

@@ -51800,28 +51800,41 @@ const React = __webpack_require__(0);
 const react_dom_1 = __webpack_require__(8);
 const react_hot_loader_1 = __webpack_require__(332);
 const Root_1 = __webpack_require__(337);
-__webpack_require__(572);
-const WebFontLoader = __webpack_require__(573);
+const WebFontLoader = __webpack_require__(572);
+__webpack_require__(573);
 // Redux code
-// const { configureStore, history } = require('./store/configureStore');
+// const { configureStore, history } = require("./store/configureStore");
 // const store = configureStore();
 WebFontLoader.load({
     google: {
-        families: ['Roboto:300,400,500,700', 'Material Icons'],
+        families: ["Roboto:300,400,500,700", "Material Icons"],
     },
 });
+// render(
+//       <Root />,
+//     document.getElementById("root")
+//   );
+//   if ((module as any).hot) {
+//     (module as any).hot.accept("./containers/Root", () => {
+//       const NextRoot = require("./containers/Root").default;
+//       render(
+//           <NextRoot />,
+//         document.getElementById("root")
+//       );
+//     });
+//   }
 react_dom_1.render(React.createElement(react_hot_loader_1.AppContainer, null,
-    React.createElement(Root_1.default, null)), document.getElementById('root'));
+    React.createElement(Root_1.default, null)), document.getElementById("root"));
 if (false) {
-    module.hot.accept('./containers/Root', () => {
-        const NextRoot = require('./containers/Root').default;
+    module.hot.accept("./containers/Root", () => {
+        const NextRoot = require("./containers/Root").default;
         react_dom_1.render(React.createElement(react_hot_loader_1.AppContainer, null,
-            React.createElement(NextRoot, null)), document.getElementById('root'));
+            React.createElement(NextRoot, null)), document.getElementById("root"));
     });
 }
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/index.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/index.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/index.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/index.tsx"); } } })();
 
 /***/ }),
 /* 242 */
@@ -63597,75 +63610,67 @@ const ReactMD = __webpack_require__(31);
 const sideBar_1 = __webpack_require__(554);
 const requestBuilder_1 = __webpack_require__(559);
 const responseViewer_1 = __webpack_require__(569);
-const index_1 = __webpack_require__(570);
+const ipcConstants_1 = __webpack_require__(570);
 const electron_1 = __webpack_require__(571);
-const dialog = electron_1.remote.dialog;
-// const mainProcess = remote.require('../main.development'); // TODO: Can this be done in a nicer TypeScript way?
 // TODO: Add option to get information about service, eg whether it is streaming or unary, display in UI
-const checkConsoleErrorMessage = 'Check console for full log (Console can be reached from View' +
-    ' -> Toggle Developer Tools -> Console)';
-class RootState {
-    constructor() {
-        this.services = [];
-        this.polyglotSettings = new index_1.PolyglotSettings();
-        this.listServicesOptions = new index_1.ListServicesOptions();
-        this.polyglotRequestOptions = new index_1.PolyglotRequestOptions();
-        this.request = '';
-        this.response = '';
-        this.settingsUIState = new index_1.SettingsUIState();
-        this.appUIState = new index_1.AppUIState();
-    }
-}
+const checkConsoleErrorMessage = "Check console for full log (Console can be reached from View" +
+    " -> Toggle Developer Tools -> Console)";
 class Root extends React.Component {
     constructor() {
         super();
         this.listServices = () => {
-            this.setState({ request: '', response: '', services: [] });
-            // // TODO: Validate input is in correct formats
-            // mainProcess.listServices(
-            //   this.state.polyglotSettings, this.state.polyglotRequestOptions,
-            //   this.state.listServicesOptions, this.listServicesReply);
+            this.setState({ request: "", response: "", services: [] });
+            const listServicesRequest = {
+                polyglotSettings: this.state.polyglotSettings,
+                listServicesOptions: this.state.listServicesOptions
+            };
+            console.log("listing services with command, ", ipcConstants_1.LIST_SERVICES_REQUEST, " and request ", listServicesRequest);
+            electron_1.ipcRenderer.send(ipcConstants_1.LIST_SERVICES_REQUEST, listServicesRequest);
         };
-        this.listServicesReply = (err, reply) => {
-            if (!err) {
+        this.listServicesResponse = (res) => {
+            if (!res.error) {
                 try {
-                    const parsedResponse = JSON.parse(reply);
+                    const parsedResponse = JSON.parse(res.response);
                     this.setState({ services: parsedResponse });
                 }
                 catch (e) {
-                    this.openErrorDialog('Error parsing list-services response:', checkConsoleErrorMessage);
-                    console.log(`Error ${e}\n${reply}`);
+                    this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
+                    console.log(`Error ${e}\n${res.response}`);
                 }
             }
             else {
-                this.openErrorDialog('Error listing services: ', checkConsoleErrorMessage);
-                console.log(`Error ${err}\n${reply}`);
+                this.openErrorDialog("Error listing services: ", checkConsoleErrorMessage);
+                console.log(`Error ${res.error}\n${res.response}`);
             }
         };
-        this.showDirectoryDialog = (id, macMessage = '', multiSelection = false) => {
-            var customProperties = ['openDirectory', 'openFile', 'showHiddenFiles'];
+        this.showDirectoryDialog = (id, macMessage = "", multiSelection = false) => {
+            console.log("showing dialog");
+            console.log(this.state);
+            const customProperties = ["openDirectory", "openFile", "showHiddenFiles"];
             if (multiSelection) {
-                customProperties.push('multiSelections');
+                customProperties.push("multiSelections");
             }
             console.log(customProperties);
-            const pathList = dialog.showOpenDialog({
+            const pathList = electron_1.remote.dialog.showOpenDialog({
                 properties: customProperties,
-                message: macMessage
+                message: macMessage,
             });
+            console.log("pathList: ", pathList);
             if (multiSelection) {
-                this.setState({ polyglotSettings: { [id]: pathList } });
-                // path = path.join(',\n'); // TODO: Move this logic to the rendering in multilinetextentry
+                this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [id]: pathList }) });
             }
             else {
-                const path = pathList[0];
-                this.setState({ polyglotSettings: { [id]: path } }); // TODO: Test is this the proper syntax?
+                if (pathList.length >= 1) {
+                    const path = pathList[0];
+                    this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [id]: path }) });
+                }
             }
         };
         this.callService = () => {
             const jsonInput = this.state.request;
-            // Remove the annotations eg. [<optioal> <repeated>] from the request. 
+            // Remove the annotations eg. [<optioal> <repeated>] from the request.
             // Note (Edge Case): If the actual JSON body contains these strings they will be removed.
-            const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, '');
+            const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
             try {
                 JSON.parse(redactedJsonInput);
             }
@@ -63673,58 +63678,78 @@ class Root extends React.Component {
                 this.openJsonParseErrorDialog();
                 this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
             }
-            // const callServiceOptions = new CallServiceOptions({ jsonRequest: redactedJsonInput });
-            // mainProcess.callService(
-            //   this.state.polyglotSettings, this.state.polyglotRequestOptions,
-            //   callServiceOptions, this.callServiceReply);
+            const cSOptions = {
+                jsonBody: redactedJsonInput,
+                fullMethod: this.state.callServiceOptions.fullMethod,
+            };
+            const callServiceRequest = {
+                polyglotSettings: this.state.polyglotSettings,
+                callServiceOptions: cSOptions
+            };
+            electron_1.ipcRenderer.send(ipcConstants_1.CALL_SERVICE_REQUEST, callServiceRequest);
         };
-        this.callServiceReply = (err, reply) => {
+        this.callServiceResponse = (res) => {
             this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
-            if (!err) {
-                const trimmedReply = reply.trim();
-                this.setState({ response: trimmedReply });
+            if (!res.error) {
+                const trimmedResponse = res.response.trim();
+                this.setState({ response: trimmedResponse });
             }
             else {
-                this.openErrorDialog('Error calling service: ', checkConsoleErrorMessage);
-                console.log(`Error ${err}\n${reply}`);
+                this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
+                console.log(`Error ${res.error}\n${res.response}`);
             }
         };
         this.openJsonParseErrorDialog = () => {
-            this.openErrorDialog('Error parsing request', 'Ensure that the request is valid JSON');
+            this.openErrorDialog("Error parsing request", "Ensure that the request is valid JSON");
         };
         this.closeErrorDialog = () => {
+            console.log("closing error dialogue");
+            console.log(this.state);
             this.setState({ appUIState: Object.assign({}, this.state.appUIState, { errorDialogVisible: false }) });
         };
         this.openErrorDialog = (title, explanation) => {
+            console.log("opening dialogue");
+            console.log(this.state);
             this.setState({
                 appUIState: Object.assign({}, this.state.appUIState, {
                     errorDialogVisible: false, errorDialogTitle: title,
-                    errorDialogExplanation: explanation
+                    errorDialogExplanation: explanation,
                 })
             });
         };
         this.handleRequestChange = (newValue) => {
+            console.log("handling request change");
+            console.log(this.state);
             this.setState({ request: newValue });
         };
         this.handleSettingsClick = () => {
-            this.setState({
-                settingsUIState: Object.assign({}, this.state.settingsUIState, { settingsOpen: !this.state.settingsUIState.settingsOpen })
-            });
+            console.log("handling settings click");
+            console.log(this);
+            const newSettingsUIState = Object.assign({}, this.state.settingsUIState, { settingsOpen: !this.state.settingsUIState.settingsOpen });
+            console.log("newSettingsUIState", newSettingsUIState);
+            // this.setState({ settingsUIState: brandNewSettingsUIState });
+            this.setState({ settingsUIState: newSettingsUIState });
         };
         // Should we validate that this is a valid path? This would have to deal
         // with the various different platforms
         this.handleTextFieldInputChange = (stateId, newText) => {
-            if (stateId === 'endpoint') {
+            console.log("handling text field change");
+            console.log(this.state);
+            if (stateId === "endpoint") {
                 this.handleEndpointChange(newText);
             }
             this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [stateId]: newText }) });
         };
         this.handleListServicesClick = () => {
-            console.log('Listing Services');
+            // console.log("handling list services click");
+            // console.log(this.state);
+            console.log("Listing Services");
             this.listServices();
         };
         // TODO: Change this pattern. We want to validate all text inputs not just the endpoint
         this.handleEndpointChange = (newEndpoint) => {
+            console.log("handling endpoint change");
+            console.log(this.state);
             const newEndPointError = this.validateEndpoint(newEndpoint);
             this.setState({
                 polyglotSettings: Object.assign({}, this.state.polyglotSettings, { endpoint: newEndpoint }),
@@ -63732,9 +63757,11 @@ class Root extends React.Component {
             });
         };
         this.validateEndpoint = (newEndpoint) => {
-            return newEndpoint === '';
+            return newEndpoint === "";
         };
         this.handleMethodClick = (serviceName, methodName) => {
+            console.log("handling method click");
+            console.log(this.state);
             try {
                 const clickedService = this.state.services.find((service) => {
                     return service.name === serviceName;
@@ -63749,7 +63776,7 @@ class Root extends React.Component {
                 const parsedResponseTemplate = JSON.parse(clickedMethod.response);
                 const prettyPrintedResponseTemplate = JSON.stringify(parsedResponseTemplate, null, 2);
                 this.setState({
-                    polyglotRequestOptions: Object.assign({}, this.state.polyglotRequestOptions, { fullMethod: serviceName + '/' + methodName }),
+                    callServiceOptions: Object.assign({}, this.state.callServiceOptions, { fullMethod: serviceName + "/" + methodName }),
                     request: prettyPrintedRequestTemplate,
                     response: prettyPrintedResponseTemplate,
                 });
@@ -63758,17 +63785,12 @@ class Root extends React.Component {
                 console.log(e);
             }
         };
-        this.state = new RootState();
-        // Binding functions, might not be required in TypeScript?
-        // const functionsToBind = ['showDirectoryDialog', 'handleMethodClick', 'listServices', 'listServicesReply',
-        //   'callService', 'callServiceReply', 'handleTextFieldInputChange', 'handleListServicesClick', 
-        //   'handleEndpointChange', 'validateEndpoint', 'handleSettingsClick', 'handleRunClick', 'handleRequestChange',
-        //   'closeErrorDialog', 'openErrorDialog', 'openJsonParseErrorDialog'];
-        // functionsToBind.forEach((func) => {
-        //   this[func] = this[func].bind(this);
-        // });
+        this.state = this.createInitialState();
+        this.registerIpcListeners();
     }
     handleRunClick() {
+        console.log("handling run click");
+        console.log(this.state);
         // Up until this point the endpoint did not need to be filled in.
         if (this.state.polyglotSettings.endpoint === undefined) {
             this.setState({
@@ -63791,10 +63813,10 @@ class Root extends React.Component {
             React.createElement(ReactMD.Toolbar, { title: "Dragoman", className: "md-toolbar--fixed", colored: true }),
             React.createElement("div", null,
                 React.createElement(sideBar_1.default, { services: this.state.services, polyglotSettings: this.state.polyglotSettings, settingsUIState: this.state.settingsUIState, handleMethodClick: this.handleMethodClick, handleSettingsClick: this.handleSettingsClick, handleListServicesClick: this.handleListServicesClick, handleTextFieldInputChange: this.handleTextFieldInputChange, handleEndpointChange: this.handleEndpointChange, handlePathDoubleClick: this.showDirectoryDialog }),
-                React.createElement("div", { style: { display: 'flex' }, className: 'md-navigation-drawer-content md-navigation-drawer-content--prominent-offset' +
-                        'md-transition--decceleration md-drawer-relative md-toolbar-relative' },
-                    React.createElement(requestBuilder_1.default, { request: this.state.request, appUIState: this.state.appUIState, serviceMethodIdentifier: this.state.polyglotRequestOptions.fullMethod, handleRunClick: this.handleRunClick, handleRequestChange: this.handleRequestChange }),
-                    React.createElement(responseViewer_1.default, { response: this.state.response, serviceMethodIdentifier: this.state.polyglotRequestOptions.fullMethod }))),
+                React.createElement("div", { style: { display: "flex" }, className: "md-navigation-drawer-content md-navigation-drawer-content--prominent-offset" +
+                        "md-transition--decceleration md-drawer-relative md-toolbar-relative" },
+                    React.createElement(requestBuilder_1.default, { request: this.state.request, appUIState: this.state.appUIState, serviceMethodIdentifier: this.state.callServiceOptions.fullMethod, handleRunClick: this.handleRunClick, handleRequestChange: this.handleRequestChange }),
+                    React.createElement(responseViewer_1.default, { response: this.state.response, serviceMethodIdentifier: this.state.callServiceOptions.fullMethod }))),
             React.createElement(ReactMD.Dialog, { id: "errorDialog", 
                 // visible and modal are not defined by default in the current alpha version of react-md, if there is
                 // an error paste visible?: boolean; modal?: boolean; into DialogProps in the Dialog.d.ts file
@@ -63802,33 +63824,55 @@ class Root extends React.Component {
                 visible: this.state.appUIState.errorDialogVisible, modal: true, title: this.state.appUIState.errorDialogTitle, actions: [{
                         onClick: this.closeErrorDialog,
                         primary: true,
-                        label: 'Ok',
+                        label: "Ok",
                     }], children: this.state.appUIState.errorDialogExplanation })));
+    }
+    // Defining initial state of app
+    createInitialState() {
+        return {
+            services: [],
+            response: undefined,
+            request: undefined,
+            polyglotSettings: {
+                protoDiscoveryRoot: undefined,
+                endpoint: undefined,
+                configSetPath: undefined,
+                configName: undefined,
+                tlsCaCertPath: undefined,
+                deadlineMs: undefined
+            },
+            listServicesOptions: {
+                serviceFilter: undefined,
+                methodFilter: undefined
+            },
+            callServiceOptions: {
+                jsonBody: "",
+                fullMethod: ""
+            },
+            appUIState: {
+                errorDialogVisible: false,
+                errorDialogTitle: undefined,
+                errorDialogExplanation: undefined,
+                callRequestInProgress: false
+            },
+            settingsUIState: {
+                settingsOpen: true,
+                endpointRequired: false,
+                endpointError: false
+            }
+        };
+    }
+    // Adding event listeners to allow callback from the main process
+    registerIpcListeners() {
+        electron_1.ipcRenderer.on(ipcConstants_1.LIST_SERVICES_RESPONSE, this.listServicesResponse);
+        electron_1.ipcRenderer.on(ipcConstants_1.CALL_SERVICE_RESPONSE, this.callServiceResponse);
     }
 }
 exports.Root = Root;
 exports.default = Root;
-// import * as Redux from 'react-redux';
-// import { History } from 'history';
-// import { Provider } from 'react-redux';
-// import { ConnectedRouter } from 'react-router-redux';
-// import Routes from '../routes';
-// interface IRootType {
-//   store: Redux.Store<any>;
-//   history: History
-// };
-// export default function Root({ store, history }: IRootType) {
-//   return (
-//     <Provider store={store}>
-//       <ConnectedRouter history={history}>
-//         <Routes />
-//       </ConnectedRouter>
-//     </Provider>
-//   );
-// } 
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/containers/Root.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/containers/Root.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/containers/Root.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/containers/Root.tsx"); } } })();
 
 /***/ }),
 /* 338 */
@@ -98975,23 +99019,20 @@ const ReactMD = __webpack_require__(31);
 const serviceListItem_1 = __webpack_require__(555);
 const settings_1 = __webpack_require__(556);
 function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick, handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange, handleEndpointChange }) {
-    const serviceList = services.map(service => (React.createElement(serviceListItem_1.default, { service: service, key: service.name, onMethodClick: handleMethodClick })));
-    const settings = (React.createElement("div", null,
-        "(",
-        React.createElement(settings_1.default, { polyglotSettings: polyglotSettings, settingsUIState: settingsUIState, handleTextFieldInputChange: handleTextFieldInputChange, handleListServicesClick: handleListServicesClick, handlePathDoubleClick: handlePathDoubleClick }),
-        ")"));
+    const serviceList = services && services.map((service) => React.createElement(serviceListItem_1.default, { service: service, key: service.name, onMethodClick: handleMethodClick }));
+    const settings = React.createElement(settings_1.default, { polyglotSettings: polyglotSettings, settingsUIState: settingsUIState, handleTextFieldInputChange: handleTextFieldInputChange, handleListServicesClick: handleListServicesClick, handlePathDoubleClick: handlePathDoubleClick });
     return (React.createElement("div", null,
-        React.createElement(ReactMD.List, { style: { 'display': 'flex', 'flexFlow': 'column', 'padding-top': 0 }, className: 'md-toolbar-relative md-paper md-paper--1 ' +
-                'md-drawer md-drawer--left md-drawer--fixed md-drawer--active ' +
-                'md-transition--decceleration md-background--card' },
-            React.createElement(ReactMD.ListItem, { primaryText: "", children: React.createElement(ReactMD.Button, { flat: true, secondary: true, raised: true, label: "List Services", onClick: handleListServicesClick, style: { 'width': '100%', 'height': '100%' } }) }),
-            React.createElement("div", { className: "md-list--drawer" }, serviceList),
-            React.createElement(ReactMD.ListItem, { primaryText: "Settings", nestedItems: [settings], isOpen: settingsUIState.settingsOpen, onClick: handleSettingsClick, tileClassName: "list-subheader" }))));
+        React.createElement(ReactMD.List, { style: { display: "flex", flexFlow: "column", paddingTop: 0 }, className: "md-toolbar-relative md-paper md-paper--1 " +
+                "md-drawer md-drawer--left md-drawer--fixed md-drawer--active " +
+                "md-transition--decceleration md-background--card" },
+            React.createElement(ReactMD.ListItem, { key: "listServicesButton", primaryText: "", className: "list-services-item-button", children: React.createElement(ReactMD.Button, { key: "button", secondary: true, flat: true, swapTheming: true, children: "List Services", onClick: handleListServicesClick, style: { width: "100%", height: "100%" } }) }),
+            React.createElement("div", { className: "md-list--drawer", key: "services" }, serviceList),
+            React.createElement(ReactMD.ListItem, { primaryText: "Settings", key: "settings", nestedItems: [settings], visible: settingsUIState.settingsOpen, onClick: handleSettingsClick, tileClassName: "list-subheader" }))));
 }
 exports.default = SideBar;
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/sideBar.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/sideBar.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/sideBar.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/sideBar.tsx"); } } })();
 
 /***/ }),
 /* 555 */
@@ -99003,13 +99044,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
 const ReactMD = __webpack_require__(31);
 function ServiceListItem({ service, onMethodClick }) {
-    const list = service.methods.map(method => (React.createElement(ReactMD.ListItem, { primaryText: method.name, key: method.name, onClick: () => onMethodClick(service.name, method.name) })));
+    const list = service.methods.map((method) => (React.createElement(ReactMD.ListItem, { primaryText: method.name, key: method.name, onClick: () => onMethodClick(service.name, method.name) })));
     return (React.createElement(ReactMD.ListItem, { primaryText: service.name, active: true, nestedItems: list }));
 }
 exports.default = ServiceListItem;
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/serviceListItem.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/serviceListItem.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/serviceListItem.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/serviceListItem.tsx"); } } })();
 
 /***/ }),
 /* 556 */
@@ -99024,17 +99065,17 @@ const multiLineTextEntry_1 = __webpack_require__(558);
 function Settings({ polyglotSettings, settingsUIState, handleTextFieldInputChange, handlePathDoubleClick, handleListServicesClick }) {
     return (React.createElement("div", null,
         React.createElement(singleLineTextEntry_1.default, { id: "endpoint", label: "gRPC Endpoint", value: polyglotSettings.endpoint, errorText: "Endpoint Required", placeholder: "<host>:<port>", handleChange: handleTextFieldInputChange, required: settingsUIState.endpointRequired, error: settingsUIState.endpointError }),
-        React.createElement(singleLineTextEntry_1.default, { id: "protoDiscoveryRoot", value: polyglotSettings.protoDiscoveryRoot, handleChange: handleTextFieldInputChange, label: "Proto Root Path", placeholder: "/path/to/protoRoot", errorText: "Proto Root Path Required", handleDoubleClick: () => handlePathDoubleClick('currentProtoDiscoveryRoot', 'Select Proto Discovery Root', false) }),
-        React.createElement(singleLineTextEntry_1.default, { id: "configSetPath", value: polyglotSettings.configSetPath, handleChange: handleTextFieldInputChange, label: "Config Path", placeholder: "/path/to/config.pb.json", handleDoubleClick: () => handlePathDoubleClick('configSetPath', 'Select Config Path', false) }),
+        React.createElement(singleLineTextEntry_1.default, { id: "protoDiscoveryRoot", value: polyglotSettings.protoDiscoveryRoot, handleChange: handleTextFieldInputChange, label: "Proto Root Path", placeholder: "/path/to/protoRoot", errorText: "Proto Root Path Required", handleDoubleClick: () => handlePathDoubleClick("protoDiscoveryRoot", "Select Proto Discovery Root", false) }),
+        React.createElement(singleLineTextEntry_1.default, { id: "configSetPath", value: polyglotSettings.configSetPath, handleChange: handleTextFieldInputChange, label: "Config Path", placeholder: "/path/to/config.pb.json", handleDoubleClick: () => handlePathDoubleClick("configSetPath", "Select Config Path", false) }),
         React.createElement(singleLineTextEntry_1.default, { id: "configName", value: polyglotSettings.configName, handleChange: handleTextFieldInputChange, label: "Config Name", placeholder: "development" }),
-        React.createElement(singleLineTextEntry_1.default, { id: "tlsCaCertPath", value: polyglotSettings.tlsCaCertPath, handleChange: handleTextFieldInputChange, label: "TLS CA Certificate Path", placeholder: "/path/to/tlsCaCertificate", handleDoubleClick: () => handlePathDoubleClick('tlsCaCertPath', 'Select TLS CA Certificate Path', false) }),
+        React.createElement(singleLineTextEntry_1.default, { id: "tlsCaCertPath", value: polyglotSettings.tlsCaCertPath, handleChange: handleTextFieldInputChange, label: "TLS CA Certificate Path", placeholder: "/path/to/tlsCaCertificate", handleDoubleClick: () => handlePathDoubleClick("tlsCaCertPath", "Select TLS CA Certificate Path", false) }),
         React.createElement(singleLineTextEntry_1.default, { id: "deadlineMs", value: polyglotSettings.deadlineMs, handleChange: handleTextFieldInputChange, label: "Deadline (milliseconds)", placeholder: "5000" }),
-        React.createElement(multiLineTextEntry_1.default, { id: "addProtocIncludes", value: polyglotSettings.addProtocIncludes, handleChange: handleTextFieldInputChange, label: "Add Protoc Includes", placeholder: "<path1>,<path2>", handleDoubleClick: () => handlePathDoubleClick('addProtocIncludes', 'Add Protoc Include Paths', true) })));
+        React.createElement(multiLineTextEntry_1.default, { id: "addProtocIncludes", value: polyglotSettings.addProtocIncludes, handleChange: handleTextFieldInputChange, label: "Add Protoc Includes", placeholder: "<path1>,<path2>", handleDoubleClick: () => handlePathDoubleClick("addProtocIncludes", "Add Protoc Include Paths", true) })));
 }
 exports.default = Settings;
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/settings.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/settings.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/settings.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/settings.tsx"); } } })();
 
 /***/ }),
 /* 557 */
@@ -99045,18 +99086,18 @@ exports.default = Settings;
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
 const ReactMD = __webpack_require__(31);
-function SingleLineTextEntry({ id, label, value, placeholder = '', errorText = '', required = false, error = false, handleChange, handleDoubleClick }) {
-    return (React.createElement("div", { style: { 'display': 'flex', 'padding': '0px 10px 0px 10px' } },
+function SingleLineTextEntry({ id, label, value, placeholder = "", errorText = "", required = false, error = false, handleChange, handleDoubleClick }) {
+    return (React.createElement("div", { style: { display: "flex", padding: "0px 10px 0px 10px" } },
         React.createElement(ReactMD.TextField, { id: id, label: label, value: value, placeholder: placeholder, required: required, error: error, errorText: errorText, onChange: (newValue) => handleChange(id, newValue), 
             // react-md@next does not have doubleClick defined for ts by default
-            // if so add onDoubleClick?: (event: React.FocusEvent<HTMLElement>) => void;  to the main index.d.ts
-            onDoubleClick: handleDoubleClick, style: { 'flex': '1', 'margin': '0px 8px 0px 8px' }, lineDirection: "center", className: "md-cell md-cell--bottom" })));
+            // if so add onDoubleClick?: (event: React.MouseEvent<HTMLElement>) => void;  to the main index.d.ts
+            onDoubleClick: handleDoubleClick, style: { flex: "1", margin: "0px 8px 0px 8px" }, lineDirection: "center", className: "md-cell md-cell--bottom" })));
 }
 exports.SingleLineTextEntry = SingleLineTextEntry;
 exports.default = SingleLineTextEntry;
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/singleLineTextEntry.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/singleLineTextEntry.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/singleLineTextEntry.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/singleLineTextEntry.tsx"); } } })();
 
 /***/ }),
 /* 558 */
@@ -99067,21 +99108,21 @@ exports.default = SingleLineTextEntry;
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
 const ReactMD = __webpack_require__(31);
-function MultiLineTextEntry({ id, handleChange, handleDoubleClick, label, value, placeholder = '', errorText, error = false, required = false }) {
+function MultiLineTextEntry({ id, handleChange, handleDoubleClick, label, value, placeholder = "", errorText, error = false, required = false }) {
     let val;
     if (value instanceof Array) {
-        val = value.join(',\n');
+        val = value.join(",\n");
     }
     else {
         val = value;
     }
-    return (React.createElement("div", { style: { 'display': 'flex', 'padding': '0px 10px 0px 10px' } },
-        React.createElement(ReactMD.TextField, { id: id, label: label, value: val, placeholder: placeholder, required: required, errorText: errorText, onChange: (newValue) => handleChange(id, newValue), onDoubleClick: handleDoubleClick, rows: 1, maxRows: -1, style: { 'flex': '1', 'margin': '0px 8px 0px 8px' }, lineDirection: "center", className: "md-cell md-cell--bottom" })));
+    return (React.createElement("div", { style: { display: "flex", padding: "0px 10px 0px 10px" } },
+        React.createElement(ReactMD.TextField, { id: id, label: label, value: val, placeholder: placeholder, required: required, errorText: errorText, onChange: (newValue) => handleChange(id, newValue), onDoubleClick: handleDoubleClick, rows: 1, maxRows: -1, style: { flex: "1", margin: "0px 8px 0px 8px" }, lineDirection: "center", className: "md-cell md-cell--bottom" })));
 }
 exports.default = MultiLineTextEntry;
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/multiLineTextEntry.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/multiLineTextEntry.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/multiLineTextEntry.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/multiLineTextEntry.tsx"); } } })();
 
 /***/ }),
 /* 559 */
@@ -99096,19 +99137,19 @@ const react_ace_1 = __webpack_require__(234);
 __webpack_require__(567);
 __webpack_require__(239);
 class RequestBuilder extends React.Component {
-    // Checking that we aren't needlessly updating the editor. TODO: Is this necessary?
-    shouldComponentUpdate(nextProps, nextState) {
-        const propsAreSame = (this.props.request === nextProps.request
-            && this.props.serviceMethodIdentifier === nextProps.serviceMethodIdentifier
-            && this.props.appUIState.callRequestInProgress === nextProps.appUIState.callRequestInProgress);
-        return !propsAreSame;
-    }
+    // Checking that we aren"t needlessly updating the editor. TODO: Is this necessary?
+    // shouldComponentUpdate(nextProps: RequestBuilderProps, nextState: object) {
+    //     const propsAreSame = (this.props.request === nextProps.request
+    //         && this.props.serviceMethodIdentifier === nextProps.serviceMethodIdentifier
+    //         && this.props.appUIState.callRequestInProgress === nextProps.appUIState.callRequestInProgress);
+    //     return !propsAreSame;
+    // }
     render() {
-        return (React.createElement(ReactMD.Card, { style: { width: '50%', padding: '20px' } },
-            React.createElement("div", { style: { 'display': 'flex' } },
+        return (React.createElement(ReactMD.Card, { style: { width: "50%", padding: "20px" } },
+            React.createElement("div", { style: { display: "flex" } },
                 React.createElement(ReactMD.CardTitle, { title: "Request Builder", subtitle: this.props.serviceMethodIdentifier }),
-                React.createElement(ReactMD.CardActions, { style: { 'flexGrow': 1 } }, !this.props.appUIState.callRequestInProgress ?
-                    React.createElement(ReactMD.Button, { floating: true, secondary: true, onClick: this.props.handleRunClick, style: { marginRight: 'auto' }, tooltipLabel: "Send Request", tooltipPosition: "right" }, "play_arrow")
+                React.createElement(ReactMD.CardActions, { style: { flexGrow: 1 } }, !this.props.appUIState.callRequestInProgress ?
+                    React.createElement(ReactMD.Button, { icon: true, secondary: true, swapTheming: true, onClick: this.props.handleRunClick, style: { marginRight: "auto" }, tooltipLabel: "Send Request", tooltipPosition: "right" }, "play_arrow")
                     :
                         React.createElement(ReactMD.CircularProgress, { id: "requestProgress", style: { marginLeft: 10 } }))),
             React.createElement(ReactMD.Card, { className: "md-block-centered" },
@@ -99118,7 +99159,7 @@ class RequestBuilder extends React.Component {
 exports.default = RequestBuilder;
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/requestBuilder.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/requestBuilder.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/requestBuilder.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/requestBuilder.tsx"); } } })();
 
 /***/ }),
 /* 560 */
@@ -101626,7 +101667,7 @@ const ReactMD = __webpack_require__(31);
 const react_ace_1 = __webpack_require__(234);
 __webpack_require__(239);
 function ResponseViewer({ response, serviceMethodIdentifier }) {
-    return (React.createElement(ReactMD.Card, { style: { width: '50%', padding: '20px' } },
+    return (React.createElement(ReactMD.Card, { style: { width: "50%", padding: "20px" } },
         React.createElement(ReactMD.CardTitle, { title: "Response Viewer", subtitle: serviceMethodIdentifier }),
         React.createElement(ReactMD.Card, { className: "md-block-centered" },
             React.createElement(react_ace_1.default, { mode: "text", theme: "xcode", name: "RESPONSE_VIEWER", editorProps: { $blockScrolling: true }, width: "auto", readOnly: true, value: response }))));
@@ -101635,7 +101676,7 @@ exports.ResponseViewer = ResponseViewer;
 exports.default = ResponseViewer;
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/responseViewer.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/components/responseViewer.tsx"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/responseViewer.tsx"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/components/responseViewer.tsx"); } } })();
 
 /***/ }),
 /* 570 */
@@ -101644,60 +101685,13 @@ exports.default = ResponseViewer;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class PolyglotSettings {
-    constructor() {
-        this.protoDiscoveryRoot = undefined;
-        this.endpoint = undefined;
-        this.configSetPath = undefined;
-        this.addProtocIncludes = undefined;
-        this.configName = undefined;
-        this.tlsCaCertPath = undefined;
-        this.deadlineMs = undefined;
-        // constructor(init?: Partial<PolyglotSettings>) {
-        //   Object.assign(this, init);
-        // }
-    }
-}
-exports.PolyglotSettings = PolyglotSettings;
-class ListServicesOptions {
-    constructor() {
-        this.serviceFilter = undefined;
-        this.methodFilter = undefined;
-    }
-}
-exports.ListServicesOptions = ListServicesOptions;
-class CallServiceOptions {
-    constructor(init) {
-        this.jsonRequest = '{}';
-        Object.assign(this, init);
-    }
-}
-exports.CallServiceOptions = CallServiceOptions;
-class PolyglotRequestOptions {
-    constructor() {
-        this.fullMethod = undefined;
-    }
-}
-exports.PolyglotRequestOptions = PolyglotRequestOptions;
-class SettingsUIState {
-    constructor() {
-        this.settingsOpen = true;
-        this.endpointRequired = false;
-        this.endpointError = false;
-    }
-}
-exports.SettingsUIState = SettingsUIState;
-class AppUIState {
-    constructor() {
-        this.errorDialogVisible = false;
-        this.errorDialogTitle = '';
-        this.callRequestInProgress = false;
-    }
-}
-exports.AppUIState = AppUIState;
+exports.LIST_SERVICES_REQUEST = "LIST_SERVICES_REQUEST";
+exports.LIST_SERVICES_RESPONSE = "LIST_SERVICES_RESPONSE";
+exports.CALL_SERVICE_REQUEST = "CALL_SERVICE_REQUEST";
+exports.CALL_SERVICE_RESPONSE = "CALL_SERVICE_RESPONSE";
 
 
- ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/types/index.ts"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/electron-react-typescript-boilerplate/app/types/index.ts"); } } })();
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/constants/ipcConstants.ts"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/constants/ipcConstants.ts"); } } })();
 
 /***/ }),
 /* 571 */
@@ -101707,12 +101701,6 @@ module.exports = require("electron");
 
 /***/ }),
 /* 572 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
-/* 573 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/* Web Font Loader v1.6.28 - (c) Adobe Systems, Google. License: Apache 2.0 */(function(){function aa(a,b,c){return a.call.apply(a.bind,arguments)}function ba(a,b,c){if(!a)throw Error();if(2<arguments.length){var d=Array.prototype.slice.call(arguments,2);return function(){var c=Array.prototype.slice.call(arguments);Array.prototype.unshift.apply(c,d);return a.apply(b,c)}}return function(){return a.apply(b,arguments)}}function p(a,b,c){p=Function.prototype.bind&&-1!=Function.prototype.bind.toString().indexOf("native code")?aa:ba;return p.apply(null,arguments)}var q=Date.now||function(){return+new Date};function ca(a,b){this.a=a;this.o=b||a;this.c=this.o.document}var da=!!window.FontFace;function t(a,b,c,d){b=a.c.createElement(b);if(c)for(var e in c)c.hasOwnProperty(e)&&("style"==e?b.style.cssText=c[e]:b.setAttribute(e,c[e]));d&&b.appendChild(a.c.createTextNode(d));return b}function u(a,b,c){a=a.c.getElementsByTagName(b)[0];a||(a=document.documentElement);a.insertBefore(c,a.lastChild)}function v(a){a.parentNode&&a.parentNode.removeChild(a)}
@@ -101734,6 +101722,12 @@ function Da(a){for(var b=a.f.length,c=0;c<b;c++){var d=a.f[c].split(":"),e=d[0].
 g,0<d.length&&(d=za[d[0]])&&(a.c[e]=d))}a.c[e]||(d=za[e])&&(a.c[e]=d);for(d=0;d<f.length;d+=1)a.a.push(new G(e,f[d]))}};function Ea(a,b){this.c=a;this.a=b}var Fa={Arimo:!0,Cousine:!0,Tinos:!0};Ea.prototype.load=function(a){var b=new B,c=this.c,d=new ta(this.a.api,this.a.text),e=this.a.families;va(d,e);var f=new ya(e);Da(f);z(c,wa(d),C(b));E(b,function(){a(f.a,f.c,Fa)})};function Ga(a,b){this.c=a;this.a=b}Ga.prototype.load=function(a){var b=this.a.id,c=this.c.o;b?A(this.c,(this.a.api||"https://use.typekit.net")+"/"+b+".js",function(b){if(b)a([]);else if(c.Typekit&&c.Typekit.config&&c.Typekit.config.fn){b=c.Typekit.config.fn;for(var e=[],f=0;f<b.length;f+=2)for(var g=b[f],m=b[f+1],h=0;h<m.length;h++)e.push(new G(g,m[h]));try{c.Typekit.load({events:!1,classes:!1,async:!0})}catch(l){}a(e)}},2E3):a([])};function Ha(a,b){this.c=a;this.f=b;this.a=[]}Ha.prototype.load=function(a){var b=this.f.id,c=this.c.o,d=this;b?(c.__webfontfontdeckmodule__||(c.__webfontfontdeckmodule__={}),c.__webfontfontdeckmodule__[b]=function(b,c){for(var g=0,m=c.fonts.length;g<m;++g){var h=c.fonts[g];d.a.push(new G(h.name,ga("font-weight:"+h.weight+";font-style:"+h.style)))}a(d.a)},A(this.c,(this.f.api||"https://f.fontdeck.com/s/css/js/")+ea(this.c)+"/"+b+".js",function(b){b&&a([])})):a([])};var Y=new oa(window);Y.a.c.custom=function(a,b){return new sa(b,a)};Y.a.c.fontdeck=function(a,b){return new Ha(b,a)};Y.a.c.monotype=function(a,b){return new ra(b,a)};Y.a.c.typekit=function(a,b){return new Ga(b,a)};Y.a.c.google=function(a,b){return new Ea(b,a)};var Z={load:p(Y.load,Y)}; true?!(__WEBPACK_AMD_DEFINE_RESULT__ = function(){return Z}.call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):"undefined"!==typeof module&&module.exports?module.exports=Z:(window.WebFont=Z,window.WebFontConfig&&Y.load(window.WebFontConfig));}());
 
+
+/***/ }),
+/* 573 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
 
 /***/ })
 /******/ ]);

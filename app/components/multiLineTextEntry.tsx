@@ -3,7 +3,7 @@ import * as ReactMD from "react-md";
 
 export interface IMultiLineTextEntryProps {
     id: string;
-    value?: string | string[];
+    value?: string;
     label?: string;
     placeholder?: string;
     errorText?: string;
@@ -15,20 +15,12 @@ export interface IMultiLineTextEntryProps {
 
 function MultiLineTextEntry({id, handleChange, handleDoubleClick, label, value,
     placeholder = "", errorText, error = false, required = false}: IMultiLineTextEntryProps) {
-    let val: string | undefined;
-
-    if (value instanceof Array) {
-        val = value.join(",\n");
-    } else {
-        val = value;
-    }
-
     return (
         <div style={{ display: "flex", padding: "0px 10px 0px 10px" }}>
             <ReactMD.TextField
                 id={id}
                 label={label}
-                value={val}
+                value={value}
                 placeholder={placeholder}
                 required={required}
                 errorText={errorText}

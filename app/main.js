@@ -507,7 +507,7 @@ module.exports = require("path");
 var base64VLQ = __webpack_require__(3);
 var util = __webpack_require__(0);
 var ArraySet = __webpack_require__(4).ArraySet;
-var MappingList = __webpack_require__(13).MappingList;
+var MappingList = __webpack_require__(14).MappingList;
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -944,7 +944,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = __webpack_require__(12);
+var base64 = __webpack_require__(13);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -1170,246 +1170,226 @@ module.exports = __webpack_require__(6);
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { app, BrowserWindow, Menu, shell } = __webpack_require__(7);
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/* tslint:disable */
+const electron_1 = __webpack_require__(7);
 const url = __webpack_require__(8);
 const path = __webpack_require__(1); // eslint-disable-line
-
-const exec = __webpack_require__(9);
-
-let menu;
-let template;
+const child_process_1 = __webpack_require__(9);
+const constants = __webpack_require__(10);
 let mainWindow;
-
 if (true) {
-  const sourceMapSupport = __webpack_require__(10); // eslint-disable-line
-  sourceMapSupport.install();
+    const sourceMapSupport = __webpack_require__(11); // eslint-disable-line
+    sourceMapSupport.install();
 }
-
 if (false) {
-  require('electron-debug')(); // eslint-disable-line global-require
-  const p = path.join(__dirname, '..', 'app', 'node_modules'); // eslint-disable-line
-  require('module').globalPaths.push(p); // eslint-disable-line
+    console.log("in development");
+    require("electron-debug")(); // eslint-disable-line global-require
+    const p = path.join(__dirname, "..", "app", "node_modules"); // eslint-disable-line
+    require("module").globalPaths.push(p); // eslint-disable-line
 }
-
 const installExtensions = () => {
-  console.log("intalling extensions, NODE_ENV=", "production");
-  if (false) {
-    const installer = require('electron-devtools-installer'); // eslint-disable-line global-require
-
-    const extensions = [
-      "REACT_DEVELOPER_TOOLS"
-      // 'REDUX_DEVTOOLS'
-    ];
-    console.log(extensions);
-    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-    return Promise.all(extensions.map(name => installer.default(installer[name], forceDownload)));
-  }
-
-  return Promise.resolve([]);
+    if (false) {
+        const installer = require("electron-devtools-installer"); // eslint-disable-line global-require
+        const extensions = [
+            "REACT_DEVELOPER_TOOLS"
+            // "REDUX_DEVTOOLS"
+        ];
+        const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+        return Promise.all(extensions.map((name) => installer.default(installer[name], forceDownload)));
+    }
+    return Promise.resolve([]);
 };
-
 const createWindow = () => {
-  mainWindow = new BrowserWindow({
-    show: false,
-    width: 1600,
-    height: 800
-  });
-
-  // and load the app.html of the app.
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, '/app.html'),
-    protocol: 'file:',
-    slashes: true
-  }));
-
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.show();
-    mainWindow.focus();
-  });
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-
-  if (false) {
-    mainWindow.webContents.openDevTools();
-    mainWindow.webContents.on('context-menu', (e, props) => {
-      const { x, y } = props;
-
-      Menu.buildFromTemplate([{
-        label: 'Inspect element',
-        click() {
-          mainWindow.webContents.inspectElement(x, y);
-        }
-      }]).popup(mainWindow);
+    mainWindow = new electron_1.BrowserWindow({
+        show: false,
+        width: 1600,
+        height: 800
     });
-  }
-
-  const template = [
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'delete' },
-        { role: 'selectall' }
-      ]
-    }, {
-      label: 'View',
-      submenu: [
-        { role: 'resetzoom' },
-        { role: 'zoomin' },
-        { role: 'zoomout' },
-        { type: 'separator' },
-        { role: 'togglefullscreen' },
-        ("production" === 'development' &&
-          { role: 'reload' },
-          { role: 'forcereload' },
-          { role: 'toggledevtools' },
-          { type: 'separator' }
-        )
-      ]
-    }, {
-      label: 'Window',
-      submenu: [
-        { role: 'minimize' },
-        { role: 'close' }
-      ]
-    }, {
-      role: 'help',
-      submenu: [
+    // and load the app.html of the app.
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, "/app.html"),
+        protocol: "file:",
+        slashes: true
+    }));
+    mainWindow.webContents.on("did-finish-load", () => {
+        mainWindow.show();
+        mainWindow.focus();
+    });
+    mainWindow.on("closed", () => {
+        mainWindow = null;
+    });
+    if (false) {
+        mainWindow.webContents.openDevTools();
+        mainWindow.webContents.on("context-menu", (e, props) => {
+            const { x, y } = props;
+            electron_1.Menu.buildFromTemplate([{
+                    label: "Inspect element",
+                    click() {
+                        mainWindow.webContents.inspectElement(x, y);
+                    }
+                }]).popup(mainWindow);
+        });
+    }
+    const template = [
         {
-          label: 'Learn More',
-          //TODO: Update this link to point to the dragoman github page
-          click() { shell.openExternal('https://electron.atom.io') }
-        }]
-    }];
-
-  if (process.platform === 'darwin') {
-    template.unshift({
-      label: app.getName(),
-      submenu: [
-        { role: 'about' },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideothers' },
-        { role: 'unhide' },
-        { type: 'separator' },
-        { role: 'quit' }
-      ]
+            label: "Edit",
+            submenu: [
+                { role: "cut" },
+                { role: "copy" },
+                { role: "paste" },
+                { role: "delete" },
+                { role: "selectall" }
+            ]
+        }, {
+            label: "View",
+            submenu: [
+                { role: "resetzoom" },
+                { role: "zoomin" },
+                { role: "zoomout" },
+                { type: "separator" },
+                { role: "togglefullscreen" },
+                { role: "reload" },
+                { role: "forcereload" },
+                { role: "toggledevtools" }
+            ]
+        }, {
+            label: "Window",
+            submenu: [
+                { role: "minimize" },
+                { role: "close" }
+            ]
+        }, {
+            role: "help",
+            submenu: [
+                {
+                    label: "Learn More",
+                    // TODO: Update this link to point to the dragoman github page
+                    click() { electron_1.shell.openExternal("https://github.com/peteboothroyd/dragoman"); }
+                }
+            ]
+        }
+    ];
+    if (process.platform === "darwin") {
+        template.unshift({
+            label: electron_1.app.getName(),
+            submenu: [
+                { role: "about" },
+                { type: "separator" },
+                { role: "hide" },
+                { role: "hideothers" },
+                { role: "unhide" },
+                { type: "separator" },
+                { role: "quit" }
+            ]
+        });
+        // Window menu
+        template[3].submenu = [
+            { role: "close" },
+            { role: "minimize" },
+            { role: "zoom" },
+            { type: "separator" },
+            { role: "front" }
+        ];
+        electron_1.Menu.setApplicationMenu(electron_1.Menu.buildFromTemplate(template));
+    }
+};
+electron_1.app.on("ready", () => {
+    installExtensions()
+        .catch(() => {
+        console.log("Error installing extensions");
     });
-
-    // Window menu
-    template[3].submenu = [
-      { role: 'close' },
-      { role: 'minimize' },
-      { role: 'zoom' },
-      { type: 'separator' },
-      { role: 'front' }
-    ]
-
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-  }
-}
-
-app.on('ready', () => {
-  // createWindow();
-  installExtensions()
-    .then(createWindow(), () => {
-      console.log("Error installing extensions");
-    })
-});
-
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', function () {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
+    // TODO: check this works properly
     createWindow();
-  }
 });
-
-//*** Calling polyglot and returning results to browser window ***//
-// var pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
-var pathToPolyglotBinary;
-
+// Quit when all windows are closed.
+electron_1.app.on("window-all-closed", () => {
+    // On OS X it is common for applications and their menu bar
+    // to stay active until the user quits explicitly with Cmd + Q
+    if (process.platform !== "darwin") {
+        electron_1.app.quit();
+    }
+});
+electron_1.app.on("activate", () => {
+    // On OS X it"s common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (mainWindow === null) {
+        createWindow();
+    }
+});
+// *** Calling polyglot and returning results to browser window ***//
+// var pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace("app.asar", "app.asar.unpacked");
+let pathToPolyglotBinary;
 if (false) {
-  pathToPolyglotBinary = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
-    "dinowernli/grpc/polyglot/polyglot_deploy.jar";
+    pathToPolyglotBinary = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
+        "dinowernli/grpc/polyglot/polyglot_deploy.jar";
 }
-
 // TODO: Update to reflect change of output flag
 // TODO: Pass settings object rather than all of these params
-exports.listServices = (polyglotSettings, polyglotRequestOptions,
-  listServicesOptions, callback) => {
-  const command = ' --command=list_services --with_message=true --json_output=true ' +
-    (polyglotSettings.protoDiscoveryRoot === undefined ? '' :
-      ' --proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot) +
-    (listServicesOptions.serviceFilter === undefined ? '' : ' --service_filter=' + listServicesOptions.serviceFilter) +
-    (listServicesOptions.methodFilter === undefined ? '' : ' --method_filter=' + listServicesOptions.methodFilter) +
-    (polyglotSettings.configSetPath === undefined ? '' : ' --config_set_path=' + polyglotSettings.configSetPath) +
-    (polyglotSettings.configName === undefined ? '' : ' --config_name=' + polyglotSettings.configName) +
-    (polyglotSettings.addProtocIncludes === undefined ? '' :
-      ' --add_protoc_includes=' + polyglotSettings.addProtocIncludes) +
-    (polyglotSettings.deadlineMs === undefined ? '' : ' --deadline_ms=' + polyglotSettings.deadlineMs) +
-    (polyglotSettings.tlsCaCertPath === undefined ? '' : ' --tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
-
-  console.log('Command: ', command);
-
-  exec(command, (err, stdout, stderr) => {
-    if (err) {
-      callback(err, stderr);
-    } else {
-      callback(err, stdout);
-    }
-  });
-};
-
-// TODO: Pass settings object rather than all of these params
-exports.callService = (polyglotSettings, polyglotRequestOptions,
-  callServiceOptions, callback) => {
-  var command = 'echo \'' + callServiceOptions.jsonRequest + '\' | java -jar ' + pathToPolyglotBinary +
-    ' --command=call ' +
-    (polyglotSettings.endpoint === undefined ? '' : ' --endpoint=' + polyglotSettings.endpoint) +
-    (polyglotRequestOptions.fullMethod === undefined ? '' : ' --full_method=' + polyglotRequestOptions.fullMethod) +
-    (polyglotSettings.protoDiscoveryRoot === undefined ? '' :
-      ' --proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot) +
-    (polyglotSettings.configSetPath === undefined ? '' : ' --config_set_path=' + polyglotSettings.configSetPath) +
-    (polyglotSettings.configName === undefined ? '' : ' --config_name=' + polyglotSettings.configName) +
-    (polyglotSettings.addProtocIncludes === undefined ? '' :
-      ' --add_protoc_includes=' + polyglotSettings.addProtocIncludes) +
-    (polyglotSettings.deadlineMs === undefined ? '' : ' --deadline_ms=' + polyglotSettings.deadlineMs) +
-    (polyglotSettings.tlsCaCertPath === undefined ? '' : ' --tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
-
-  console.log('Command: ', command);
-
-  exec(command,
-    (err, stdout, stderr) => {
-      // console.log('err: ', err, '\nstdout: ', stdout, '\nstderr: ', stderr);
-      if (err) {
-        callback(err, stderr);
-      } else {
-        // TODO: Investigate, when polyglot gets an error and err = nil how best to test for this and
-        // report to users?
-        if (stdout === '' && stderr !== '') {
-          // Is this the best way to do this? The text of Error is meant to be a stack trace.
-          callback(new Error('Error'), stderr);
+electron_1.ipcMain.on(constants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
+    const { polyglotSettings, listServicesOptions } = listServicesRequest;
+    // Build polyglot command
+    const command = " --command=list_services --with_message=true --json_output=true " +
+        (polyglotSettings.protoDiscoveryRoot === undefined ? "" :
+            " --proto_discovery_root=" + polyglotSettings.protoDiscoveryRoot) +
+        (listServicesOptions.serviceFilter === undefined ?
+            "" : " --service_filter=" + listServicesOptions.serviceFilter) +
+        (listServicesOptions.methodFilter === undefined ? "" : " --method_filter=" + listServicesOptions.methodFilter) +
+        (polyglotSettings.configSetPath === undefined ? "" : " --config_set_path=" + polyglotSettings.configSetPath) +
+        (polyglotSettings.configName === undefined ? "" : " --config_name=" + polyglotSettings.configName) +
+        (polyglotSettings.addProtocIncludes === undefined ? "" :
+            " --add_protoc_includes=" + polyglotSettings.addProtocIncludes) +
+        (polyglotSettings.deadlineMs === undefined ? "" : " --deadline_ms=" + polyglotSettings.deadlineMs) +
+        (polyglotSettings.tlsCaCertPath === undefined ? "" : " --tls_ca_certificate=" + polyglotSettings.tlsCaCertPath);
+    console.log("Command: ", command);
+    child_process_1.exec(command, (err, stdout, stderr) => {
+        if (err) {
+            event.sender.send(constants.LIST_SERVICES_RESPONSE, err, stderr);
         }
-        callback(err, stdout);
-      }
+        else {
+            event.sender.send(constants.LIST_SERVICES_RESPONSE, err, stdout);
+        }
     });
-};
+});
+// TODO: Pass settings object rather than all of these params
+electron_1.ipcMain.on(constants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
+    const { polyglotSettings, callServiceOptions } = callServiceRequest;
+    // Build polyglot command
+    const command = "echo \"" + callServiceOptions.jsonBody + "\" | java -jar " + pathToPolyglotBinary +
+        " --command=call " +
+        (polyglotSettings.endpoint === undefined ? "" : " --endpoint=" + polyglotSettings.endpoint) +
+        (callServiceOptions.fullMethod === undefined ? "" : " --full_method=" + callServiceOptions.fullMethod) +
+        (polyglotSettings.protoDiscoveryRoot === undefined ? "" :
+            " --proto_discovery_root=" + polyglotSettings.protoDiscoveryRoot) +
+        (polyglotSettings.configSetPath === undefined ? "" : " --config_set_path=" + polyglotSettings.configSetPath) +
+        (polyglotSettings.configName === undefined ? "" : " --config_name=" + polyglotSettings.configName) +
+        (polyglotSettings.addProtocIncludes === undefined ? "" :
+            " --add_protoc_includes=" + polyglotSettings.addProtocIncludes) +
+        (polyglotSettings.deadlineMs === undefined ? "" : " --deadline_ms=" + polyglotSettings.deadlineMs) +
+        (polyglotSettings.tlsCaCertPath === undefined ? "" : " --tls_ca_certificate=" + polyglotSettings.tlsCaCertPath);
+    console.log("Command: ", command);
+    child_process_1.exec(command, (err, stdout, stderr) => {
+        // console.log("err: ", err, "\nstdout: ", stdout, "\nstderr: ", stderr);
+        if (err) {
+            event.sender.send(constants.CALL_SERVICE_RESPONSE, err, stderr);
+        }
+        else {
+            // TODO: Investigate, when polyglot gets an error and err = nil how best to test for this and
+            // report to users?
+            if (stdout === "" && stderr !== "") {
+                // Is this the best way to do this? The text of Error is meant to be a stack trace.
+                event.sender.send(constants.CALL_SERVICE_RESPONSE, new Error("Error"), stderr);
+            }
+            event.sender.send(constants.CALL_SERVICE_RESPONSE, err, stdout);
+        }
+    });
+});
+// ****************************************************************//
 
-//****************************************************************//
+
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/electron-main.ts"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/electron-main.ts"); } } })();
 
 /***/ }),
 /* 7 */
@@ -1433,12 +1413,27 @@ module.exports = require("child_process");
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var SourceMapConsumer = __webpack_require__(11).SourceMapConsumer;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LIST_SERVICES_REQUEST = "LIST_SERVICES_REQUEST";
+exports.LIST_SERVICES_RESPONSE = "LIST_SERVICES_RESPONSE";
+exports.CALL_SERVICE_REQUEST = "CALL_SERVICE_REQUEST";
+exports.CALL_SERVICE_RESPONSE = "CALL_SERVICE_RESPONSE";
+
+
+ ;(function register() { /* react-hot-loader/webpack */ if (false) { if (typeof __REACT_HOT_LOADER__ === 'undefined') { return; } if (typeof module.exports === 'function') { __REACT_HOT_LOADER__.register(module.exports, 'module.exports', "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/constants/ipcConstants.ts"); return; } for (var key in module.exports) { if (!Object.prototype.hasOwnProperty.call(module.exports, key)) { continue; } var namedExport = void 0; try { namedExport = module.exports[key]; } catch (err) { continue; } __REACT_HOT_LOADER__.register(namedExport, key, "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/constants/ipcConstants.ts"); } } })();
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var SourceMapConsumer = __webpack_require__(12).SourceMapConsumer;
 var path = __webpack_require__(1);
 
 var fs;
 try {
-  fs = __webpack_require__(18);
+  fs = __webpack_require__(19);
   if (!fs.existsSync || !fs.readFileSync) {
     // fs doesn't have all methods we need
     fs = null;
@@ -1905,7 +1900,7 @@ exports.install = function(options) {
   if (options.hookRequire && !isInBrowser()) {
     var Module;
     try {
-      Module = __webpack_require__(19);
+      Module = __webpack_require__(20);
     } catch (err) {
       // NOP: Loading in catch block to convert webpack error to warning.
     }
@@ -1954,7 +1949,7 @@ exports.install = function(options) {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -1963,12 +1958,12 @@ exports.install = function(options) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 exports.SourceMapGenerator = __webpack_require__(2).SourceMapGenerator;
-exports.SourceMapConsumer = __webpack_require__(14).SourceMapConsumer;
-exports.SourceNode = __webpack_require__(17).SourceNode;
+exports.SourceMapConsumer = __webpack_require__(15).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(18).SourceNode;
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2041,7 +2036,7 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2126,7 +2121,7 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2137,10 +2132,10 @@ exports.MappingList = MappingList;
  */
 
 var util = __webpack_require__(0);
-var binarySearch = __webpack_require__(15);
+var binarySearch = __webpack_require__(16);
 var ArraySet = __webpack_require__(4).ArraySet;
 var base64VLQ = __webpack_require__(3);
-var quickSort = __webpack_require__(16).quickSort;
+var quickSort = __webpack_require__(17).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -3214,7 +3209,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3331,7 +3326,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3451,7 +3446,7 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3864,13 +3859,13 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("module");

@@ -5,19 +5,16 @@
     "module": "commonjs",
     "jsx": "react",
     "types": [],
-
+    "allowJs": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
-    
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
     "sourceMap": true,
-
     "outDir": "dist"
   },
   "files": [

@@ -4,43 +4,29 @@ import * as ReactMD from "react-md";
 import SideBar from "../components/sideBar";
 import RequestBuilder from "../components/requestBuilder";
 import ResponseViewer from "../components/responseViewer";
+
 import {
-  IService, IMethod, IPolyglotRequestOptions, IPolyglotSettings,
-  IListServicesOptions, ISettingsUIState, IAppUIState, // ListServicesRequest,
-  // PolyglotResponse, CallServiceRequest
+  IService, IMethod, IPolyglotSettings,
+  IListServicesOptions, ISettingsUIState, IAppUIState, IListServicesRequest,
+  IPolyglotResponse, ICallServiceRequest, ICallServiceOptions
 } from "../types/index";
 
-import { remote } from "electron";
-const dialog = remote.dialog;
-// const mainProcess = remote.require("../main.development"); // TODO: Can this be done in a nicer TypeScript way?
+import {LIST_SERVICES_REQUEST, LIST_SERVICES_RESPONSE,
+CALL_SERVICE_REQUEST, CALL_SERVICE_RESPONSE
+} from "../constants/ipcConstants";
+
+import { remote, ipcRenderer } from "electron";
 
 // TODO: Add option to get information about service, eg whether it is streaming or unary, display in UI
-// const checkConsoleErrorMessage = "Check console for full log (Console can be reached from View" +
-//   " -> Toggle Developer Tools -> Console)";
+const checkConsoleErrorMessage = "Check console for full log (Console can be reached from View" +
+  " -> Toggle Developer Tools -> Console)";
 
-// class RootState {
-//   services: Service[] = [];
-//   polyglotSettings: PolyglotSettings = new PolyglotSettings();
-//   listServicesOptions: ListServicesOptions = new ListServicesOptions();
-//   polyglotRequestOptions: PolyglotRequestOptions = new PolyglotRequestOptions();
-//   request: string = "";
-//   response: string = "";
-//   settingsUIState: SettingsUIState = new SettingsUIState();
-//   appUIState: AppUIState = new AppUIState();
-
-//   constructor(init?: Partial<RootState>) {
-//     Object.assign(this, init);
-//   }
-// }
-
-// let mainProcessCallService: (req: CallServiceRequest) => PolyglotResponse;
-// let mainProcessListServices: (req: ListServicesRequest) => PolyglotResponse
-
+// TODO: Decide which of these should be optional
 interface IRootState {
   services: IService[];
   polyglotSettings: IPolyglotSettings;
   listServicesOptions: IListServicesOptions;
-  polyglotRequestOptions: IPolyglotRequestOptions;
+  callServiceOptions: ICallServiceOptions;
   request?: string;
   response?: string;
   settingsUIState: ISettingsUIState;
@@ -51,30 +37,34 @@ export class Root extends React.Component<{}, IRootState> {
   constructor() {
     super();
     this.state = this.createInitialState();
+    this.registerIpcListeners();
   }
 
   public listServices = () => {
     this.setState({ request: "", response: "", services: [] });
 
-    // // TODO: Validate input is in correct formats, make this conform to the interface defined in types
-    // mainProcess.listServices(
-    //   this.state.polyglotSettings, this.state.polyglotRequestOptions,
-    //   this.state.listServicesOptions, this.listServicesReply);
+    const listServicesRequest: IListServicesRequest = {
+      polyglotSettings: this.state.polyglotSettings,
+      listServicesOptions: this.state.listServicesOptions
+    };
+
+    ipcRenderer.send(LIST_SERVICES_REQUEST, listServicesRequest);
   }
 
-  public listServicesReply = (/*res: PolyglotResponse*/) => {
-    // if (!res.error) {
-    //   try {
-    //     const parsedResponse = JSON.parse(res.reply);
-    //     this.setState({ services: parsedResponse });
-    //   } catch (e) {
-    //     this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
-    //     console.log(`Error ${e}\n${res.reply}`);
-    //   }
-    // } else {
-    //   this.openErrorDialog("Error listing services: ", checkConsoleErrorMessage);
-    //   console.log(`Error ${res.error}\n${res.reply}`);
-    // }
+  public listServicesResponse = (event: Event, res: IPolyglotResponse) => {
+    console.log(res);
+    if (!res.error) {
+      try {
+        const parsedResponse = JSON.parse(res.response);
+        this.setState({ services: parsedResponse });
+      } catch (e) {
+        this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
+        console.log(`Error ${e}\n${res.response}`);
+      }
+    } else {
+      this.openErrorDialog("Error listing services: ", checkConsoleErrorMessage);
+      console.log(`Error ${res.error}\n${res.response}`);
+    }
   }
 
   public showDirectoryDialog = (id: string, macMessage: string = "", multiSelection: boolean = false) => {
@@ -88,7 +78,7 @@ export class Root extends React.Component<{}, IRootState> {
 
     console.log(customProperties);
 
-    const pathList = dialog.showOpenDialog({
+    const pathList = remote.dialog.showOpenDialog({
       properties: customProperties,
       message: macMessage,
     } as Electron.OpenDialogOptions);
@@ -118,22 +108,28 @@ export class Root extends React.Component<{}, IRootState> {
       this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
     }
 
-    // const callServiceOptions = new CallServiceOptions({ jsonRequest: redactedJsonInput });
+    const cSOptions: ICallServiceOptions = {
+      jsonBody: redactedJsonInput,
+      fullMethod: this.state.callServiceOptions.fullMethod,
+    };
 
-    // mainProcess.callService(
-    //   this.state.polyglotSettings, this.state.polyglotRequestOptions,
-    //   callServiceOptions, this.callServiceReply);
+    const callServiceRequest: ICallServiceRequest = {
+      polyglotSettings: this.state.polyglotSettings,
+      callServiceOptions: cSOptions
+    };
+    console.log("calling service with ", CALL_SERVICE_REQUEST, " and request ", callServiceRequest);
+    ipcRenderer.send(CALL_SERVICE_REQUEST, callServiceRequest);
   }
 
-  public callServiceReply = (/*res: PolyglotResponse*/) => {
-    // this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
-    // if (!res.error) {
-    //   const trimmedReply = res.reply.trim();
-    //   this.setState({ response: trimmedReply });
-    // } else {
-    //   this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
-    //   console.log(`Error ${res.error}\n${res.reply}`);
-    // }
+  public callServiceResponse = (event: Event, res: IPolyglotResponse) => {
+    this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
+    if (!res.error) {
+      const trimmedResponse = res.response.trim();
+      this.setState({ response: trimmedResponse });
+    } else {
+      this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
+      console.error(`Error ${res.error}\n${res.response}`);
+    }
   }
 
   public openJsonParseErrorDialog = () => {
@@ -159,16 +155,14 @@ export class Root extends React.Component<{}, IRootState> {
   }
 
   public handleRequestChange = (newValue: string) => {
-    console.log("handling request change");
-    console.log(this.state);
     this.setState({ request: newValue });
   }
 
-  public handleRunClick() {
+  public handleRunClick = () => {
     console.log("handling run click");
     console.log(this.state);
     // Up until this point the endpoint did not need to be filled in.
-    if (this.state.polyglotSettings.endpoint === undefined) {
+    if (this.state.polyglotSettings.endpoint === "") {
       this.setState({
         settingsUIState: Object.assign({}, this.state.settingsUIState, {
           settingsOpen: true,
@@ -186,20 +180,14 @@ export class Root extends React.Component<{}, IRootState> {
   }
 
   public handleSettingsClick = () => {
-    console.log("handling settings click");
-    console.log(this);
     const newSettingsUIState: ISettingsUIState = Object.assign({}, this.state.settingsUIState,
       { settingsOpen: !this.state.settingsUIState.settingsOpen });
-    console.log("newSettingsUIState", newSettingsUIState);
-    // this.setState({ settingsUIState: brandNewSettingsUIState });
-    this.setState({settingsUIState: newSettingsUIState} as IRootState);
+    this.setState({settingsUIState: newSettingsUIState});
   }
 
   // Should we validate that this is a valid path? This would have to deal
   // with the various different platforms
   public handleTextFieldInputChange = (stateId: string, newText: string | number) => {
-    console.log("handling text field change");
-    console.log(this.state);
     if (stateId === "endpoint") {
       this.handleEndpointChange(newText as string);
     }
@@ -207,16 +195,11 @@ export class Root extends React.Component<{}, IRootState> {
   }
 
   public handleListServicesClick = () => {
-    console.log("handling list services click");
-    console.log(this.state);
-    console.log("Listing Services");
     this.listServices();
   }
 
   // TODO: Change this pattern. We want to validate all text inputs not just the endpoint
   public handleEndpointChange = (newEndpoint: string) => {
-    console.log("handling endpoint change");
-    console.log(this.state);
     const newEndPointError = this.validateEndpoint(newEndpoint);
     this.setState({
       polyglotSettings: Object.assign({}, this.state.polyglotSettings, { endpoint: newEndpoint }),
@@ -239,23 +222,30 @@ export class Root extends React.Component<{}, IRootState> {
         return method.name === methodName;
       }) as IMethod;
 
+      console.log(clickedMethod);
+      console.log(clickedMethod.requestMessage, typeof(clickedMethod.requestMessage));
+
       // Initially pretty print the templates to make it easy for users to vew the templates.
       // Store and display as simple strings to make subsequent editing easier.
-      const parsedRequestTemplate = JSON.parse(clickedMethod.request);
+      const parsedRequestTemplate = JSON.parse(clickedMethod.requestMessage);
+      console.log(parsedRequestTemplate);
       const prettyPrintedRequestTemplate = JSON.stringify(parsedRequestTemplate, null, 2);
+      console.log(prettyPrintedRequestTemplate);
 
-      const parsedResponseTemplate = JSON.parse(clickedMethod.response);
+      const parsedResponseTemplate = JSON.parse(clickedMethod.responseMessage);
+      console.log(parsedResponseTemplate);
       const prettyPrintedResponseTemplate = JSON.stringify(parsedResponseTemplate, null, 2);
+      console.log(prettyPrintedResponseTemplate);
 
       this.setState({
-        polyglotRequestOptions: Object.assign({},
-          this.state.polyglotRequestOptions,
+        callServiceOptions: Object.assign({},
+          this.state.callServiceOptions,
           { fullMethod: serviceName + "/" + methodName }),
         request: prettyPrintedRequestTemplate,
         response: prettyPrintedResponseTemplate,
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -289,13 +279,13 @@ export class Root extends React.Component<{}, IRootState> {
             <RequestBuilder
               request={this.state.request}
               appUIState={this.state.appUIState}
-              serviceMethodIdentifier={this.state.polyglotRequestOptions.fullMethod}
+              serviceMethodIdentifier={this.state.callServiceOptions.fullMethod}
               handleRunClick={this.handleRunClick}
               handleRequestChange={this.handleRequestChange}
             />
             <ResponseViewer
               response={this.state.response}
-              serviceMethodIdentifier={this.state.polyglotRequestOptions.fullMethod}
+              serviceMethodIdentifier={this.state.callServiceOptions.fullMethod}
             />
           </div>
         </div>
@@ -319,38 +309,33 @@ export class Root extends React.Component<{}, IRootState> {
       </div>);
   }
 
-  // componentWillUnmount() {
-  //   console.log("root will unmount");
-  // }
-
-  // componentDidMount() {
-  //   console.log("root did mount");
-  // }
-
+  // Defining initial state of app
   private createInitialState(): IRootState {
     return {
       services: [],
-      response: undefined,
-      request: undefined,
+      response: "",
+      request: "",
       polyglotSettings: {
-        protoDiscoveryRoot: undefined,
-        endpoint: undefined,
-        configSetPath: undefined,
-        configName: undefined,
-        tlsCaCertPath: undefined,
-        deadlineMs: undefined
+        protoDiscoveryRoot: "",
+        endpoint: "",
+        configSetPath: "",
+        configName: "",
+        tlsCaCertPath: "",
+        deadlineMs: 0,
+        addProtocIncludes: ""
       },
       listServicesOptions: {
-        serviceFilter: undefined,
-        methodFilter: undefined
+        serviceFilter: "",
+        methodFilter: ""
       },
-      polyglotRequestOptions: {
-        fullMethod: undefined
+      callServiceOptions: {
+        jsonBody: "",
+        fullMethod: ""
       },
       appUIState: {
         errorDialogVisible: false,
-        errorDialogTitle: undefined,
-        errorDialogExplanation: undefined,
+        errorDialogTitle: "",
+        errorDialogExplanation: "",
         callRequestInProgress: false
       },
       settingsUIState: {
@@ -359,6 +344,12 @@ export class Root extends React.Component<{}, IRootState> {
         endpointError: false
       }
     };
+  }
+
+  // Adding event listeners to allow callback from the main process
+  private registerIpcListeners(): void {
+    ipcRenderer.on(LIST_SERVICES_RESPONSE, this.listServicesResponse);
+    ipcRenderer.on(CALL_SERVICE_RESPONSE, this.callServiceResponse);
   }
 }
 

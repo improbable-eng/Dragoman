@@ -21,23 +21,20 @@ function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClic
                    handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange,
                    handleEndpointChange}: ISideBarProps) {
     const serviceList = services && services.map((service) =>
-        (<ServiceListItem
+        <ServiceListItem
             service={service}
             key={service.name}
             onMethodClick={handleMethodClick}
-        />));
+        />);
 
-    const settings = (
-        <div>
+    const settings =
             <Settings
                 polyglotSettings={polyglotSettings}
                 settingsUIState={settingsUIState}
                 handleTextFieldInputChange={handleTextFieldInputChange}
                 handleListServicesClick={handleListServicesClick}
                 handlePathDoubleClick={handlePathDoubleClick}
-            />
-        </div>
-    );
+            />;
     return (
         <div>
             <ReactMD.List
@@ -58,7 +55,7 @@ function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClic
                             swapTheming={true}
                             children={"List Services"}
                             onClick={handleListServicesClick}
-                            style={{ width: "100%", height: "100%" }}
+                            style={{ width: "100%", height: "100%", borderRadius: 0 }}
                         />}
                 />
                 <div className="md-list--drawer" key="services">
