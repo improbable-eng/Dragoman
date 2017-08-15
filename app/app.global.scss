@@ -1,0 +1,37 @@
+// Can't use the nice '~react-md/src/scss/react-md' since this isn't being bundled with webpack
+@import '~react-md/src/scss/react-md';
+
+// Variable overrides
+$md-primary-color: $md-grey-900;
+$md-secondary-color: $md-blue-a-400;
+$md-background--primary: $md-grey-200;
+$md-tertiary-color: $md-green-200;
+
+@include react-md-everything;
+
+.list-subheader div {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.list-services-item-button div {
+  padding: 0px;
+}
+
+body {
+  margin: 0;
+}
+
+// Ace editor
+
+.ace_editor, .ace_editor div {
+    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+
+.ace_line {
+    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+
+.ace_line span {
+    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}

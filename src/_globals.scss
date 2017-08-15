@@ -1,8 +1,0 @@
-// Can't use the nice '~react-md/src/scss/react-md' since this isn't being bundled with webpack
-@import '/Users/peteboothroyd/node_modules/react-md/src/scss/react-md';
-
-// Variable overrides
-$md-primary-color: $md-grey-900;
-$md-secondary-color: $md-blue-a-400;
-$md-background--primary: $md-grey-200;
-$md-tertiary-color: $md-green-200;
