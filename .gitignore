@@ -20,3 +20,5 @@ yarn-error.log*
 
 *.css
 .idea
+app/main.js
+ app/main.js.map

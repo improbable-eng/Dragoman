@@ -11,6 +11,9 @@ This project is based on the [react-typescript-electron-boilerplate](https://git
 ## Screenshot
 ![Dragoman Demo](https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-demo.gif)
 
+## Known Issues
+The current material design library has typescript definition issues. In the meantime the TypeScript definition files can be fixed manually to allow compilation and building. I am investigating moving to [material-ui](http://www.material-ui.com/#/).
+
 ## Getting Started
 To get start clone the repo:
 ```bash
