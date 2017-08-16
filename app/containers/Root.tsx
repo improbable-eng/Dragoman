@@ -27,8 +27,8 @@ interface IRootState {
   polyglotSettings: IPolyglotSettings;
   listServicesOptions: IListServicesOptions;
   callServiceOptions: ICallServiceOptions;
-  request?: string;
-  response?: string;
+  request: string;
+  response: string;
   settingsUIState: ISettingsUIState;
   appUIState: IAppUIState;
 }

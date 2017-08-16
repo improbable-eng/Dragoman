@@ -9,7 +9,7 @@
 
 # production
 /build
-/dist
+/app/dist
 
 # misc
 .DS_Store
@@ -20,3 +20,4 @@ yarn-error.log*
 
 *.css
 .idea
+vs/

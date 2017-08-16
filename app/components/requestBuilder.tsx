@@ -3,12 +3,10 @@ import * as ReactMD from "react-md";
 
 import { IAppUIState } from "../types/index";
 
-import AceEditor from "react-ace";
-import "brace/mode/json";
-import "brace/theme/xcode";
+import MonacoEditor from "react-monaco-editor";
 
 export interface IRequestBuilderProps {
-    request?: string;
+    request: string;
     serviceMethodIdentifier?: string;
     appUIState: IAppUIState;
     handleRunClick: () => void;
@@ -23,7 +21,6 @@ class RequestBuilder extends React.Component<IRequestBuilderProps> {
     //         && this.props.appUIState.callRequestInProgress === nextProps.appUIState.callRequestInProgress);
     //     return !propsAreSame;
     // }
-
     public render() {
         return (
             <ReactMD.Card style={{ width: "50%", padding: "20px" }} >
@@ -56,15 +53,15 @@ class RequestBuilder extends React.Component<IRequestBuilderProps> {
                 </div>
 
                 <ReactMD.Card className="md-block-centered">
-                    <AceEditor
-                        mode="json"
-                        theme="xcode"
-                        onChange={this.props.handleRequestChange}
-                        name="REQUEST_EDITOR"
-                        editorProps={{ $blockScrolling: Infinity }}
+                    <MonacoEditor
+                        language="json"
+                        theme="vs"
+                        onChange={(val) => this.props.handleRequestChange(val)}
                         width="auto"
+                        height="500"
                         value={this.props.request}
-                        wrapEnabled={true}
+                        editorWillMount={this.componentWillMount}
+                        options={{wordWrap: true}}
                     />
                 </ReactMD.Card>
             </ReactMD.Card>

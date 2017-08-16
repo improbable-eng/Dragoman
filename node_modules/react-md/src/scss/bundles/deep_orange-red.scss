@@ -1,0 +1,7 @@
+
+@import '../react-md';
+
+$md-primary-color: $md-deep-orange-500;
+$md-secondary-color: $md-red-a-400;
+
+@include react-md-everything;
