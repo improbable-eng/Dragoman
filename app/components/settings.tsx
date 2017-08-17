@@ -82,7 +82,7 @@ function Settings({ polyglotSettings, settingsUIState,
                 value={polyglotSettings.addProtocIncludes}
                 handleChange={handleTextFieldInputChange}
                 label="Add Protoc Includes"
-                placeholder="<path1>,<path2>"
+                placeholder="<path1>, <path2>"
                 handleDoubleClick={() =>
                     handlePathDoubleClick("addProtocIncludes",
                                           "Add Protoc Include Paths",

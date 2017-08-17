@@ -1,15 +1,15 @@
 import * as React from "react";
 import * as ReactMD from "react-md";
 
-import AceEditor from "react-ace";
-import "brace/theme/xcode";
+// import MonacoEditor from "react-monaco-editor";
+import MonacoEditor from "./reactMonacoEditor";
 
 export interface IResponseViewerProps {
-    response?: string;
+    response: string;
     serviceMethodIdentifier?: string;
 }
 
-export function ResponseViewer({response, serviceMethodIdentifier}: IResponseViewerProps) {
+export function ResponseViewer({ response, serviceMethodIdentifier }: IResponseViewerProps) {
     return (
         <ReactMD.Card style={{ width: "50%", padding: "20px" }}>
             <ReactMD.CardTitle
@@ -17,14 +17,12 @@ export function ResponseViewer({response, serviceMethodIdentifier}: IResponseVie
                 subtitle={serviceMethodIdentifier}
             />
             <ReactMD.Card className="md-block-centered">
-                <AceEditor
-                    mode="text"
-                    theme="xcode"
-                    name="RESPONSE_VIEWER"
-                    editorProps={{ $blockScrolling: true }}
-                    width="auto"
-                    readOnly={true}
+                <MonacoEditor
+                    language="json"
+                    theme="vs"
+                    height="500"
                     value={response}
+                    options={{ wordWrap: true, readOnly: true }}
                 />
             </ReactMD.Card>
         </ReactMD.Card>

@@ -9,7 +9,8 @@
 
 # production
 /build
-/dist
+/app/dist
+
 
 # misc
 .DS_Store
@@ -22,3 +23,4 @@ yarn-error.log*
 .idea
 app/main.js
  app/main.js.map
+vs/

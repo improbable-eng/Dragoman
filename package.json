@@ -115,6 +115,7 @@
     "@types/react": "^15.0.37",
     "@types/react-dom": "^15.5.1",
     "@types/react-hot-loader": "^3.0.1",
+    "@types/react-monaco-editor": "^0.8.1",
     "@types/react-redux": "^4.4.35",
     "@types/react-router": "^4.0.11",
     "@types/react-router-dom": "^4.0.7",
@@ -125,6 +126,7 @@
     "asar": "^0.13.0",
     "boiler-room-custodian": "^0.6.2",
     "concurrently": "^3.1.0",
+    "copy-webpack-plugin": "^4.0.1",
     "cross-env": "^5.0.1",
     "css-loader": "^0.28.4",
     "css-modules-require-hook": "^4.1.0",
@@ -161,6 +163,7 @@
     "webpack-merge": "^2.0.0"
   },
   "dependencies": {
+    "amdrequire": "0.0.3",
     "electron-debug": "^1.1.0",
     "font-awesome": "^4.7.0",
     "history": "^4.6.1",
@@ -168,6 +171,7 @@
     "react-ace": "^5.1.2",
     "react-dom": "^15.4.1",
     "react-md": "^1.1.0-alpha-8",
+    "react-monaco-editor": "^0.10.0",
     "react-redux": "^5.0.1",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",

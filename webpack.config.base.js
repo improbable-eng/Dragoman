@@ -3,6 +3,7 @@
  */
 
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const {
   dependencies: externals
 } = require('./app/package.json');
