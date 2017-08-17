@@ -3,7 +3,8 @@ import * as ReactMD from "react-md";
 
 import { IAppUIState } from "../types/index";
 
-import MonacoEditor from "react-monaco-editor";
+// import MonacoEditor from "react-monaco-editor";
+import MonacoEditor from "./reactMonacoEditor";
 
 export interface IRequestBuilderProps {
     request: string;
@@ -56,8 +57,7 @@ class RequestBuilder extends React.Component<IRequestBuilderProps> {
                     <MonacoEditor
                         language="json"
                         theme="vs"
-                        onChange={(val) => this.props.handleRequestChange(val)}
-                        width="auto"
+                        onChange={(val: string) => this.props.handleRequestChange(val)}
                         height="500"
                         value={this.props.request}
                         editorWillMount={this.componentWillMount}

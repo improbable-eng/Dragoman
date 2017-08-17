@@ -1,7 +1,8 @@
 import * as React from "react";
 import * as ReactMD from "react-md";
 
-import MonacoEditor from "react-monaco-editor";
+// import MonacoEditor from "react-monaco-editor";
+import MonacoEditor from "./reactMonacoEditor";
 
 export interface IResponseViewerProps {
     response: string;
@@ -19,7 +20,6 @@ export function ResponseViewer({ response, serviceMethodIdentifier }: IResponseV
                 <MonacoEditor
                     language="json"
                     theme="vs"
-                    width="auto"
                     height="500"
                     value={response}
                     options={{ wordWrap: true, readOnly: true }}
