@@ -15,20 +15,6 @@ WebFontLoader.load({
   },
 });
 
-// render(
-//       <Root />,
-//     document.getElementById("root")
-//   );
-//   if ((module as any).hot) {
-//     (module as any).hot.accept("./containers/Root", () => {
-//       const NextRoot = require("./containers/Root").default;
-//       render(
-//           <NextRoot />,
-//         document.getElementById("root")
-//       );
-//     });
-//   }
-
 render(
   <AppContainer>
     <Root />

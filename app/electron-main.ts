@@ -1,4 +1,9 @@
 /* tslint:disable */
+
+// This is a TypeScript version of main.development.js. It will be outdated compared to this.
+// I would like to use this TypeScript version but the hot loading does not currently work when I do this
+// TODO: TypeScriptify main.development.js
+
 import { app, BrowserWindow, Menu, shell, ipcMain } from "electron";
 import * as url from "url";
 import * as  path from "path"; // eslint-disable-line

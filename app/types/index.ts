@@ -2,8 +2,8 @@
 
 export interface IMethod {
     name: string;
-    requestMessage: string;
-    responseMessage: string;
+    request: string;
+    response: string;
 }
 
 export interface IService {
@@ -46,7 +46,7 @@ export interface ICallServiceRequest extends IPolyglotRequestOptions {
 
 export interface IPolyglotResponse {
     error: Error;
-    response: string;
+    response: string | ArrayBuffer;
 }
 
 // ************************************** //

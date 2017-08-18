@@ -55,15 +55,16 @@ export class Root extends React.Component<{}, IRootState> {
     console.log(res);
     if (!res.error) {
       try {
-        const parsedResponse = JSON.parse(res.response);
+        const parsedResponse = JSON.parse(res.response as string);
+        console.log(parsedResponse);
         this.setState({ services: parsedResponse });
       } catch (e) {
         this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
-        console.log(`Error ${e}\n${res.response}`);
+        console.error(`Error ${e}\n${res.response}`);
       }
     } else {
       this.openErrorDialog("Error listing services: ", checkConsoleErrorMessage);
-      console.log(`Error ${res.error}\n${res.response}`);
+      console.error(`Error ${res.error}\n${res.response}`);
     }
   }
 
@@ -122,9 +123,12 @@ export class Root extends React.Component<{}, IRootState> {
   }
 
   public callServiceResponse = (event: Event, res: IPolyglotResponse) => {
+    console.log(res);
+    const decodedResponse = new TextDecoder("utf-8").decode(res.response as ArrayBuffer);
+    console.log(decodedResponse);
     this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
     if (!res.error) {
-      const trimmedResponse = res.response.trim();
+      const trimmedResponse = decodedResponse.trim();
       this.setState({ response: trimmedResponse });
     } else {
       this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
@@ -213,7 +217,6 @@ export class Root extends React.Component<{}, IRootState> {
 
   public handleMethodClick = (serviceName: string, methodName: string) => {
     console.log("handling method click");
-    console.log(this.state);
     try {
       const clickedService = this.state.services.find((service) => {
         return service.name === serviceName;
@@ -223,18 +226,17 @@ export class Root extends React.Component<{}, IRootState> {
       }) as IMethod;
 
       console.log(clickedMethod);
-      console.log(clickedMethod.requestMessage, typeof(clickedMethod.requestMessage));
 
       // Initially pretty print the templates to make it easy for users to vew the templates.
       // Store and display as simple strings to make subsequent editing easier.
-      const parsedRequestTemplate = JSON.parse(clickedMethod.requestMessage);
-      console.log(parsedRequestTemplate);
-      const prettyPrintedRequestTemplate = JSON.stringify(parsedRequestTemplate, null, 2);
+      // const parsedRequestTemplate = JSON.parse(clickedMethod.request);
+      // console.log(parsedRequestTemplate);
+      const prettyPrintedRequestTemplate = JSON.stringify(clickedMethod.request, null, 2);
       console.log(prettyPrintedRequestTemplate);
 
-      const parsedResponseTemplate = JSON.parse(clickedMethod.responseMessage);
-      console.log(parsedResponseTemplate);
-      const prettyPrintedResponseTemplate = JSON.stringify(parsedResponseTemplate, null, 2);
+      // const parsedResponseTemplate = JSON.parse(clickedMethod.response);
+      // console.log(parsedResponseTemplate);
+      const prettyPrintedResponseTemplate = JSON.stringify(clickedMethod.response, null, 2);
       console.log(prettyPrintedResponseTemplate);
 
       this.setState({
