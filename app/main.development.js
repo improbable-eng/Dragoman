@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
 const url = require('url');
 const path = require('path'); // eslint-disable-line
 const { spawn } = require('child_process');
+const {accessSync} = require('fs');
 
 const ipcConstants = require('./constants/ipcConstants'); 
 
@@ -69,7 +70,34 @@ const createWindow = () => {
             }]).popup(mainWindow);
         });
     }
+    setupElectronMenu()
+}
 
+app.on('ready', () => {
+    installExtensions()
+        .then(createWindow(), () => {
+            console.log("Error installing extensions");
+        })
+});
+
+// Quit when all windows are closed.
+app.on('window-all-closed', function () {
+    // On OS X it is common for applications and their menu bar
+    // to stay active until the user quits explicitly with Cmd + Q
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+app.on('activate', function () {
+    // On OS X it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (mainWindow === null) {
+        createWindow();
+    }
+});
+
+const setupElectronMenu = () => {
     const template = [
         {
             label: 'Edit',
@@ -136,54 +164,19 @@ const createWindow = () => {
     }
 }
 
-app.on('ready', () => {
-    installExtensions()
-        .then(createWindow(), () => {
-            console.log("Error installing extensions");
-        })
-});
-
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
-
-app.on('activate', function () {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (mainWindow === null) {
-        createWindow();
-    }
-});
-
 //*** Calling polyglot and returning results to browser window ***//
-// var pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
-var pathToPolyglotBinary;
+
+let pathToPolyglotBinary;
 console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === "development") {
     pathToPolyglotBinary = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
         "dinowernli/grpc/polyglot/polyglot_deploy.jar";
+} else {
+    pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
 }
-
-
 
 // TODO: Add use_tls flag 
 ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
-    (function() {
-        var childProcess = require("child_process");
-        var oldSpawn = childProcess.spawn;
-        function mySpawn() {
-            console.log('spawn called');
-            console.log(arguments);
-            var result = oldSpawn.apply(this, arguments);
-            return result;
-        }
-        childProcess.spawn = mySpawn;
-    })();
 
     console.log(listServicesRequest);
     const { polyglotSettings, listServicesOptions } = listServicesRequest;
@@ -231,7 +224,6 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
 
     const echoCommandLineArgs = [callServiceOptions.jsonBody];
     const echo = spawn("echo", echoCommandLineArgs);
-    console.log(`Echo Args: ${echoCommandLineArgs}`);
 
     // Build polyglot command
     const javaCommand = 'java'; 
@@ -246,23 +238,25 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
     if(polyglotSettings.endpoint !== "") javaCommandLineArgs.push('--endpoint=' + polyglotSettings.endpoint);
     if(callServiceOptions.fullMethod !== "") javaCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
 
-    console.log(`Java Command: ${javaCommand} Args: ${javaCommandLineArgs}`);
-
     const polyglot = spawn(javaCommand, javaCommandLineArgs);
 
+    var echoStdErr = ""
+
     echo.stdout.on('data', (data) => {
-        console.log(`echoStdOut: ${data}\n`);
         polyglot.stdin.write(data);
     });
 
     echo.stderr.on('data', (data) => {
-        console.log(`echoStdErr: ${data}`);
+        console.error(`echoStdErr: ${data}`);
+        echoStdErr += data;   
     });
 
     echo.on('close', (code) => {
-        console.log(`echoCode: ${code}\n`);
+        console.log(`echo closing with code: ${code}\n`);
         if(code === 0){
             polyglot.stdin.end();
+        } else {
+            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, {error: code, response: echoStdErr});  
         }
     }); 
 
@@ -270,29 +264,50 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
     var polyglotStdout = "";
 
     polyglot.stderr.on('data', (data) => {
-        console.log(`polyglotStdErr: ${data}\n`);
-        polyglotStderr = data;
+        console.warn(`polyglotStdErr: ${data}\n`);
+        polyglotStderr += data;
     });
 
     polyglot.stdout.on('data', (data) => {
-        console.log(`polyglotStdOut: ${data}\n`);
-        polyglotStdout = data;
+        polyglotStdout += data;
     });
 
     polyglot.on('close', (code) => {
-        console.log(`code: ${code}\n`);
+        console.log(`polyglot closing with code: ${code}\n`);
+
         if (code !== 0){
-            console.warn("err: ", code, ". stderr: ", polyglotStderr);
+            console.error("err: ", code, ". stderr: ", polyglotStderr);
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr }); 
         } else {
             if (polyglotStdout === '' && polyglotStderr !== '') {
                 // Is this the best way to do this? The text of Error is meant to be a stack trace.
                 event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
             }
-            console.log(`Sending back call service response ${polyglotStdout}`);
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
         } 
     });
+});
+
+//****************************************************************//
+
+//******* Node process communication for renderer process ********//
+
+/* A method for checking if local paths are valid, takes a list of strings and should return a list of booleans which correspond to 
+   the validity of the path. Identical indices should correspond such that the boolean at index i represents the validity of path at
+   index i. The id is passed straight back to allow the renderer to identify which component sent the request */
+ipcMain.on(ipcConstants.VALIDATE_PATH_REQUEST, (event, validatePathsRequest) => {
+    console.log(validatePathsRequest);
+    var validPathList = [];
+    for(i = 0; i < validatePathsRequest.paths.length; i++) {
+        try {
+            accessSync(validatePathsRequest.paths[i]);
+            validPathList.push(true);
+        } catch (err) {
+            console.warn(`path ${path} does not exist`);
+            validPathList.push(false); 
+        }
+    }
+    event.sender.send(ipcConstants.VALIDATE_PATH_RESPONSE, {id: validatePathsRequest.id, validPaths: validPathList});
 });
 
 //****************************************************************//

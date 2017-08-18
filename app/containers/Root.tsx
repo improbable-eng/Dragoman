@@ -8,7 +8,8 @@ import ResponseViewer from "../components/responseViewer";
 import {
   IService, IMethod, PolyglotSettings,
   ListServicesOptions, SettingsUIState, AppUIState, ListServicesRequest,
-  PolyglotResponse, CallServiceRequest, CallServiceOptions
+  PolyglotResponse, CallServiceRequest, CallServiceOptions, ValidatePathsRequest,
+  ValidatePathsResponse
 } from "../types/index";
 
 const ipcConstants = require("../constants/ipcConstants"); // tslint:disable-line
@@ -38,6 +39,16 @@ export class Root extends React.Component<{}, RootState> {
     this.registerIpcListeners();
   }
 
+  public validateSystemPathRequest = (validatePathsRequest: ValidatePathsRequest) => {
+    console.log("validating paths: ", validatePathsRequest.paths, ". from: ", validatePathsRequest.id);
+    ipcRenderer.send(ipcConstants.VALIDATE_PATH_REQUEST, validatePathsRequest);
+  }
+
+  public validateSystemPathResponse = (event: Event, res: ValidatePathsResponse) => {
+    console.log("received validate paths response: ", res);
+
+  }
+
   public listServices = () => {
     this.setState({ request: "", response: "", services: [] });
 
@@ -50,7 +61,7 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public listServicesResponse = (event: Event, res: PolyglotResponse) => {
-    console.log(res);
+    console.log("received list service response: ", res);
     if (!res.error) {
       try {
         const parsedResponse = JSON.parse(res.response as string);
@@ -191,11 +202,11 @@ export class Root extends React.Component<{}, RootState> {
 
   // Should we validate that this is a valid path? This would have to deal
   // with the various different platforms
-  public handleTextFieldInputChange = (stateId: string, newText: string | number) => {
+  public handleTextFieldInputChange = (stateId: string, newVal: string | number) => {
     if (stateId === "endpoint") {
-      this.handleEndpointChange(newText as string);
+      this.handleEndpointChange(newVal as string);
     }
-    this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [stateId]: newText }) });
+    this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [stateId]: newVal }) });
   }
 
   public handleListServicesClick = () => {
@@ -209,6 +220,14 @@ export class Root extends React.Component<{}, RootState> {
       polyglotSettings: Object.assign({}, this.state.polyglotSettings, { endpoint: newEndpoint }),
       settingsUIState: Object.assign({}, this.state.settingsUIState, { endpointError: newEndPointError })
     });
+  }
+
+  public handlePathBlur = (iD: string) => {
+    const paths = this.state.polyglotSettings[iD] as string;
+    const pathArray = [paths];
+    console.log(paths);
+
+    this.validateSystemPathRequest({id: iD, paths: pathArray});
   }
 
   public validateEndpoint = (newEndpoint: string) => {
@@ -263,6 +282,7 @@ export class Root extends React.Component<{}, RootState> {
             handleTextFieldInputChange={this.handleTextFieldInputChange}
             handleEndpointChange={this.handleEndpointChange}
             handlePathDoubleClick={this.showDirectoryDialog}
+            handlePathBlur={this.handlePathBlur}
           />
           <div
             style={{ display: "flex" }}
@@ -308,6 +328,7 @@ export class Root extends React.Component<{}, RootState> {
   private registerIpcListeners(): void {
     ipcRenderer.on(ipcConstants.LIST_SERVICES_RESPONSE, this.listServicesResponse);
     ipcRenderer.on(ipcConstants.CALL_SERVICE_RESPONSE, this.callServiceResponse);
+    ipcRenderer.on(ipcConstants.VALIDATE_PATHS_RESPONSE, this.validateSystemPathResponse);
   }
 }
 

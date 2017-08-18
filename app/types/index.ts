@@ -22,6 +22,7 @@ export class PolyglotSettings {
     public configName: string = "";
     public tlsCaCertPath: string = "";
     public deadlineMs: number = 0;
+    [key: string]: string | number;
 
     public constructor(init?: Partial<PolyglotSettings>) {
         Object.assign(this, init);
@@ -75,6 +76,20 @@ export class CallServiceRequest extends PolyglotRequestOptions {
 export class PolyglotResponse {
     public error: Error;
     public response: string | ArrayBuffer;
+}
+
+// ************************************** //
+
+// ************ Validation ************ //
+
+export class ValidatePathsRequest {
+    public paths: string[];
+    public id: string;
+}
+
+export class ValidatePathsResponse {
+    public validPaths: boolean[];
+    public id: string;
 }
 
 // ************************************** //

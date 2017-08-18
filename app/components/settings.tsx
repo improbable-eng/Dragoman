@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { IPolyglotSettings, ISettingsUIState } from "../types/index";
+import { PolyglotSettings, SettingsUIState } from "../types/index";
 
 import SingleLineTextEntry from "./singleLineTextEntry";
 import MultiLineTextEntry from "./multiLineTextEntry";
@@ -8,15 +8,17 @@ import MultiLineTextEntry from "./multiLineTextEntry";
 // TODO: Change to using local .scss files?
 
 export interface ISettingsProps {
-    polyglotSettings: IPolyglotSettings;
-    settingsUIState: ISettingsUIState;
+    polyglotSettings: PolyglotSettings;
+    settingsUIState: SettingsUIState;
     handleTextFieldInputChange: (settingStateId: string, newValue: string | number) => void;
     handleListServicesClick: () => void;
     handlePathDoubleClick: (stateId: string, message: string, allowMultiSelect: boolean) => void;
+    handlePathBlur: (id: string) => void;
 }
 
 function Settings({ polyglotSettings, settingsUIState,
-    handleTextFieldInputChange, handlePathDoubleClick, handleListServicesClick }: ISettingsProps) {
+    handleTextFieldInputChange, handlePathDoubleClick, handleListServicesClick,
+    handlePathBlur }: ISettingsProps) {
     return (
         <div>
             <SingleLineTextEntry
@@ -40,6 +42,7 @@ function Settings({ polyglotSettings, settingsUIState,
                     handlePathDoubleClick("protoDiscoveryRoot",
                                           "Select Proto Discovery Root",
                                           false)}
+                handleBlur={handlePathBlur}
             />
             <SingleLineTextEntry
                 id="configSetPath"

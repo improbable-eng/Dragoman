@@ -11,10 +11,11 @@ export interface ISingleLineTextEntryProps {
     error?: boolean;
     handleChange: (id: string, newValue: string | number) => void;
     handleDoubleClick?: () => void;
+    handleBlur?: (id: string) => void;
 }
 
 export function SingleLineTextEntry({ id, label, value, placeholder = "", errorText = "",
-    required = false, error = false, handleChange, handleDoubleClick }: ISingleLineTextEntryProps) {
+    required = false, error = false, handleChange, handleDoubleClick, handleBlur }: ISingleLineTextEntryProps) {
     return (
         <div style={{ display: "flex", padding: "0px 10px 0px 10px" }}>
             <ReactMD.TextField
@@ -28,6 +29,7 @@ export function SingleLineTextEntry({ id, label, value, placeholder = "", errorT
                 onChange={(newValue) => handleChange(id, newValue)}
                 // react-md@next does not have doubleClick defined for ts by default
                 // if so add onDoubleClick?: (event: React.MouseEvent<HTMLElement>) => void;  to the main index.d.ts
+                onBlur={handleBlur ? () => handleBlur(id) : undefined}
                 onDoubleClick={handleDoubleClick}
                 style={{ flex: "1", margin: "0px 8px 0px 8px" }}
                 lineDirection="center"

@@ -3,23 +3,24 @@ import * as ReactMD from "react-md";
 
 import ServiceListItem from "./serviceListItem";
 import Settings from "./settings";
-import { IService, IPolyglotSettings, ISettingsUIState } from "../types/index";
+import { IService, PolyglotSettings, SettingsUIState } from "../types/index";
 
 export interface ISideBarProps {
     services?: IService[];
-    polyglotSettings: IPolyglotSettings;
-    settingsUIState: ISettingsUIState;
+    polyglotSettings: PolyglotSettings;
+    settingsUIState: SettingsUIState;
     handleMethodClick: (serviceName: string, methodName: string) => void;
     handleListServicesClick: () => void;
     handleSettingsClick: () => void;
     handleTextFieldInputChange: (settingStateId: string, newValue: string | number) => void;
     handlePathDoubleClick: (stateId: string, message: string, allowMultiSelect: boolean) => void;
     handleEndpointChange: (newValue: string) => void;
+    handlePathBlur: (id: string) => void;
 }
 
 function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick,
                    handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange,
-                   handleEndpointChange}: ISideBarProps) {
+                   handleEndpointChange, handlePathBlur}: ISideBarProps) {
     const serviceList = services && services.map((service) =>
         <ServiceListItem
             service={service}
@@ -34,6 +35,7 @@ function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClic
                 handleTextFieldInputChange={handleTextFieldInputChange}
                 handleListServicesClick={handleListServicesClick}
                 handlePathDoubleClick={handlePathDoubleClick}
+                handlePathBlur={handlePathBlur}
             />;
     return (
         <div>

@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactMD from "react-md";
 
-import { IAppUIState } from "../types/index";
+import { AppUIState } from "../types/index";
 
 // import MonacoEditor from "react-monaco-editor";
 import MonacoEditor from "./reactMonacoEditor";
@@ -9,7 +9,7 @@ import MonacoEditor from "./reactMonacoEditor";
 export interface IRequestBuilderProps {
     request: string;
     serviceMethodIdentifier?: string;
-    appUIState: IAppUIState;
+    appUIState: AppUIState;
     handleRunClick: () => void;
     handleRequestChange: (newValue: string) => void;
 }
