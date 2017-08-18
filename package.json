@@ -47,7 +47,6 @@
   "build": {
     "productName": "Dragoman",
     "appId": "io.improbable.dragoman",
-    "asar": false,
     "asarUnpack": [
       "polyglot_deploy.jar"
     ],
@@ -109,7 +108,8 @@
     "electron",
     "react",
     "webpack",
-    "react-hot"
+    "react-hot",
+    "polyglot"
   ],
   "homepage": "https://github.com/peteboothroyd/dragoman#readme",
   "devDependencies": {
@@ -126,6 +126,7 @@
     "@types/react-router-redux": "^5.0.6",
     "@types/redux-logger": "^3.0.0",
     "@types/sinon": "^2.3.1",
+    "@types/text-encoding": "0.0.31",
     "@types/webfontloader": "^1.6.28",
     "asar": "^0.13.0",
     "boiler-room-custodian": "^0.6.2",
@@ -167,10 +168,8 @@
     "webpack-merge": "^2.0.0"
   },
   "dependencies": {
-    "@types/text-encoding": "0.0.31",
     "amdrequire": "0.0.3",
     "electron-debug": "^1.1.0",
-    "font-awesome": "^4.7.0",
     "history": "^4.6.1",
     "monaco-editor": "^0.10.0",
     "react": "^15.4.1",

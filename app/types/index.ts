@@ -1,17 +1,17 @@
 // ***** Interfacing with Polyglot ******* //
 
-export interface IMethod {
-    name: string;
-    request: string;
-    response: string;
+export class Method {
+    public name: string = "";
+    public request: string = "";
+    public response: string = "";
 }
 
-export interface IService {
-    name: string;
-    path: string;
-    methods: IMethod[];
-    clientStreaming: boolean;
-    serverStreaming: boolean;
+export class Service {
+    public name: string = "";
+    public path: string = "";
+    public methodMap: Map<string, Method> = new Map();
+    public clientStreaming: boolean = false;
+    public serverStreaming: boolean = false;
 }
 
 export class PolyglotSettings {

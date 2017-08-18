@@ -6,7 +6,7 @@ import RequestBuilder from "../components/requestBuilder";
 import ResponseViewer from "../components/responseViewer";
 
 import {
-  IService, IMethod, PolyglotSettings,
+  Service, Method, PolyglotSettings,
   ListServicesOptions, SettingsUIState, AppUIState, ListServicesRequest,
   PolyglotResponse, CallServiceRequest, CallServiceOptions, ValidatePathsRequest,
   ValidatePathsResponse
@@ -22,7 +22,8 @@ const checkConsoleErrorMessage = "Check console for full log (Console can be rea
 
 // TODO: Decide which of these should be optional
 class RootState {
-  public services: IService[] = [];
+  // public serviceMap: {[name: string]: Service} = {};
+  public serviceMap: Map<string, Service> = new Map();
   public polyglotSettings: PolyglotSettings = new PolyglotSettings();
   public listServicesOptions: ListServicesOptions = new ListServicesOptions();
   public callServiceOptions: CallServiceOptions = new CallServiceOptions();
@@ -50,7 +51,7 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public listServices = () => {
-    this.setState({ request: "", response: "", services: [] });
+    this.setState({ request: "", response: "", serviceMap: new Map()});
 
     const listServicesRequest: ListServicesRequest = {
       polyglotSettings: this.state.polyglotSettings,
@@ -62,11 +63,24 @@ export class Root extends React.Component<{}, RootState> {
 
   public listServicesResponse = (event: Event, res: PolyglotResponse) => {
     console.log("received list service response: ", res);
+
     if (!res.error) {
       try {
         const parsedResponse = JSON.parse(res.response as string);
         console.log(parsedResponse);
-        this.setState({ services: parsedResponse });
+        const mappedServices: Map<string, Service> = new Map();
+
+        for (const service of parsedResponse) {
+          mappedServices.set(service.name, service);
+          service.methodMap = new Map<string, Method>();
+
+          for (const method of service.methods) {
+            const methodName = method.name as string;
+            service.methodMap.set(methodName, method);
+          }
+        }
+
+        this.setState({ serviceMap: mappedServices });
       } catch (e) {
         this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
         console.error(`Error ${e}\n${res.response}`);
@@ -78,15 +92,11 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public showDirectoryDialog = (id: string, macMessage: string = "", multiSelection: boolean = false) => {
-    console.log("showing dialog");
-    console.log(this.state);
     const customProperties = ["openDirectory", "openFile", "showHiddenFiles"];
 
     if (multiSelection) {
       customProperties.push("multiSelections");
     }
-
-    console.log(customProperties);
 
     const pathList = remote.dialog.showOpenDialog({
       properties: customProperties,
@@ -108,42 +118,42 @@ export class Root extends React.Component<{}, RootState> {
   public callService = () => {
     const jsonInput = this.state.request;
 
-    // Remove the annotations eg. [<optioal> <repeated>] from the request.
+    // Remove the annotations [<optioal> <repeated>] from the request.
     // Note (Edge Case): If the actual JSON body contains these strings they will be removed.
     const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
 
+    // Testing whether it is valid JSON. This will not work when constructing streaming responses
+    // TODO: Change this to deal with streaming requests
     try {
       JSON.parse(redactedJsonInput);
     } catch (e) {
-      this.openJsonParseErrorDialog();
       this.setState({appUIState: Object.assign({}, this.state.appUIState, {callRequestInProgress: false})});
+      this.openJsonParseErrorDialog();
     }
-
-    const cSOptions = new CallServiceOptions({
-      jsonBody: redactedJsonInput,
-      fullMethod: this.state.callServiceOptions.fullMethod,
-    });
 
     const callServiceRequest = new CallServiceRequest({
       polyglotSettings: this.state.polyglotSettings,
-      callServiceOptions: cSOptions
-    });
+      callServiceOptions: new CallServiceOptions({
+        jsonBody: redactedJsonInput,
+        fullMethod: this.state.callServiceOptions.fullMethod,
+      })});
 
-    console.log("calling service with request \n", callServiceRequest);
+    console.log(`calling service with request \n${callServiceRequest}`);
+
     ipcRenderer.send(ipcConstants.CALL_SERVICE_REQUEST, callServiceRequest);
   }
 
   public callServiceResponse = (event: Event, res: PolyglotResponse) => {
-    this.setState({ appUIState: Object.assign({}, this.state.appUIState, {callRequestInProgress: false})});
+    this.setState({appUIState: Object.assign({}, this.state.appUIState, {callRequestInProgress: false})});
 
-    console.log("received call service response \n", res);
-
-    // The response can be an array encoded in utf-8
-    if (typeof res.response  !== "string") {
-      res.response = new TextDecoder("utf-8").decode(res.response as ArrayBuffer);
-    }
+    console.log(`received call service response \n${res}`);
 
     if (!res.error) {
+       // The response can be an array encoded in utf-8
+      if (typeof res.response  !== "string") {
+        res.response = new TextDecoder("utf-8").decode(res.response as ArrayBuffer);
+      }
+
       const trimmedResponse = res.response.trim();
       this.setState({response: trimmedResponse});
     } else {
@@ -164,10 +174,8 @@ export class Root extends React.Component<{}, RootState> {
   public openErrorDialog = (title: string, explanation: string) => {
     this.setState({
       appUIState: Object.assign({}, this.state.appUIState,
-        {
-          errorDialogVisible: false, errorDialogTitle: title,
-          errorDialogExplanation: explanation,
-        })
+        { errorDialogVisible: false, errorDialogTitle: title,
+          errorDialogExplanation: explanation})
     });
   }
 
@@ -200,8 +208,9 @@ export class Root extends React.Component<{}, RootState> {
     this.setState({settingsUIState: newSettingsUIState});
   }
 
-  // Should we validate that this is a valid path? This would have to deal
-  // with the various different platforms
+  // Should we check that this is a valid path? This would have to deal
+  // with the various different platforms. Can delegate to main process and use standard node
+  // TODO: Implement path validation
   public handleTextFieldInputChange = (stateId: string, newVal: string | number) => {
     if (stateId === "endpoint") {
       this.handleEndpointChange(newVal as string);
@@ -237,12 +246,8 @@ export class Root extends React.Component<{}, RootState> {
   public handleMethodClick = (serviceName: string, methodName: string) => {
     console.log("handling method click");
     try {
-      const clickedService = this.state.services.find((service) => {
-        return service.name === serviceName;
-      }) as IService;
-      const clickedMethod = clickedService.methods.find((method) => {
-        return method.name === methodName;
-      }) as IMethod;
+      const clickedService = this.state.serviceMap.get(serviceName) as Service;
+      const clickedMethod = clickedService.methodMap.get(methodName) as Method;
 
       console.log(clickedMethod);
 
@@ -254,12 +259,13 @@ export class Root extends React.Component<{}, RootState> {
       this.setState({
         callServiceOptions: Object.assign({},
           this.state.callServiceOptions,
-          { fullMethod: serviceName + "/" + methodName }),
+          {fullMethod: serviceName + "/" + methodName}),
         request: prettyPrintedRequestTemplate,
         response: prettyPrintedResponseTemplate,
       });
     } catch (e) {
-      console.error(e);
+      // TODO: Present error dialog?
+      console.error(`Error when method was clicked ${e}`);
     }
   }
 
@@ -273,7 +279,7 @@ export class Root extends React.Component<{}, RootState> {
         />
         <div>
           <SideBar
-            services={this.state.services}
+            serviceMap={this.state.serviceMap}
             polyglotSettings={this.state.polyglotSettings}
             settingsUIState={this.state.settingsUIState}
             handleMethodClick={this.handleMethodClick}

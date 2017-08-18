@@ -3,10 +3,10 @@ import * as ReactMD from "react-md";
 
 import ServiceListItem from "./serviceListItem";
 import Settings from "./settings";
-import { IService, PolyglotSettings, SettingsUIState } from "../types/index";
+import { Service, PolyglotSettings, SettingsUIState } from "../types/index";
 
 export interface ISideBarProps {
-    services?: IService[];
+    serviceMap: Map<string, Service>;
     polyglotSettings: PolyglotSettings;
     settingsUIState: SettingsUIState;
     handleMethodClick: (serviceName: string, methodName: string) => void;
@@ -18,15 +18,20 @@ export interface ISideBarProps {
     handlePathBlur: (id: string) => void;
 }
 
-function SideBar({ services, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick,
+function SideBar({ serviceMap, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick,
                    handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange,
                    handleEndpointChange, handlePathBlur}: ISideBarProps) {
-    const serviceList = services && services.map((service) =>
+
+    const serviceList: JSX.Element[] = [];
+
+    serviceMap.forEach((service: Service, key: string) => {
+        serviceList.push(
         <ServiceListItem
-            service={service}
-            key={service.name}
-            onMethodClick={handleMethodClick}
+        service={service}
+        key={service.name}
+        onMethodClick={handleMethodClick}
         />);
+    });
 
     const settings =
             <Settings

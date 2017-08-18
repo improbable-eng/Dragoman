@@ -1,25 +1,29 @@
 import * as React from "react";
 import * as ReactMD from "react-md";
 
-import { IService } from "../types/index";
+import { Service, Method } from "../types/index";
 
 export interface IServiceListProps {
-    service: IService;
+    service: Service;
     onMethodClick: (serviceName: string, methodName: string) => void;
 }
 
 function ServiceListItem({ service, onMethodClick }: IServiceListProps) {
-    const list = service.methods.map((method) =>
-        (<ReactMD.ListItem
-            primaryText={method.name}
-            key={method.name}
-            onClick={() => onMethodClick(service.name, method.name)}
-        />));
+    const methodList: JSX.Element[] = [];
+
+    service.methodMap.forEach((method: Method, key: string) => {
+        methodList.push(
+        <ReactMD.ListItem
+        primaryText={method.name}
+        key={method.name}
+        onClick={() => onMethodClick(service.name, method.name)}
+    />);
+    });
     return (
         <ReactMD.ListItem
             primaryText={service.name}
             active={true}
-            nestedItems={list}
+            nestedItems={methodList}
         />
     );
 }

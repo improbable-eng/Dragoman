@@ -3,7 +3,6 @@ import * as ReactMD from "react-md";
 
 import { AppUIState } from "../types/index";
 
-// import MonacoEditor from "react-monaco-editor";
 import MonacoEditor from "./reactMonacoEditor";
 
 export interface IRequestBuilderProps {
@@ -15,13 +14,6 @@ export interface IRequestBuilderProps {
 }
 
 class RequestBuilder extends React.Component<IRequestBuilderProps> {
-    // Checking that we aren"t needlessly updating the editor. TODO: Is this necessary?
-    // shouldComponentUpdate(nextProps: RequestBuilderProps, nextState: object) {
-    //     const propsAreSame = (this.props.request === nextProps.request
-    //         && this.props.serviceMethodIdentifier === nextProps.serviceMethodIdentifier
-    //         && this.props.appUIState.callRequestInProgress === nextProps.appUIState.callRequestInProgress);
-    //     return !propsAreSame;
-    // }
     public render() {
         return (
             <ReactMD.Card style={{ width: "50%", padding: "20px" }} >
