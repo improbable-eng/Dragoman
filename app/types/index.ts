@@ -10,60 +10,96 @@ export interface IService {
     name: string;
     path: string;
     methods: IMethod[];
+    clientStreaming: boolean;
+    serverStreaming: boolean;
 }
 
-export interface IPolyglotSettings {
-    protoDiscoveryRoot: string;
-    endpoint: string;
-    configSetPath: string;
-    addProtocIncludes: string;
-    configName: string;
-    tlsCaCertPath: string;
-    deadlineMs: number;
+export class PolyglotSettings {
+    public protoDiscoveryRoot: string = "";
+    public endpoint: string = "";
+    public configSetPath: string = "";
+    public addProtocIncludes: string = "";
+    public configName: string = "";
+    public tlsCaCertPath: string = "";
+    public deadlineMs: number = 0;
+
+    public constructor(init?: Partial<PolyglotSettings>) {
+        Object.assign(this, init);
+    }
 }
 
-export interface IListServicesOptions {
-    serviceFilter: string;
-    methodFilter: string;
+export class ListServicesOptions {
+    public serviceFilter: string = "";
+    public methodFilter: string = "";
+
+    public constructor(init?: Partial<ListServicesOptions>) {
+        Object.assign(this, init);
+    }
 }
 
-export interface ICallServiceOptions {
-    jsonBody: string;
-    fullMethod: string;
+export class CallServiceOptions {
+    public jsonBody: string = "";
+    public fullMethod: string = "";
+
+    public constructor(init?: Partial<CallServiceOptions>) {
+        Object.assign(this, init);
+    }
 }
 
-interface IPolyglotRequestOptions {
-    polyglotSettings: IPolyglotSettings;
+export class PolyglotRequestOptions {
+    public polyglotSettings: PolyglotSettings = new PolyglotSettings();
+
+    public constructor(init?: Partial<PolyglotRequestOptions>) {
+        Object.assign(this, init);
+    }
 }
 
-export interface IListServicesRequest extends IPolyglotRequestOptions {
-    listServicesOptions: IListServicesOptions;
+export class ListServicesRequest extends PolyglotRequestOptions {
+    public listServicesOptions: ListServicesOptions = new ListServicesOptions();
+
+    public constructor(init?: Partial<ListServicesRequest>) {
+        super();
+        Object.assign(this, init);
+    }
 }
 
-export interface ICallServiceRequest extends IPolyglotRequestOptions {
-    callServiceOptions: ICallServiceOptions;
+export class CallServiceRequest extends PolyglotRequestOptions {
+    public callServiceOptions: CallServiceOptions = new CallServiceOptions();
+
+    public constructor(init?: Partial<CallServiceRequest>) {
+        super();
+        Object.assign(this, init);
+    }
 }
 
-export interface IPolyglotResponse {
-    error: Error;
-    response: string | ArrayBuffer;
+export class PolyglotResponse {
+    public error: Error;
+    public response: string | ArrayBuffer;
 }
 
 // ************************************** //
 
 // ************ App UI State ************ //
 
-export interface ISettingsUIState {
-    settingsOpen: boolean;
-    endpointRequired: boolean;
-    endpointError: boolean;
+export class SettingsUIState {
+    public settingsOpen: boolean = true;
+    public endpointRequired: boolean = false;
+    public endpointError: boolean = false;
+
+    public constructor(init?: Partial<SettingsUIState>) {
+        Object.assign(this, init);
+    }
 }
 
-export interface IAppUIState {
-    errorDialogVisible: boolean;
-    errorDialogTitle: string;
-    errorDialogExplanation: string;
-    callRequestInProgress: boolean;
+export class AppUIState {
+    public errorDialogVisible: boolean = false;
+    public errorDialogTitle: string = "";
+    public errorDialogExplanation: string = "";
+    public callRequestInProgress: boolean = false;
+
+    public constructor(init?: Partial<AppUIState>) {
+        Object.assign(this, init);
+    }
 }
 
 // ************************************** //

@@ -3,10 +3,7 @@ const url = require('url');
 const path = require('path'); // eslint-disable-line
 const { spawn } = require('child_process');
 
-const LIST_SERVICES_REQUEST = "LIST_SERVICES_REQUEST";
-const LIST_SERVICES_RESPONSE = "LIST_SERVICES_RESPONSE";
-const CALL_SERVICE_REQUEST = "CALL_SERVICE_REQUEST";
-const CALL_SERVICE_RESPONSE = "CALL_SERVICE_RESPONSE";
+const ipcConstants = require('./constants/ipcConstants'); 
 
 let mainWindow;
 
@@ -22,7 +19,6 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const installExtensions = () => {
-    // console.log("intalling extensions, NODE_ENV=", process.env.NODE_ENV);
     if (process.env.NODE_ENV === 'development') {
         const installer = require('electron-devtools-installer'); // eslint-disable-line global-require
 
@@ -30,7 +26,6 @@ const installExtensions = () => {
             "REACT_DEVELOPER_TOOLS"
             // 'REDUX_DEVTOOLS'
         ];
-        // console.log(extensions);
         const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
         return Promise.all(extensions.map(name => installer.default(installer[name], forceDownload)));
     }
@@ -177,7 +172,7 @@ if (process.env.NODE_ENV === "development") {
 
 
 // TODO: Add use_tls flag 
-ipcMain.on(LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
+ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     (function() {
         var childProcess = require("child_process");
         var oldSpawn = childProcess.spawn;
@@ -223,15 +218,15 @@ ipcMain.on(LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
         console.log(`code: ${code}\n`);
         if (code !== 0){
             console.warn("err: ", err, ". stderr: ", stderr);
-            event.sender.send(LIST_SERVICES_RESPONSE, { error: code, response: polyglotStderr });
+            event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: code, response: polyglotStderr });
         } else {
-            event.sender.send(LIST_SERVICES_RESPONSE, { error: null, response: polyglotStdout });
+            event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: null, response: polyglotStdout });
         }
     });
 });
 
 // TODO: Pass settings object rather than all of these params
-ipcMain.on(CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
+ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
     const { polyglotSettings, callServiceOptions } = callServiceRequest;
 
     const echoCommandLineArgs = [callServiceOptions.jsonBody];
@@ -288,32 +283,16 @@ ipcMain.on(CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
         console.log(`code: ${code}\n`);
         if (code !== 0){
             console.warn("err: ", code, ". stderr: ", polyglotStderr);
-            event.sender.send(CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr }); 
+            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr }); 
         } else {
             if (polyglotStdout === '' && polyglotStderr !== '') {
                 // Is this the best way to do this? The text of Error is meant to be a stack trace.
-                event.sender.send(CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
+                event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
             }
             console.log(`Sending back call service response ${polyglotStdout}`);
-            event.sender.send(CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
+            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
         } 
     });
-
-    //TODO: integrate this back
-    // (err, stdout, stderr) => {
-    //     // console.log('err: ', err, '\nstdout: ', stdout, '\nstderr: ', stderr);
-    //     if (err) {
-    //         event.sender.send(CALL_SERVICE_RESPONSE, { error: err, response: stderr });
-    //     } else {
-    //         // TODO: Investigate, when polyglot gets an error and err = nil how best to test for this and
-    //         // report to users?
-    //         if (stdout === '' && stderr !== '') {
-    //             // Is this the best way to do this? The text of Error is meant to be a stack trace.
-    //             event.sender.send(CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: stderr });
-    //         }
-    //         event.sender.send(CALL_SERVICE_RESPONSE, { error: err, response: stdout });
-    //     }
-    // });
 });
 
 //****************************************************************//

@@ -6,14 +6,12 @@ import RequestBuilder from "../components/requestBuilder";
 import ResponseViewer from "../components/responseViewer";
 
 import {
-  IService, IMethod, IPolyglotSettings,
-  IListServicesOptions, ISettingsUIState, IAppUIState, IListServicesRequest,
-  IPolyglotResponse, ICallServiceRequest, ICallServiceOptions
+  IService, IMethod, PolyglotSettings,
+  ListServicesOptions, SettingsUIState, AppUIState, ListServicesRequest,
+  PolyglotResponse, CallServiceRequest, CallServiceOptions
 } from "../types/index";
 
-import {LIST_SERVICES_REQUEST, LIST_SERVICES_RESPONSE,
-CALL_SERVICE_REQUEST, CALL_SERVICE_RESPONSE
-} from "../constants/ipcConstants";
+const ipcConstants = require("../constants/ipcConstants"); // tslint:disable-line
 
 import { remote, ipcRenderer } from "electron";
 
@@ -22,36 +20,36 @@ const checkConsoleErrorMessage = "Check console for full log (Console can be rea
   " -> Toggle Developer Tools -> Console)";
 
 // TODO: Decide which of these should be optional
-interface IRootState {
-  services: IService[];
-  polyglotSettings: IPolyglotSettings;
-  listServicesOptions: IListServicesOptions;
-  callServiceOptions: ICallServiceOptions;
-  request: string;
-  response: string;
-  settingsUIState: ISettingsUIState;
-  appUIState: IAppUIState;
+class RootState {
+  public services: IService[] = [];
+  public polyglotSettings: PolyglotSettings = new PolyglotSettings();
+  public listServicesOptions: ListServicesOptions = new ListServicesOptions();
+  public callServiceOptions: CallServiceOptions = new CallServiceOptions();
+  public request: string = "";
+  public response: string = "";
+  public settingsUIState: SettingsUIState = new SettingsUIState();
+  public appUIState: AppUIState = new AppUIState();
 }
 
-export class Root extends React.Component<{}, IRootState> {
+export class Root extends React.Component<{}, RootState> {
   constructor() {
     super();
-    this.state = this.createInitialState();
+    this.state = new RootState();
     this.registerIpcListeners();
   }
 
   public listServices = () => {
     this.setState({ request: "", response: "", services: [] });
 
-    const listServicesRequest: IListServicesRequest = {
+    const listServicesRequest: ListServicesRequest = {
       polyglotSettings: this.state.polyglotSettings,
       listServicesOptions: this.state.listServicesOptions
     };
 
-    ipcRenderer.send(LIST_SERVICES_REQUEST, listServicesRequest);
+    ipcRenderer.send(ipcConstants.LIST_SERVICES_REQUEST, listServicesRequest);
   }
 
-  public listServicesResponse = (event: Event, res: IPolyglotResponse) => {
+  public listServicesResponse = (event: Event, res: PolyglotResponse) => {
     console.log(res);
     if (!res.error) {
       try {
@@ -98,57 +96,61 @@ export class Root extends React.Component<{}, IRootState> {
 
   public callService = () => {
     const jsonInput = this.state.request;
+
     // Remove the annotations eg. [<optioal> <repeated>] from the request.
     // Note (Edge Case): If the actual JSON body contains these strings they will be removed.
-    const redactedJsonInput = jsonInput!.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
+    const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
 
     try {
       JSON.parse(redactedJsonInput);
     } catch (e) {
       this.openJsonParseErrorDialog();
-      this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
+      this.setState({appUIState: Object.assign({}, this.state.appUIState, {callRequestInProgress: false})});
     }
 
-    const cSOptions: ICallServiceOptions = {
+    const cSOptions = new CallServiceOptions({
       jsonBody: redactedJsonInput,
       fullMethod: this.state.callServiceOptions.fullMethod,
-    };
+    });
 
-    const callServiceRequest: ICallServiceRequest = {
+    const callServiceRequest = new CallServiceRequest({
       polyglotSettings: this.state.polyglotSettings,
       callServiceOptions: cSOptions
-    };
-    console.log("calling service with ", CALL_SERVICE_REQUEST, " and request ", callServiceRequest);
-    ipcRenderer.send(CALL_SERVICE_REQUEST, callServiceRequest);
+    });
+
+    console.log("calling service with request \n", callServiceRequest);
+    ipcRenderer.send(ipcConstants.CALL_SERVICE_REQUEST, callServiceRequest);
   }
 
-  public callServiceResponse = (event: Event, res: IPolyglotResponse) => {
-    console.log(res);
-    const decodedResponse = new TextDecoder("utf-8").decode(res.response as ArrayBuffer);
-    console.log(decodedResponse);
-    this.setState({ appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: false }) });
+  public callServiceResponse = (event: Event, res: PolyglotResponse) => {
+    this.setState({ appUIState: Object.assign({}, this.state.appUIState, {callRequestInProgress: false})});
+
+    console.log("received call service response \n", res);
+
+    // The response can be an array encoded in utf-8
+    if (typeof res.response  !== "string") {
+      res.response = new TextDecoder("utf-8").decode(res.response as ArrayBuffer);
+    }
+
     if (!res.error) {
-      const trimmedResponse = decodedResponse.trim();
-      this.setState({ response: trimmedResponse });
+      const trimmedResponse = res.response.trim();
+      this.setState({response: trimmedResponse});
     } else {
       this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
-      console.error(`Error ${res.error}\n${res.response}`);
+      console.error(`Error ${res.error} \n${res.response}`);
     }
   }
 
+  // TODO: This is not working properly, fix
   public openJsonParseErrorDialog = () => {
     this.openErrorDialog("Error parsing request", "Ensure that the request is valid JSON");
   }
 
   public closeErrorDialog = () => {
-    console.log("closing error dialogue");
-    console.log(this.state);
-    this.setState({ appUIState: Object.assign({}, this.state.appUIState, { errorDialogVisible: false }) });
+    this.setState({appUIState: Object.assign({}, this.state.appUIState, { errorDialogVisible: false})});
   }
 
   public openErrorDialog = (title: string, explanation: string) => {
-    console.log("opening dialogue");
-    console.log(this.state);
     this.setState({
       appUIState: Object.assign({}, this.state.appUIState,
         {
@@ -159,12 +161,10 @@ export class Root extends React.Component<{}, IRootState> {
   }
 
   public handleRequestChange = (newValue: string) => {
-    this.setState({ request: newValue });
+    this.setState({request: newValue});
   }
 
   public handleRunClick = () => {
-    console.log("handling run click");
-    console.log(this.state);
     // Up until this point the endpoint did not need to be filled in.
     if (this.state.polyglotSettings.endpoint === "") {
       this.setState({
@@ -184,7 +184,7 @@ export class Root extends React.Component<{}, IRootState> {
   }
 
   public handleSettingsClick = () => {
-    const newSettingsUIState: ISettingsUIState = Object.assign({}, this.state.settingsUIState,
+    const newSettingsUIState: SettingsUIState = Object.assign({}, this.state.settingsUIState,
       { settingsOpen: !this.state.settingsUIState.settingsOpen });
     this.setState({settingsUIState: newSettingsUIState});
   }
@@ -229,15 +229,8 @@ export class Root extends React.Component<{}, IRootState> {
 
       // Initially pretty print the templates to make it easy for users to vew the templates.
       // Store and display as simple strings to make subsequent editing easier.
-      // const parsedRequestTemplate = JSON.parse(clickedMethod.request);
-      // console.log(parsedRequestTemplate);
       const prettyPrintedRequestTemplate = JSON.stringify(clickedMethod.request, null, 2);
-      console.log(prettyPrintedRequestTemplate);
-
-      // const parsedResponseTemplate = JSON.parse(clickedMethod.response);
-      // console.log(parsedResponseTemplate);
       const prettyPrintedResponseTemplate = JSON.stringify(clickedMethod.response, null, 2);
-      console.log(prettyPrintedResponseTemplate);
 
       this.setState({
         callServiceOptions: Object.assign({},
@@ -311,47 +304,10 @@ export class Root extends React.Component<{}, IRootState> {
       </div>);
   }
 
-  // Defining initial state of app
-  private createInitialState(): IRootState {
-    return {
-      services: [],
-      response: "",
-      request: "",
-      polyglotSettings: {
-        protoDiscoveryRoot: "",
-        endpoint: "",
-        configSetPath: "",
-        configName: "",
-        tlsCaCertPath: "",
-        deadlineMs: 0,
-        addProtocIncludes: ""
-      },
-      listServicesOptions: {
-        serviceFilter: "",
-        methodFilter: ""
-      },
-      callServiceOptions: {
-        jsonBody: "",
-        fullMethod: ""
-      },
-      appUIState: {
-        errorDialogVisible: false,
-        errorDialogTitle: "",
-        errorDialogExplanation: "",
-        callRequestInProgress: false
-      },
-      settingsUIState: {
-        settingsOpen: true,
-        endpointRequired: false,
-        endpointError: false
-      }
-    };
-  }
-
   // Adding event listeners to allow callback from the main process
   private registerIpcListeners(): void {
-    ipcRenderer.on(LIST_SERVICES_RESPONSE, this.listServicesResponse);
-    ipcRenderer.on(CALL_SERVICE_RESPONSE, this.callServiceResponse);
+    ipcRenderer.on(ipcConstants.LIST_SERVICES_RESPONSE, this.listServicesResponse);
+    ipcRenderer.on(ipcConstants.CALL_SERVICE_RESPONSE, this.callServiceResponse);
   }
 }
 
