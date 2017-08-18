@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Hello Electron React!</title>
+  <title>Dragoman</title>
   <script>
     (function () {
       if (!process.env.HOT) {
@@ -26,7 +26,6 @@
       script.src = (process.env.HOT)
         ? 'http://localhost:' + port + '/dist/bundle.js'
         : './dist/bundle.js';
-      console.log("script src=", script.src);
       // HACK: Writing the script path should be done with webpack
       document.body.appendChild(script);
     }

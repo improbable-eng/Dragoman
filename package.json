@@ -47,6 +47,10 @@
   "build": {
     "productName": "Dragoman",
     "appId": "io.improbable.dragoman",
+    "asar": false,
+    "asarUnpack": [
+      "polyglot_deploy.jar"
+    ],
     "dmg": {
       "contents": [
         {
@@ -68,7 +72,8 @@
       "app.html",
       "main.js",
       "main.js.map",
-      "package.json"
+      "package.json",
+      "polyglot_deploy.jar"
     ],
     "directories": {
       "buildResources": "resources",
@@ -115,7 +120,6 @@
     "@types/react": "^15.0.37",
     "@types/react-dom": "^15.5.1",
     "@types/react-hot-loader": "^3.0.1",
-    "@types/react-monaco-editor": "^0.8.1",
     "@types/react-redux": "^4.4.35",
     "@types/react-router": "^4.0.11",
     "@types/react-router-dom": "^4.0.7",
@@ -168,11 +172,11 @@
     "electron-debug": "^1.1.0",
     "font-awesome": "^4.7.0",
     "history": "^4.6.1",
+    "monaco-editor": "^0.10.0",
     "react": "^15.4.1",
     "react-ace": "^5.1.2",
     "react-dom": "^15.4.1",
     "react-md": "^1.1.0-alpha-8",
-    "react-monaco-editor": "^0.10.0",
     "react-redux": "^5.0.1",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",

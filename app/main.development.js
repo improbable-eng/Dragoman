@@ -8,7 +8,10 @@ const ipcConstants = require('./constants/ipcConstants');
 
 let mainWindow;
 
+console.log("RUNNING");
+
 if (process.env.NODE_ENV === 'production') {
+    console.log("production");
     const sourceMapSupport = require('source-map-support'); // eslint-disable-line
     sourceMapSupport.install();
 }
@@ -35,6 +38,7 @@ const installExtensions = () => {
 };
 
 const createWindow = () => {
+    console.log("creating window");
     mainWindow = new BrowserWindow({
         show: false,
         width: 2000,

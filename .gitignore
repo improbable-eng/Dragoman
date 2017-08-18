@@ -25,3 +25,6 @@ yarn-error.log*
 /app/main.js.map
 /vs
 /app/vs
+/release
+app/polyglot_deploy.jar
+monaco-editor/

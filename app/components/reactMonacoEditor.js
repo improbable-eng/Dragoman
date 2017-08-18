@@ -119,7 +119,12 @@ var MonacoEditor = function (_React$Component) {
         // Running in electron, need to deal with the difference between node require and AMDRequire
         // Save a reference to node's require to set back up later
         context.electronNodeRequire = context.require;
-        loaderUrl = '../node_modules/monaco-editor/min/vs/loader.js'
+        
+        if (process.env.NODE_ENV === "production") {
+          loaderUrl = 'file:///' + context.__dirname + '/dist/monaco-editor/min/vs/loader.js'
+        } else {
+          loaderUrl = './dist/monaco-editor/dev/vs/loader.js';
+        }
       }
       var onGotAmdLoader = function onGotAmdLoader() {
         if (context.__REACT_MONACO_EDITOR_LOADER_ISPENDING__) {
@@ -127,6 +132,8 @@ var MonacoEditor = function (_React$Component) {
           if (inElectron){
             // Have just loaded loader.js and now context.require is not node's require
             var path = context.electronNodeRequire('path');
+
+            // TODO: Check this works cross-platform. Probably won't?
             function uriFromPath(_path) {
                 var pathName = path.resolve(_path).replace(/\\/g, '/');
                 if (pathName.length > 0 && pathName.charAt(0) !== '/') {
@@ -134,7 +141,15 @@ var MonacoEditor = function (_React$Component) {
                 }
                 return encodeURI('file://' + pathName);
             }
-            const monacoPath = path.join(context.__dirname, '../node_modules/monaco-editor/min');
+            
+            let monacoPath;
+
+            if (process.env.NODE_ENV === "production") {
+              monacoPath = path.join(context.__dirname, 'dist/monaco-editor/min');
+            } else {
+              monacoPath = path.join(context.__dirname + '/dist/monaco-editor/dev');
+            }
+
             const amdRequireBaseUrl = uriFromPath(monacoPath);
 
             context.require.config({

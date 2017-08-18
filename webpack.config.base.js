@@ -46,7 +46,12 @@ module.exports = {
     ]
   },
 
-  plugins: [],
+  plugins: [new CopyWebpackPlugin([
+    {
+      from: 'node_modules/monaco-editor',
+      to: 'monaco-editor',
+    }
+  ])],
 
   externals: Object.keys(externals || {})
 };
