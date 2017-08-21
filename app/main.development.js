@@ -194,8 +194,10 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     if (polyglotSettings.configSetPath !== "") commandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
     if (polyglotSettings.configName !== "") commandLineArgs.push('--config_name=' + polyglotSettings.configName);
     if (polyglotSettings.addProtocIncludes !== "") commandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes);
-    if (polyglotSettings.deadlineMs !== 0) commandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
+    if (polyglotSettings.deadlineMs > 0) commandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
     if (polyglotSettings.tlsCaCertPath !== "") commandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
+
+    event.sender.send(ipcConstants.POST_LOGS, {log: "Running command " + command + " " + commandLineArgs.join(" "), level: "info"});
 
     console.log(`Command: ${command} Args: ${commandLineArgs}`);
 
@@ -222,7 +224,6 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     });
 });
 
-// TODO: Pass settings object rather than all of these params
 ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
     const { polyglotSettings, callServiceOptions } = callServiceRequest;
 
@@ -237,10 +238,12 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
     if(polyglotSettings.configSetPath !== "") javaCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
     if(polyglotSettings.configName !== "") javaCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
     if(polyglotSettings.addProtocIncludes !== "") javaCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes);
-    if(polyglotSettings.deadlineMs !== 0) javaCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
+    if(polyglotSettings.deadlineMs > 0) javaCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
     if(polyglotSettings.tlsCaCertPath !== "") javaCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
     if(polyglotSettings.endpoint !== "") javaCommandLineArgs.push('--endpoint=' + polyglotSettings.endpoint);
     if(callServiceOptions.fullMethod !== "") javaCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
+
+    event.sender.send(ipcConstants.POST_LOGS, {log: "Running command " + javaCommand + " " + javaCommandLineArgs.join(" "), level: "info"});
 
     const polyglot = spawn(javaCommand, javaCommandLineArgs);
 
@@ -260,7 +263,8 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
         if(code === 0){
             polyglot.stdin.end();
         } else {
-            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, {error: code, response: echoStdErr});  
+            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, 
+                {error: new Error("Error with echo piping json into polyglot"), response: echoStdErr});  
         }
     }); 
 
@@ -268,23 +272,27 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
     var polyglotStdout = "";
 
     polyglot.stderr.on('data', (data) => {
-        console.warn(`polyglotStdErr: ${data}\n`);
+        console.warn(`polyglotStdErr: ${data}`);
         polyglotStderr += data;
+        event.sender.send(ipcConstants.POST_LOGS, {log: data, level: "warn"});
     });
 
     polyglot.stdout.on('data', (data) => {
         polyglotStdout += data;
     });
 
+    polyglot.on('exit', (code, signal) => {
+        console.log('polyglot exiting with code ', code, " and signal ", signal);
+    });
+
     polyglot.on('close', (code) => {
         console.log(`polyglot closing with code: ${code}\n`);
 
         if (code !== 0){
-            console.error("err: ", code, ". stderr: ", polyglotStderr);
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr }); 
         } else {
             if (polyglotStdout === '' && polyglotStderr !== '') {
-                // Is this the best way to do this? The text of Error is meant to be a stack trace.
+                // Sometimes the code is 0 but polyglot has had an error. Is this the best way to do this? The text of Error is meant to be a stack trace.
                 event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
             }
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
@@ -299,6 +307,7 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
 /* A method for checking if local paths are valid, takes a list of strings and should return a list of booleans which correspond to 
    the validity of the path. Identical indices should correspond such that the boolean at index i represents the validity of path at
    index i. The id is passed straight back to allow the renderer to identify which component sent the request */
+
 ipcMain.on(ipcConstants.VALIDATE_PATH_REQUEST, (event, validatePathsRequest) => {
     console.log(validatePathsRequest);
     var validPathList = [];

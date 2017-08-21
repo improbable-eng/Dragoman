@@ -21,7 +21,7 @@ export class PolyglotSettings {
     public addProtocIncludes: string = "";
     public configName: string = "";
     public tlsCaCertPath: string = "";
-    public deadlineMs: number = 0;
+    public deadlineMs: number = -1;
     [key: string]: string | number;
 
     public constructor(init?: Partial<PolyglotSettings>) {
@@ -78,9 +78,14 @@ export class PolyglotResponse {
     public response: string | ArrayBuffer;
 }
 
+export class PolyglotLog {
+    public log: string | ArrayBuffer;
+    public level: string;
+}
+
 // ************************************** //
 
-// ************ Validation ************ //
+// ************* Validation ************* //
 
 export class ValidatePathsRequest {
     public paths: string[];

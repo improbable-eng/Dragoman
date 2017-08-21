@@ -9,7 +9,7 @@ import {
   Service, Method, PolyglotSettings,
   ListServicesOptions, SettingsUIState, AppUIState, ListServicesRequest,
   PolyglotResponse, CallServiceRequest, CallServiceOptions, ValidatePathsRequest,
-  ValidatePathsResponse
+  ValidatePathsResponse, PolyglotLog
 } from "../types/index";
 
 const ipcConstants = require("../constants/ipcConstants"); // tslint:disable-line
@@ -40,14 +40,33 @@ export class Root extends React.Component<{}, RootState> {
     this.registerIpcListeners();
   }
 
+  public processPolyglotLog = (event: Event, polyglotLog: PolyglotLog) => {
+    if (typeof polyglotLog.log  !== "string") {
+      polyglotLog.log = new TextDecoder("utf-8").decode(polyglotLog.log as ArrayBuffer).trim();
+    }
+    if (polyglotLog.log !== "") {
+      switch (polyglotLog.level) {
+        case "warn":
+          console.warn(polyglotLog.log);
+          break;
+        case "info":
+          console.info(polyglotLog.log);
+          break;
+        default:
+          console.log(polyglotLog.log);
+          break;
+      }
+    }
+  }
+
   public validateSystemPathRequest = (validatePathsRequest: ValidatePathsRequest) => {
     console.log("validating paths: ", validatePathsRequest.paths, ". from: ", validatePathsRequest.id);
     ipcRenderer.send(ipcConstants.VALIDATE_PATH_REQUEST, validatePathsRequest);
   }
 
+  // TODO: Implement this validaiton response for the paths
   public validateSystemPathResponse = (event: Event, res: ValidatePathsResponse) => {
     console.log("received validate paths response: ", res);
-
   }
 
   public listServices = () => {
@@ -58,6 +77,7 @@ export class Root extends React.Component<{}, RootState> {
       listServicesOptions: this.state.listServicesOptions
     };
 
+    console.log("sending request to list services with options: ", listServicesRequest);
     ipcRenderer.send(ipcConstants.LIST_SERVICES_REQUEST, listServicesRequest);
   }
 
@@ -67,7 +87,9 @@ export class Root extends React.Component<{}, RootState> {
     if (!res.error) {
       try {
         const parsedResponse = JSON.parse(res.response as string);
-        console.log(parsedResponse);
+
+        console.log("list service response parsed to: ", parsedResponse);
+
         const mappedServices: Map<string, Service> = new Map();
 
         for (const service of parsedResponse) {
@@ -80,7 +102,7 @@ export class Root extends React.Component<{}, RootState> {
           }
         }
 
-        this.setState({ serviceMap: mappedServices });
+        this.setState({serviceMap: mappedServices});
       } catch (e) {
         this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
         console.error(`Error ${e}\n${res.response}`);
@@ -138,7 +160,7 @@ export class Root extends React.Component<{}, RootState> {
         fullMethod: this.state.callServiceOptions.fullMethod,
       })});
 
-    console.log(`calling service with request \n${callServiceRequest}`);
+    console.log("calling service with request\n", callServiceRequest);
 
     ipcRenderer.send(ipcConstants.CALL_SERVICE_REQUEST, callServiceRequest);
   }
@@ -244,12 +266,11 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public handleMethodClick = (serviceName: string, methodName: string) => {
-    console.log("handling method click");
     try {
       const clickedService = this.state.serviceMap.get(serviceName) as Service;
       const clickedMethod = clickedService.methodMap.get(methodName) as Method;
 
-      console.log(clickedMethod);
+      console.log("Method clicked ", clickedMethod);
 
       // Initially pretty print the templates to make it easy for users to vew the templates.
       // Store and display as simple strings to make subsequent editing easier.
@@ -335,6 +356,7 @@ export class Root extends React.Component<{}, RootState> {
     ipcRenderer.on(ipcConstants.LIST_SERVICES_RESPONSE, this.listServicesResponse);
     ipcRenderer.on(ipcConstants.CALL_SERVICE_RESPONSE, this.callServiceResponse);
     ipcRenderer.on(ipcConstants.VALIDATE_PATHS_RESPONSE, this.validateSystemPathResponse);
+    ipcRenderer.on(ipcConstants.POST_LOGS, this.processPolyglotLog);
   }
 }
 
