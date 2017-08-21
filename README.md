@@ -4,15 +4,57 @@
   <p align="center">An open source GUI for polyglot, a universal gRPC client<p>
 </p>
 
-
 ## Overview
 This project is based on the [react-typescript-electron-boilerplate](https://github.com/iRath96/electron-react-typescript-boilerplate) project. It is powered by [Electron](https://electron.atom.io/).
 
-## Screenshot
-![Dragoman Demo](https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-demo.gif)
+# How to use:
+- Polyglot by default looks to ~/.polyglot/config.pb.json for its configuration. Define settings here for or override them in the UI.
+- Note not all settings can be defined in the UI currently.
+- An example config might be (remember to insert the OAuth secret, path to refresh token, and update the proto discovery paths as appropriate): 
+```
+{
+	"configurations": [
+		{
+			"name": "production",
+			"call_config": {
+				"use_tls": "true",
+				"oauth_config": {
+					"refresh_token_credentials": {
+						"token_endpoint_url": "https://auth.improbable.io/auth/v1/token",
+						"client": {
+							"id": "improbable_cli_client_go",
+							"secret": "{{INSERT CLIENT SECRET HERE}}"
+						},
+						"refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
+					}
+				}
+			},
+			"proto_config": {
+				"proto_discovery_root": "/Users/peteboothroyd/Projects/platform/proto",
+				"include_paths": [
+					"/Users/peteboothroyd/Projects/platform/go/src",
+					"/Users/peteboothroyd/Projects/platform/go/src/github.com/gogo/protobuf/protobuf",
+					"/Users/peteboothroyd/Projects/platform/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
+				]
+			}
+		}
+	]
+}
+```
+- Logs can be viewed from View/Toggle Developer Tools/Console. 
 
 ## Known Issues
-The current material design library has typescript definition issues. In the meantime the TypeScript definition files can be fixed manually to allow compilation and building. I am investigating moving to [material-ui](http://www.material-ui.com/#/).
+### Run
+- Polyglot is known to hang if authentication fails, causing the request to soin indefinitely. Get a new refresh token, reload the page and try again.
+- Text editors do not resize
+- Run request button is not centered
+- No option to define whether to use TLS or not yet
+- No filtering of services/methods yet
+### Build
+- The current material design library has typescript definition issues. In the meantime the TypeScript definition files can be fixed manually to allow compilation and building. I am investigating moving to [material-ui](http://www.material-ui.com/#/).
+
+## Screenshot
+![Dragoman Demo](https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-demo.gif)
 
 ## Getting Started
 To get start clone the repo:
