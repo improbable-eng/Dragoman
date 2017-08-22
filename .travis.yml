@@ -11,7 +11,7 @@ node_js:
 
 jobs:
   include: 
+    - stage: package
+    - script: npm run package
     - stage: test
     - script: npm run test-all
-    - stage: package
-    - script: npm run package-all
