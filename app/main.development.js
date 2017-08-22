@@ -174,14 +174,14 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     // Build polyglot command
     const polyglotCommand = 'java'; 
     const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=list_services', '--with_message=true', '--list_output_format=json'];
-    if (polyglotSettings.protoDiscoveryRoot !== "") commandLineArgs.push(' --proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
-    if (listServicesOptions.serviceFilter !== "") commandLineArgs.push('--service_filter=' + listServicesOptions.serviceFilter);
-    if (listServicesOptions.methodFilter !== "") commandLineArgs.push('--method_filter=' + listServicesOptions.methodFilter);
-    if (polyglotSettings.configSetPath !== "") commandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
-    if (polyglotSettings.configName !== "") commandLineArgs.push('--config_name=' + polyglotSettings.configName);
-    if (polyglotSettings.addProtocIncludes !== "") commandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes);
-    if (polyglotSettings.deadlineMs > 0) commandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
-    if (polyglotSettings.tlsCaCertPath !== "") commandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
+    if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push(' --proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
+    if (listServicesOptions.serviceFilter !== "") polyglotCommandLineArgs.push('--service_filter=' + listServicesOptions.serviceFilter);
+    if (listServicesOptions.methodFilter !== "") polyglotCommandLineArgs.push('--method_filter=' + listServicesOptions.methodFilter);
+    if (polyglotSettings.configSetPath !== "") polyglotCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
+    if (polyglotSettings.configName !== "") polyglotCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
+    if (polyglotSettings.addProtocIncludes !== "") polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes);
+    if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
+    if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
 
     event.sender.send(ipcConstants.POST_LOGS, {log: "Running polyglot command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: "info"});
 

@@ -7,15 +7,30 @@ import MonacoEditor from "./reactMonacoEditor";
 export interface IResponseViewerProps {
     response: string;
     serviceMethodIdentifier?: string;
+    serverStreaming?: boolean;
 }
 
-export function ResponseViewer({ response, serviceMethodIdentifier }: IResponseViewerProps) {
+export function ResponseViewer({ response, serviceMethodIdentifier, serverStreaming }: IResponseViewerProps) {
     return (
         <ReactMD.Card style={{ width: "50%", padding: "20px" }}>
-            <ReactMD.CardTitle
-                title="Response Viewer"
-                subtitle={serviceMethodIdentifier}
-            />
+            <div style={{ display: "flex", alignItems: "center" }}>
+                <ReactMD.CardTitle
+                    title="Response Viewer"
+                    subtitle={serviceMethodIdentifier}
+                    style={{ padding: 24 }}
+                />
+                <ReactMD.Button
+                        icon={true}
+                        tooltipLabel={serverStreaming !== undefined ?
+                            (serverStreaming ? "streaming response" : "unary response")
+                            : ""}
+                        tooltipPosition="right"
+                    >
+                        {serverStreaming !== undefined ?
+                            (serverStreaming ? "more_horiz" : "lens")
+                            : ""}
+                    </ReactMD.Button>
+            </div>
             <ReactMD.Card className="md-block-centered">
                 <MonacoEditor
                     language="json"

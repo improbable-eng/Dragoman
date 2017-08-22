@@ -4,14 +4,18 @@ export class Method {
     public name: string = "";
     public request: string = "";
     public response: string = "";
+    public clientStreaming: string = "false";
+    public serverStreaming: string = "false";
 }
 
 export class Service {
     public name: string = "";
     public path: string = "";
     public methodMap: Map<string, Method> = new Map();
-    public clientStreaming: boolean = false;
-    public serverStreaming: boolean = false;
+
+    public constructor(init?: Partial<PolyglotSettings>) {
+        Object.assign(this, init);
+    }
 }
 
 export class PolyglotSettings {
@@ -122,6 +126,8 @@ export class AppUIState {
     public errorDialogTitle: string = "";
     public errorDialogExplanation: string = "";
     public callRequestInProgress: boolean = false;
+    public clientStreaming?: boolean = undefined;
+    public serverStreaming?: boolean = undefined;
 
     public constructor(init?: Partial<AppUIState>) {
         Object.assign(this, init);

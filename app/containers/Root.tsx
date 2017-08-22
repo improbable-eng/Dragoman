@@ -111,12 +111,12 @@ export class Root extends React.Component<{}, RootState> {
         const mappedServices: Map<string, Service> = new Map();
 
         for (const service of parsedResponse) {
-          mappedServices.set(service.name, service);
-          service.methodMap = new Map<string, Method>();
+          const parsedService = new Service({name: service.name, path: service.path});
+          mappedServices.set(service.name, parsedService);
 
           for (const method of service.methods) {
             const methodName = method.name as string;
-            service.methodMap.set(methodName, method);
+            parsedService.methodMap.set(methodName, method);
           }
         }
 
@@ -303,6 +303,8 @@ export class Root extends React.Component<{}, RootState> {
           {fullMethod: serviceName + "/" + methodName}),
         request: prettyPrintedRequestTemplate,
         response: prettyPrintedResponseTemplate,
+        appUIState: Object.assign({}, this.state.appUIState,
+          {clientStreaming: clickedMethod.clientStreaming, serverStreaming: clickedMethod.serverStreaming})
       });
     } catch (e) {
       // TODO: Present error dialog?
@@ -348,6 +350,7 @@ export class Root extends React.Component<{}, RootState> {
             <ResponseViewer
               response={this.state.response}
               serviceMethodIdentifier={this.state.callServiceOptions.fullMethod}
+              serverStreaming={this.state.appUIState.serverStreaming}
             />
           </div>
         </div>
