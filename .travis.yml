@@ -13,5 +13,5 @@ jobs:
   include: 
     - stage: package
     - script: npm run package
-    - stage: test
-    - script: npm run test-all
+#    - stage: test
+#    - script: npm run test-all
