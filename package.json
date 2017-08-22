@@ -21,7 +21,8 @@
     "package-win": "npm run build && build --win --x64",
     "package-linux": "npm run build && build --linux",
     "package-all": "npm run build && build -mwl",
-    "cleanup": "mop -v"
+    "cleanup": "mop -v",
+    "release": "build"
   },
   "jest": {
     "moduleNameMapper": {
@@ -50,6 +51,9 @@
     "asarUnpack": [
       "polyglot_deploy.jar"
     ],
+    "publish": {
+      "provider": "github"
+    },
     "dmg": {
       "contents": [
         {
@@ -171,6 +175,7 @@
   "dependencies": {
     "amdrequire": "0.0.3",
     "electron-debug": "^1.1.0",
+    "electron-updater": "^2.8.7",
     "history": "^4.6.1",
     "monaco-editor": "^0.10.0",
     "react": "^15.4.1",
