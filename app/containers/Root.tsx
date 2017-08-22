@@ -356,7 +356,7 @@ export class Root extends React.Component<{}, RootState> {
             />
           </div>
         </div>
-        <ReactMD.Dialog
+        <ReactMD.DialogContainer
           id="errorDialog"
           // visible and modal are not defined by default in the current alpha version of react-md, if there is
           // an error paste visible?: boolean; modal?: boolean; into DialogProps in the Dialog.d.ts file
