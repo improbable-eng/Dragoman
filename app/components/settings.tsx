@@ -25,7 +25,7 @@ function Settings({ polyglotSettings, settingsUIState,
                 id="endpoint"
                 label="gRPC Endpoint"
                 value={polyglotSettings.endpoint}
-                errorText="Endpoint Required"
+                errorText="Format must be host:port"
                 placeholder="<host>:<port>"
                 handleChange={handleTextFieldInputChange}
                 required={settingsUIState.endpointRequired}
@@ -37,12 +37,13 @@ function Settings({ polyglotSettings, settingsUIState,
                 handleChange={handleTextFieldInputChange}
                 label="Proto Root Path"
                 placeholder="/path/to/protoRoot"
-                errorText="Proto Root Path Required"
+                errorText="Proto Root Path is invalid"
+                error={settingsUIState.protoDiscoveryRootError}
                 handleDoubleClick={() =>
                     handlePathDoubleClick("protoDiscoveryRoot",
                                           "Select Proto Discovery Root",
                                           false)}
-                handleBlur={handlePathBlur}
+                handleBlur={() => handlePathBlur("protoDiscoveryRoot")}
             />
             <SingleLineTextEntry
                 id="configSetPath"
@@ -50,10 +51,13 @@ function Settings({ polyglotSettings, settingsUIState,
                 handleChange={handleTextFieldInputChange}
                 label="Config Path"
                 placeholder="/path/to/config.pb.json"
+                errorText="Config Path is invalid"
+                handleBlur={() => handlePathBlur("configSetPath")}
                 handleDoubleClick={() =>
                     handlePathDoubleClick("configSetPath",
                                           "Select Config Path",
                                           false)}
+                error={settingsUIState.configSetPathError}
             />
             <SingleLineTextEntry
                 id="configName"
@@ -68,6 +72,9 @@ function Settings({ polyglotSettings, settingsUIState,
                 handleChange={handleTextFieldInputChange}
                 label="TLS CA Certificate Path"
                 placeholder="/path/to/tlsCaCertificate"
+                errorText="TLS CA Certificate Path is invalid"
+                error={settingsUIState.tlsCaCertPathError}
+                handleBlur={() => handlePathBlur("tlsCaCertPath")}
                 handleDoubleClick={() =>
                     handlePathDoubleClick("tlsCaCertPath",
                                           "Select TLS CA Certificate Path",
@@ -82,14 +89,22 @@ function Settings({ polyglotSettings, settingsUIState,
             />
             <MultiLineTextEntry
                 id="addProtocIncludes"
-                value={polyglotSettings.addProtocIncludes}
+                value={polyglotSettings.addProtocIncludes.join(",")}
                 handleChange={handleTextFieldInputChange}
                 label="Add Protoc Includes"
                 placeholder="<path1>, <path2>"
+                // Searches the array of booleans, if any of the booleans are false then the overall
+                // status of the field should be an error. If none are found the index=-1 < 0
+                error={settingsUIState.addProtocIncludesErrors.indexOf(false) >= 0}
+                // Display helpful error message by displaying which lines are invalid
+                errorText={
+                    "Path(s) " + settingsUIState.addProtocIncludesErrors.map((value, index) =>
+                !value ? index + 1 : "").filter(Number).join() + " are invalid"}
                 handleDoubleClick={() =>
                     handlePathDoubleClick("addProtocIncludes",
                                           "Add Protoc Include Paths",
                                           true)}
+                handleBlur={() => handlePathBlur("addProtocIncludes")}
             />
         </div>);
 }

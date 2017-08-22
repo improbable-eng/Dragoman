@@ -22,7 +22,6 @@ const checkConsoleErrorMessage = "Check console for full log (Console can be rea
 
 // TODO: Decide which of these should be optional
 class RootState {
-  // public serviceMap: {[name: string]: Service} = {};
   public serviceMap: Map<string, Service> = new Map();
   public polyglotSettings: PolyglotSettings = new PolyglotSettings();
   public listServicesOptions: ListServicesOptions = new ListServicesOptions();
@@ -40,55 +39,74 @@ export class Root extends React.Component<{}, RootState> {
     this.registerIpcListeners();
   }
 
-  public processPolyglotLog = (event: Event, polyglotLog: PolyglotLog) => {
-    if (typeof polyglotLog.log  !== "string") {
-      polyglotLog.log = new TextDecoder("utf-8").decode(polyglotLog.log as ArrayBuffer).trim();
-    }
-    if (polyglotLog.log !== "") {
-      switch (polyglotLog.level) {
-        case "warn":
-          console.warn(polyglotLog.log);
-          break;
-        case "info":
-          console.info(polyglotLog.log);
-          break;
-        default:
-          console.log(polyglotLog.log);
-          break;
+  public handlePathBlur = (stateId: string) => {
+    console.log("Handling path blur from ", stateId);
+    const paths = this.state.polyglotSettings[stateId];
+    console.log(paths);
+    console.assert((typeof(paths) === "string" || paths.constructor === Array)); // tslint:disable-line
+
+    let pathArray: string[];
+
+    if (paths.constructor === Array) {
+      pathArray = paths as string[];
+      if (pathArray.length === 1 && pathArray[0] === "") { // We don't want to validate an empty text field
+        this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
+          {[stateId + "Errors"]: []})});
+        return;
       }
+    } else {
+      if (paths === "") {
+        this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
+          {[stateId + "Error"]: false})});
+        return;
+      }
+      pathArray = [paths as string];
     }
+
+    this.validateSystemPathRequest({id: stateId, paths: pathArray});
   }
 
   public validateSystemPathRequest = (validatePathsRequest: ValidatePathsRequest) => {
-    console.log("validating paths: ", validatePathsRequest.paths, ". from: ", validatePathsRequest.id);
-    ipcRenderer.send(ipcConstants.VALIDATE_PATH_REQUEST, validatePathsRequest);
+    console.log("Validating paths ", validatePathsRequest.paths, " from: ", validatePathsRequest.id);
+    ipcRenderer.send(ipcConstants.VALIDATE_PATHS_REQUEST, validatePathsRequest);
   }
 
-  // TODO: Implement this validaiton response for the paths
+  // TODO: Implement this validation response for the paths
   public validateSystemPathResponse = (event: Event, res: ValidatePathsResponse) => {
-    console.log("received validate paths response: ", res);
+    console.log("Received validate paths response: ", res);
+    const state = this.state.polyglotSettings[res.id];
+    console.assert(res.validPaths instanceof Array);
+    if (typeof(state) === "string") {
+      console.assert(res.validPaths.length >= 1);
+      this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
+        { [res.id + "Error"]: !res.validPaths[0]})});
+    } else if (state.constructor === Array) {
+      this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
+        { [res.id + "Errors"]: res.validPaths})});
+    } else {
+      console.log("SHOULD NOT REACH THIS");
+    }
   }
 
   public listServices = () => {
-    this.setState({ request: "", response: "", serviceMap: new Map()});
+    this.setState({request: "", response: "", serviceMap: new Map()});
 
     const listServicesRequest: ListServicesRequest = {
       polyglotSettings: this.state.polyglotSettings,
       listServicesOptions: this.state.listServicesOptions
     };
 
-    console.log("sending request to list services with options: ", listServicesRequest);
+    console.log("Sending request to list services with options: ", listServicesRequest);
     ipcRenderer.send(ipcConstants.LIST_SERVICES_REQUEST, listServicesRequest);
   }
 
   public listServicesResponse = (event: Event, res: PolyglotResponse) => {
-    console.log("received list service response: ", res);
+    console.log("Received list service response: ", res);
 
     if (!res.error) {
       try {
         const parsedResponse = JSON.parse(res.response as string);
-
-        console.log("list service response parsed to: ", parsedResponse);
+        console.log("List service response parsed to: ", parsedResponse);
 
         const mappedServices: Map<string, Service> = new Map();
 
@@ -124,15 +142,15 @@ export class Root extends React.Component<{}, RootState> {
       properties: customProperties,
       message: macMessage,
     } as Electron.OpenDialogOptions);
-    console.log("pathList: ", pathList);
+    console.log("Paths ", pathList, " selected using path finder dialog");
 
     if (multiSelection) {
-      this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [id]: pathList })});
+      this.setState({polyglotSettings: Object.assign({}, this.state.polyglotSettings, {[id]: pathList})});
     } else {
       if (pathList.length >= 1) {
         const path = pathList[0];
         this.setState({ polyglotSettings:
-          Object.assign({}, this.state.polyglotSettings, { [id]: path })});
+          Object.assign({}, this.state.polyglotSettings, {[id]: path})});
       }
     }
   }
@@ -160,24 +178,22 @@ export class Root extends React.Component<{}, RootState> {
         fullMethod: this.state.callServiceOptions.fullMethod,
       })});
 
-    console.log("calling service with request\n", callServiceRequest);
-
+    console.log("Calling service with request", callServiceRequest);
     ipcRenderer.send(ipcConstants.CALL_SERVICE_REQUEST, callServiceRequest);
   }
 
   public callServiceResponse = (event: Event, res: PolyglotResponse) => {
     this.setState({appUIState: Object.assign({}, this.state.appUIState, {callRequestInProgress: false})});
 
-    console.log(`received call service response \n${res}`);
+    console.log(`Received call service response \n${res}`);
 
     if (!res.error) {
        // The response can be an array encoded in utf-8
       if (typeof res.response  !== "string") {
-        res.response = new TextDecoder("utf-8").decode(res.response as ArrayBuffer);
+        res.response = new TextDecoder("utf-8").decode(res.response as ArrayBuffer).trim();
       }
 
-      const trimmedResponse = res.response.trim();
-      this.setState({response: trimmedResponse});
+      this.setState({response: res.response});
     } else {
       this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
       console.error(`Error ${res.error} \n${res.response}`);
@@ -193,6 +209,7 @@ export class Root extends React.Component<{}, RootState> {
     this.setState({appUIState: Object.assign({}, this.state.appUIState, { errorDialogVisible: false})});
   }
 
+  // TODO: This is not working properly, fix
   public openErrorDialog = (title: string, explanation: string) => {
     this.setState({
       appUIState: Object.assign({}, this.state.appUIState,
@@ -210,9 +227,7 @@ export class Root extends React.Component<{}, RootState> {
     if (this.state.polyglotSettings.endpoint === "") {
       this.setState({
         settingsUIState: Object.assign({}, this.state.settingsUIState, {
-          settingsOpen: true,
-          endpointError: true, endpointRequired: true
-        })
+          settingsOpen: true, endpointError: true, endpointRequired: true})
       });
     } else {
       this.setState({
@@ -234,10 +249,20 @@ export class Root extends React.Component<{}, RootState> {
   // with the various different platforms. Can delegate to main process and use standard node
   // TODO: Implement path validation
   public handleTextFieldInputChange = (stateId: string, newVal: string | number) => {
-    if (stateId === "endpoint") {
-      this.handleEndpointChange(newVal as string);
+    let processedNewVal: any;
+    console.log("Handling text field change with new value: ", newVal, " from ", stateId);
+    switch (stateId) {
+      case "endpoint":
+        this.handleEndpointChange(newVal as string);
+        break;
+      case "addProtocIncludes":
+        processedNewVal = (newVal as string).split(",");
+        console.log("processedNewVal ", processedNewVal);
+        break;
+      default:
+        processedNewVal = newVal;
     }
-    this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [stateId]: newVal }) });
+    this.setState({ polyglotSettings: Object.assign({}, this.state.polyglotSettings, { [stateId]: processedNewVal }) });
   }
 
   public handleListServicesClick = () => {
@@ -246,23 +271,18 @@ export class Root extends React.Component<{}, RootState> {
 
   // TODO: Change this pattern. We want to validate all text inputs not just the endpoint
   public handleEndpointChange = (newEndpoint: string) => {
-    const newEndPointError = this.validateEndpoint(newEndpoint);
+    console.log("Handling endpoint change with newEndpoint ", newEndpoint);
     this.setState({
       polyglotSettings: Object.assign({}, this.state.polyglotSettings, { endpoint: newEndpoint }),
-      settingsUIState: Object.assign({}, this.state.settingsUIState, { endpointError: newEndPointError })
+      settingsUIState: Object.assign({}, this.state.settingsUIState,
+        { endpointError: this.validateEndpoint(newEndpoint) })
     });
   }
 
-  public handlePathBlur = (iD: string) => {
-    const paths = this.state.polyglotSettings[iD] as string;
-    const pathArray = [paths];
-    console.log(paths);
-
-    this.validateSystemPathRequest({id: iD, paths: pathArray});
-  }
-
   public validateEndpoint = (newEndpoint: string) => {
-    return newEndpoint === "";
+    const valid = /[^\:]+:[0-9]+/.test(newEndpoint);
+    console.log("newEndpoint ", newEndpoint, " is valid ", valid);
+    return !valid;
   }
 
   public handleMethodClick = (serviceName: string, methodName: string) => {
@@ -357,6 +377,22 @@ export class Root extends React.Component<{}, RootState> {
     ipcRenderer.on(ipcConstants.CALL_SERVICE_RESPONSE, this.callServiceResponse);
     ipcRenderer.on(ipcConstants.VALIDATE_PATHS_RESPONSE, this.validateSystemPathResponse);
     ipcRenderer.on(ipcConstants.POST_LOGS, this.processPolyglotLog);
+  }
+
+  private processPolyglotLog = (event: Event, polyglotLog: PolyglotLog) => {
+    if (typeof polyglotLog.log  !== "string") {
+      polyglotLog.log = new TextDecoder("utf-8").decode(polyglotLog.log as ArrayBuffer).trim();
+    }
+    if (polyglotLog.log !== "") {
+      switch (polyglotLog.level) {
+        case "warn":
+          console.warn(polyglotLog.log);
+          break;
+        default:
+          console.log(polyglotLog.log);
+          break;
+      }
+    }
   }
 }
 

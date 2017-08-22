@@ -38,7 +38,7 @@
       "app/node_modules"
     ],
     "transform": {
-      "^.+\\.(ts|tsx)$": "<rootDir>/test/preprocessor.js"
+      "^.+\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testMatch": [
       "**/?(*.)(spec|test).ts?(x)"
@@ -156,6 +156,7 @@
     "sinon": "^2.3.8",
     "spectron": "^3.4.1",
     "style-loader": "^0.18.2",
+    "ts-jest": "^20.0.10",
     "ts-loader": "^2.3.2",
     "ts-node": "^3.1.0",
     "tslint": "^5.6.0",

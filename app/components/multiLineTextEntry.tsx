@@ -10,10 +10,11 @@ export interface IMultiLineTextEntryProps {
     error?: boolean;
     required?: boolean;
     handleChange: (id: string, newValue: string) => void;
-    handleDoubleClick: () => void;
+    handleDoubleClick?: () => void;
+    handleBlur?: () => void;
 }
 
-function MultiLineTextEntry({id, handleChange, handleDoubleClick, label, value,
+function MultiLineTextEntry({id, handleChange, handleDoubleClick, handleBlur, label, value,
     placeholder = "", errorText, error = false, required = false}: IMultiLineTextEntryProps) {
     return (
         <div style={{ display: "flex", padding: "0px 10px 0px 10px" }}>
@@ -23,9 +24,11 @@ function MultiLineTextEntry({id, handleChange, handleDoubleClick, label, value,
                 value={value}
                 placeholder={placeholder}
                 required={required}
+                error={error}
                 errorText={errorText}
                 onChange={(newValue) => handleChange(id, newValue as string)}
                 onDoubleClick={handleDoubleClick}
+                onBlur={handleBlur}
                 rows={1}
                 maxRows={-1}
                 style={{ flex: "1", margin: "0px 8px 0px 8px" }}

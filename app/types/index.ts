@@ -18,11 +18,11 @@ export class PolyglotSettings {
     public protoDiscoveryRoot: string = "";
     public endpoint: string = "";
     public configSetPath: string = "";
-    public addProtocIncludes: string = "";
+    public addProtocIncludes: string[] = [];
     public configName: string = "";
     public tlsCaCertPath: string = "";
     public deadlineMs: number = -1;
-    [key: string]: string | number;
+    [key: string]: string | number | string[];
 
     public constructor(init?: Partial<PolyglotSettings>) {
         Object.assign(this, init);
@@ -99,12 +99,18 @@ export class ValidatePathsResponse {
 
 // ************************************** //
 
-// ************ App UI State ************ //
+// ************ App UI State ************ //\
 
 export class SettingsUIState {
     public settingsOpen: boolean = true;
     public endpointRequired: boolean = false;
     public endpointError: boolean = false;
+    public protoDiscoveryRootError: boolean = false;
+    public configSetPathError: boolean = false;
+    public tlsCaCertPathError: boolean = false;
+    // There can be multiple paths for the addProtocIncludes field, we want to be able to validate each one to provide
+    // hints to users as to which path is wrong.
+    public addProtocIncludesErrors: boolean[] = [];
 
     public constructor(init?: Partial<SettingsUIState>) {
         Object.assign(this, init);

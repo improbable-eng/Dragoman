@@ -1,30 +1,30 @@
 const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
 const url = require('url');
-const path = require('path'); // eslint-disable-line
+const path = require('path'); 
 const { spawn } = require('child_process');
-const {accessSync} = require('fs');
+const { accessSync } = require('fs');
 
 const ipcConstants = require('./constants/ipcConstants'); 
 
+const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
+                                    "dinowernli/grpc/polyglot/polyglot_deploy.jar";
+
 let mainWindow;
 
-console.log("RUNNING");
-
 if (process.env.NODE_ENV === 'production') {
-    console.log("production");
-    const sourceMapSupport = require('source-map-support'); // eslint-disable-line
+    const sourceMapSupport = require('source-map-support'); 
     sourceMapSupport.install();
 }
 
 if (process.env.NODE_ENV === 'development') {
-    require('electron-debug')(); // eslint-disable-line global-require
-    const p = path.join(__dirname, '..', 'app', 'node_modules'); // eslint-disable-line
-    require('module').globalPaths.push(p); // eslint-disable-line
+    require('electron-debug')(); 
+    const p = path.join(__dirname, '..', 'app', 'node_modules'); 
+    require('module').globalPaths.push(p); 
 }
 
 const installExtensions = () => {
     if (process.env.NODE_ENV === 'development') {
-        const installer = require('electron-devtools-installer'); // eslint-disable-line global-require
+        const installer = require('electron-devtools-installer');
 
         const extensions = [
             "REACT_DEVELOPER_TOOLS"
@@ -61,19 +61,6 @@ const createWindow = () => {
         mainWindow = null;
     });
 
-    if (process.env.NODE_ENV === 'development') {
-        mainWindow.webContents.openDevTools();
-        mainWindow.webContents.on('context-menu', (e, props) => {
-            const { x, y } = props;
-
-            Menu.buildFromTemplate([{
-                label: 'Inspect element',
-                click() {
-                    mainWindow.webContents.inspectElement(x, y);
-                }
-            }]).popup(mainWindow);
-        });
-    }
     setupElectronMenu()
 }
 
@@ -171,10 +158,9 @@ const setupElectronMenu = () => {
 //*** Calling polyglot and returning results to browser window ***//
 
 let pathToPolyglotBinary;
-console.log(process.env.NODE_ENV);
+
 if (process.env.NODE_ENV === "development") {
-    pathToPolyglotBinary = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
-        "dinowernli/grpc/polyglot/polyglot_deploy.jar";
+    pathToPolyglotBinary = DEV_PATH_TO_POLYGLOT_BINARY;
 } else {
     pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
 }
@@ -186,8 +172,8 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     const { polyglotSettings, listServicesOptions } = listServicesRequest;
 
     // Build polyglot command
-    const command = 'java'; 
-    const commandLineArgs = ['-jar', pathToPolyglotBinary, '--command=list_services', '--with_message=true', '--list_output_format=json'];
+    const polyglotCommand = 'java'; 
+    const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=list_services', '--with_message=true', '--list_output_format=json'];
     if (polyglotSettings.protoDiscoveryRoot !== "") commandLineArgs.push(' --proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
     if (listServicesOptions.serviceFilter !== "") commandLineArgs.push('--service_filter=' + listServicesOptions.serviceFilter);
     if (listServicesOptions.methodFilter !== "") commandLineArgs.push('--method_filter=' + listServicesOptions.methodFilter);
@@ -197,16 +183,17 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     if (polyglotSettings.deadlineMs > 0) commandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
     if (polyglotSettings.tlsCaCertPath !== "") commandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
 
-    event.sender.send(ipcConstants.POST_LOGS, {log: "Running command " + command + " " + commandLineArgs.join(" "), level: "info"});
+    event.sender.send(ipcConstants.POST_LOGS, {log: "Running polyglot command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: "info"});
 
-    console.log(`Command: ${command} Args: ${commandLineArgs}`);
+    console.log(`Command: ${polyglotCommand} Args: ${polyglotCommandLineArgs}`);
 
-    const polyglot = spawn(command, commandLineArgs);
+    const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
     var polyglotStderr = "";
     var polyglotStdout = "";
 
     polyglot.stderr.on('data', (data) => {
         polyglotStderr += data;
+        event.sender.send(ipcConstants.POST_LOGS, {log: data, level: "warn"});
     });
 
     polyglot.stdout.on('data', (data) => {
@@ -308,19 +295,20 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
    the validity of the path. Identical indices should correspond such that the boolean at index i represents the validity of path at
    index i. The id is passed straight back to allow the renderer to identify which component sent the request */
 
-ipcMain.on(ipcConstants.VALIDATE_PATH_REQUEST, (event, validatePathsRequest) => {
-    console.log(validatePathsRequest);
+ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, (event, validatePathsRequest) => {
+    console.log("Request to validate paths: ", validatePathsRequest);
     var validPathList = [];
     for(i = 0; i < validatePathsRequest.paths.length; i++) {
         try {
             accessSync(validatePathsRequest.paths[i]);
             validPathList.push(true);
         } catch (err) {
-            console.warn(`path ${path} does not exist`);
+            console.warn("path ", validatePathsRequest.paths[i] ," does not exist");
             validPathList.push(false); 
         }
     }
-    event.sender.send(ipcConstants.VALIDATE_PATH_RESPONSE, {id: validatePathsRequest.id, validPaths: validPathList});
+    console.log(validPathList);
+    event.sender.send(ipcConstants.VALIDATE_PATHS_RESPONSE, {id: validatePathsRequest.id, validPaths: validPathList});
 });
 
 //****************************************************************//

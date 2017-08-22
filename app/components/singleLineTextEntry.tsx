@@ -15,7 +15,8 @@ export interface ISingleLineTextEntryProps {
 }
 
 export function SingleLineTextEntry({ id, label, value, placeholder = "", errorText = "",
-    required = false, error = false, handleChange, handleDoubleClick, handleBlur }: ISingleLineTextEntryProps) {
+    required = false, error = false, handleChange,
+    handleDoubleClick, handleBlur}: ISingleLineTextEntryProps) {
     return (
         <div style={{ display: "flex", padding: "0px 10px 0px 10px" }}>
             <ReactMD.TextField
