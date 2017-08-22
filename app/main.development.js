@@ -148,8 +148,8 @@ function listServices(event, listServicesRequest) {
         delete childProcesses[polyglot.pid];
         console.log(`Polyglot command closing with code: ${code}\n`);
         if (code !== 0){
-            console.warn("err: ", err, ". stderr: ", stderr);
-            event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: code, response: polyglotStderr });
+            console.warn("Error code: ", code, ". polyglotStderr: ", polyglotStderr);
+            event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: new Error("Error code: " + code), response: polyglotStderr});
         } else {
             event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: null, response: polyglotStdout });
         }
@@ -226,7 +226,8 @@ function callService (event, callServiceRequest) {
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr }); 
         } else {
             if (polyglotStdout === '' && polyglotStderr !== '') {
-                // Sometimes the code is 0 but polyglot has had an error. Is this the best way to do this? The text of Error is meant to be a stack trace.
+                // Sometimes the code is 0 but polyglot has had an error. Is this the best way to do this? 
+                // The text of Error is meant to be a stack trace.
                 event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
             }
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
@@ -256,7 +257,8 @@ function validatePaths(event, validatePathsRequest) {
     event.sender.send(ipcConstants.VALIDATE_PATHS_RESPONSE, {id: validatePathsRequest.id, validPaths: validPathList});
 }
 
-/* Users can cancel long running requests. This will remove all running child processes and return success. */
+/* Users can cancel long running requests. This will remove all running child processes and return 
+   the success of the operation. */
 function killChildProcess(event) {
     console.warn("Killing current child process");
     var successfullyKilled = true;
