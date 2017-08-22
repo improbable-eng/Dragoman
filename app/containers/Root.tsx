@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as ReactMD from "react-md";
+import { Provider } from "react-redux";
 
 import SideBar from "../components/sideBar";
 import RequestBuilder from "../components/requestBuilder";

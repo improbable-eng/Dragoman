@@ -6,8 +6,8 @@ import * as WebFontLoader from "webfontloader";
 import "./app.global.scss";
 
 // Redux code
-// const { configureStore, history } = require("./store/configureStore");
-// const store = configureStore();
+import { configureStore } from "./store/configureStore";
+const store = configureStore();
 
 WebFontLoader.load({
   google: {
@@ -17,7 +17,7 @@ WebFontLoader.load({
 
 render(
   <AppContainer>
-    <Root />
+    <Root store={store} />
   </AppContainer>,
   document.getElementById("root"));
 
@@ -26,7 +26,7 @@ if ((module as any).hot) {
     const NextRoot = require("./containers/Root").default;
     render(
       <AppContainer>
-        <NextRoot />
+        <NextRoot store={store}/>
       </AppContainer>,
       document.getElementById("root"));
   });
