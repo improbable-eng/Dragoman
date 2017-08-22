@@ -29,8 +29,9 @@ export function ResponseViewer({ response, serviceMethodIdentifier, serverStream
                         {serverStreaming !== undefined ?
                             (serverStreaming ? "more_horiz" : "lens")
                             : ""}
-                    </ReactMD.Button>
+                </ReactMD.Button>
             </div>
+            <div style={{height: 3}}/>
             <ReactMD.Card className="md-block-centered">
                 <MonacoEditor
                     language="json"

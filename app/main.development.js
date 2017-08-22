@@ -159,6 +159,9 @@ const setupElectronMenu = () => {
 
 let pathToPolyglotBinary;
 
+// Keep references to the child process we spawn, we can kill them in the future if we need
+let childProcesses = {};
+
 if (process.env.NODE_ENV === "development") {
     pathToPolyglotBinary = DEV_PATH_TO_POLYGLOT_BINARY;
 } else {
@@ -187,7 +190,9 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
 
     console.log(`Command: ${polyglotCommand} Args: ${polyglotCommandLineArgs}`);
 
-    const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
+    var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
+    childProcesses[polyglot.pid] = polyglot;
+
     var polyglotStderr = "";
     var polyglotStdout = "";
 
@@ -201,7 +206,8 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     });
 
     polyglot.on('close', (code) => {
-        console.log(`code: ${code}\n`);
+        delete childProcesses[polyglot.pid];
+        console.log(`Polyglot command closing with code: ${code}\n`);
         if (code !== 0){
             console.warn("err: ", err, ". stderr: ", stderr);
             event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: code, response: polyglotStderr });
@@ -215,7 +221,9 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
     const { polyglotSettings, callServiceOptions } = callServiceRequest;
 
     const echoCommandLineArgs = [callServiceOptions.jsonBody];
-    const echo = spawn("echo", echoCommandLineArgs);
+    var echo = spawn("echo", echoCommandLineArgs);
+    childProcesses[echo.pid] = echo;
+    console.log("echo spawned ", echo);
 
     // Build polyglot command
     const javaCommand = 'java'; 
@@ -232,7 +240,9 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
 
     event.sender.send(ipcConstants.POST_LOGS, {log: "Running command " + javaCommand + " " + javaCommandLineArgs.join(" "), level: "info"});
 
-    const polyglot = spawn(javaCommand, javaCommandLineArgs);
+    var polyglot = spawn(javaCommand, javaCommandLineArgs);
+    console.log("polyglot spawned with id ", polyglot.pid, polyglot.stdio.pause);
+    childProcesses[polyglot.pid] = polyglot;
 
     var echoStdErr = ""
 
@@ -247,6 +257,7 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
 
     echo.on('close', (code) => {
         console.log(`echo closing with code: ${code}\n`);
+        delete childProcesses[echo.pid];
         if(code === 0){
             polyglot.stdin.end();
         } else {
@@ -268,12 +279,9 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
         polyglotStdout += data;
     });
 
-    polyglot.on('exit', (code, signal) => {
-        console.log('polyglot exiting with code ', code, " and signal ", signal);
-    });
-
     polyglot.on('close', (code) => {
         console.log(`polyglot closing with code: ${code}\n`);
+        delete childProcesses[polyglot.pid];
 
         if (code !== 0){
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr }); 
@@ -310,5 +318,24 @@ ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, (event, validatePathsRequest) =>
     console.log(validPathList);
     event.sender.send(ipcConstants.VALIDATE_PATHS_RESPONSE, {id: validatePathsRequest.id, validPaths: validPathList});
 });
+
+function killChildProcess(event) {
+    console.warn("Killing current child process\n", childProcesses);
+    var successfullyKilled = true;
+
+    for (var procId in childProcesses) {
+        childProcesses[procId].kill(); 
+        if (!childProcesses[procId].killed) {
+            successfullyKilled = false;
+        } else {
+            delete childProcesses[procId];
+        }
+    }
+    
+    console.warn("Processes killed successfully: ", successfullyKilled);
+    event.sender.send(ipcConstants.CANCEL_REQUEST_RESPONSE, successfullyKilled);
+}
+
+ipcMain.on(ipcConstants.CANCEL_REQUEST, killChildProcess);
 
 //****************************************************************//

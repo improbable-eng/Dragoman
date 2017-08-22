@@ -239,6 +239,15 @@ export class Root extends React.Component<{}, RootState> {
     }
   }
 
+  public handleCancelClick = () => {
+    console.warn("Cancelling request");
+    ipcRenderer.send(ipcConstants.CANCEL_REQUEST);
+  }
+
+  public cancelRequestResponse = (success: boolean) => {
+    this.setState({appUIState: Object.assign({}, this.state.appUIState, {callRequestInProgress: !success})});
+  }
+
   public handleSettingsClick = () => {
     const newSettingsUIState: SettingsUIState = Object.assign({}, this.state.settingsUIState,
       { settingsOpen: !this.state.settingsUIState.settingsOpen });
@@ -254,6 +263,7 @@ export class Root extends React.Component<{}, RootState> {
     switch (stateId) {
       case "endpoint":
         this.handleEndpointChange(newVal as string);
+        processedNewVal = newVal;
         break;
       case "addProtocIncludes":
         processedNewVal = (newVal as string).split(",");
@@ -272,17 +282,11 @@ export class Root extends React.Component<{}, RootState> {
   // TODO: Change this pattern. We want to validate all text inputs not just the endpoint
   public handleEndpointChange = (newEndpoint: string) => {
     console.log("Handling endpoint change with newEndpoint ", newEndpoint);
+    const endpointValid = /[^\:]+:[0-9]+/.test(newEndpoint);
     this.setState({
-      polyglotSettings: Object.assign({}, this.state.polyglotSettings, { endpoint: newEndpoint }),
       settingsUIState: Object.assign({}, this.state.settingsUIState,
-        { endpointError: this.validateEndpoint(newEndpoint) })
+        {endpointError: !endpointValid})
     });
-  }
-
-  public validateEndpoint = (newEndpoint: string) => {
-    const valid = /[^\:]+:[0-9]+/.test(newEndpoint);
-    console.log("newEndpoint ", newEndpoint, " is valid ", valid);
-    return !valid;
   }
 
   public handleMethodClick = (serviceName: string, methodName: string) => {
@@ -346,6 +350,7 @@ export class Root extends React.Component<{}, RootState> {
               serviceMethodIdentifier={this.state.callServiceOptions.fullMethod}
               handleRunClick={this.handleRunClick}
               handleRequestChange={this.handleRequestChange}
+              handleCancelClick={this.handleCancelClick}
             />
             <ResponseViewer
               response={this.state.response}
@@ -380,6 +385,7 @@ export class Root extends React.Component<{}, RootState> {
     ipcRenderer.on(ipcConstants.CALL_SERVICE_RESPONSE, this.callServiceResponse);
     ipcRenderer.on(ipcConstants.VALIDATE_PATHS_RESPONSE, this.validateSystemPathResponse);
     ipcRenderer.on(ipcConstants.POST_LOGS, this.processPolyglotLog);
+    ipcRenderer.on(ipcConstants.CANCEL_REQUEST_RESPONSE, this.cancelRequestResponse);
   }
 
   private processPolyglotLog = (event: Event, polyglotLog: PolyglotLog) => {

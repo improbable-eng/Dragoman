@@ -10,6 +10,7 @@ export interface IRequestBuilderProps {
     appUIState: AppUIState;
     handleRunClick: () => void;
     handleRequestChange: (newValue: string) => void;
+    handleCancelClick: () => void;
 }
 
 class RequestBuilder extends React.Component<IRequestBuilderProps> {
@@ -32,10 +33,16 @@ class RequestBuilder extends React.Component<IRequestBuilderProps> {
                                 play_arrow
                             </ReactMD.Button>
                             :
-                            <ReactMD.CircularProgress
-                                id="requestProgress"
-                                style={{ marginLeft: 10 }}
-                            />}
+                            <ReactMD.Button
+                                icon={true}
+                                onClick={this.props.handleCancelClick}
+                                style={{ marginRight: "auto", backgroundColor: "#EF9A9A" }}
+                                tooltipLabel="Cancel Request"
+                                tooltipPosition="bottom"
+                                // className="md-red-200"
+                            >
+                                clear
+                            </ReactMD.Button>}
                     </ReactMD.CardActions>
                     <ReactMD.CardTitle
                         title="Request Builder"
@@ -54,7 +61,9 @@ class RequestBuilder extends React.Component<IRequestBuilderProps> {
                             : ""}
                     </ReactMD.Button>
                 </div>
-
+                {this.props.appUIState.callRequestInProgress ?
+                <ReactMD.LinearProgress id="callRequestProgress" style={{margin: 0}}/> :
+                <div style={{height: 3}}/>}
                 <ReactMD.Card className="md-block-centered">
                     <MonacoEditor
                         language="json"

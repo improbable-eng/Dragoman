@@ -6,11 +6,14 @@ const CALL_SERVICE_REQUEST = "CALL_SERVICE_REQUEST";
 const CALL_SERVICE_RESPONSE = "CALL_SERVICE_RESPONSE";
 //************************//
 
-//** Polyglot Commands ***//
+//** Dragoman Commands ***//
 const VALIDATE_PATHS_REQUEST = "VALIDATE_PATHS_REQUEST";
 const VALIDATE_PATHS_RESPONSE = "VALIDATE_PATHS_RESPONSE";
 
-const POST_LOGS = "POST_LOGS"
+const POST_LOGS = "POST_LOGS";
+
+const CANCEL_REQUEST = "CANCEL_REQUEST";
+const CANCEL_REQUEST_RESPONSE = "CANCEL_REQUEST_RESPONSE";
 //************************//
 
 module.exports = {
@@ -20,5 +23,7 @@ module.exports = {
     CALL_SERVICE_RESPONSE,
     VALIDATE_PATHS_REQUEST,
     VALIDATE_PATHS_RESPONSE,
-    POST_LOGS
+    POST_LOGS,
+    CANCEL_REQUEST,
+    CANCEL_REQUEST_RESPONSE
 }
