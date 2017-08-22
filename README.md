@@ -2,6 +2,7 @@
   <img src="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.png" height="64">
   <h3 align="center">Dragoman</h3>
   <p align="center">An open source GUI for polyglot, a universal gRPC client<p>
+  <p align="center"><a href="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master"><img src="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master" alt="Build Status"></a></p>
 </p>
 
 ## Overview
