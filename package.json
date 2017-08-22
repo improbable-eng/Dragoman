@@ -21,8 +21,7 @@
     "package-win": "npm run build && build --win --x64",
     "package-linux": "npm run build && build --linux",
     "package-all": "npm run build && build -mwl",
-    "cleanup": "mop -v",
-    "release": "build"
+    "cleanup": "mop -v"
   },
   "jest": {
     "moduleNameMapper": {

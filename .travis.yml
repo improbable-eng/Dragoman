@@ -1,9 +1,17 @@
 os:
   - linux
+  - osx
 
 language: node_js
 sudo: false
-node_js: node
+node_js:
+  - node
+  - lts/*
+  - 6
 
-script:
-  - npm run release
+jobs:
+  include: 
+    - stage: test
+    - script: npm run test-all
+    - stage: package
+    - script: npm run package-all
