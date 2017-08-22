@@ -3,10 +3,10 @@ import * as ReactMD from "react-md";
 
 import { AppUIState } from "../types/index";
 import MonacoEditor from "./reactMonacoEditor";
+import { CallServiceOptions } from "../types/index";
 
 export interface IRequestBuilderProps {
-    request: string;
-    serviceMethodIdentifier?: string;
+    callServiceOptions: CallServiceOptions;
     appUIState: AppUIState;
     handleRunClick: () => void;
     handleRequestChange: (newValue: string) => void;
@@ -46,7 +46,7 @@ class RequestBuilder extends React.Component<IRequestBuilderProps> {
                     </ReactMD.CardActions>
                     <ReactMD.CardTitle
                         title="Request Builder"
-                        subtitle={this.props.serviceMethodIdentifier}
+                        subtitle={this.props.callServiceOptions.fullMethod}
                         style={{ padding: 24 }}
                     />
                     <ReactMD.Button
@@ -70,7 +70,7 @@ class RequestBuilder extends React.Component<IRequestBuilderProps> {
                         theme="vs"
                         onChange={(val: string) => this.props.handleRequestChange(val)}
                         height="500"
-                        value={this.props.request}
+                        value={this.props.callServiceOptions.jsonBody}
                         editorWillMount={this.componentWillMount}
                         options={{ wordWrap: true }}
                     />

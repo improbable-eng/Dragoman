@@ -26,7 +26,6 @@ class RootState {
   public polyglotSettings: PolyglotSettings = new PolyglotSettings();
   public listServicesOptions: ListServicesOptions = new ListServicesOptions();
   public callServiceOptions: CallServiceOptions = new CallServiceOptions();
-  public request: string = "";
   public response: string = "";
   public settingsUIState: SettingsUIState = new SettingsUIState();
   public appUIState: AppUIState = new AppUIState();
@@ -89,7 +88,7 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public listServices = () => {
-    this.setState({request: "", response: "", serviceMap: new Map()});
+    this.setState({callServiceOptions: new CallServiceOptions(), response: "", serviceMap: new Map()});
 
     const listServicesRequest: ListServicesRequest = {
       polyglotSettings: this.state.polyglotSettings,
@@ -156,7 +155,7 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public callService = () => {
-    const jsonInput = this.state.request;
+    const jsonInput = this.state.callServiceOptions.jsonBody;
 
     // Remove the annotations [<optioal> <repeated>] from the request.
     // Note (Edge Case): If the actual JSON body contains these strings they will be removed.
@@ -219,7 +218,7 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public handleRequestChange = (newValue: string) => {
-    this.setState({request: newValue});
+    this.setState({callServiceOptions: Object.assign({}, this.state.callServiceOptions, {jsonBody: newValue})});
   }
 
   public handleRunClick = () => {
@@ -304,8 +303,7 @@ export class Root extends React.Component<{}, RootState> {
       this.setState({
         callServiceOptions: Object.assign({},
           this.state.callServiceOptions,
-          {fullMethod: serviceName + "/" + methodName}),
-        request: prettyPrintedRequestTemplate,
+          {fullMethod: serviceName + "/" + methodName, jsonBody: prettyPrintedRequestTemplate}),
         response: prettyPrintedResponseTemplate,
         appUIState: Object.assign({}, this.state.appUIState,
           {clientStreaming: clickedMethod.clientStreaming, serverStreaming: clickedMethod.serverStreaming})
@@ -345,9 +343,8 @@ export class Root extends React.Component<{}, RootState> {
             }
           >
             <RequestBuilder
-              request={this.state.request}
+              callServiceOptions={this.state.callServiceOptions}
               appUIState={this.state.appUIState}
-              serviceMethodIdentifier={this.state.callServiceOptions.fullMethod}
               handleRunClick={this.handleRunClick}
               handleRequestChange={this.handleRequestChange}
               handleCancelClick={this.handleCancelClick}

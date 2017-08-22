@@ -3,7 +3,6 @@ const url = require('url');
 const path = require('path'); 
 const { spawn } = require('child_process');
 const { accessSync } = require('fs');
-
 const ipcConstants = require('./constants/ipcConstants'); 
 
 const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
@@ -69,6 +68,7 @@ app.on('ready', () => {
         .then(createWindow(), () => {
             console.log("Error installing extensions");
         })
+        .then(registerIpcListeners());
 });
 
 // Quit when all windows are closed.
@@ -88,78 +88,18 @@ app.on('activate', function () {
     }
 });
 
-const setupElectronMenu = () => {
-    const template = [
-        {
-            label: 'Edit',
-            submenu: [
-                { role: 'cut' },
-                { role: 'copy' },
-                { role: 'paste' },
-                { role: 'delete' },
-                { role: 'selectall' }
-            ]
-        }, {
-            label: 'View',
-            submenu: [
-                { role: 'resetzoom' },
-                { role: 'zoomin' },
-                { role: 'zoomout' },
-                { type: 'separator' },
-                { role: 'togglefullscreen' },
-                { type: 'separator' },
-                { role: 'reload' },
-                { role: 'forcereload' },
-                { role: 'toggledevtools' }
-            ]
-        }, {
-            label: 'Window',
-            submenu: [
-                { role: 'minimize' },
-                { role: 'close' }
-            ]
-        }, {
-            role: 'help',
-            submenu: [
-                {
-                    label: 'Learn More',
-                    //TODO: Update this link to point to the dragoman github page
-                    click() { shell.openExternal('https://github.com/peteboothroyd/dragoman') }
-                }]
-        }];
-
-    if (process.platform === 'darwin') {
-        template.unshift({
-            label: app.getName(),
-            submenu: [
-                { role: 'about' },
-                { type: 'separator' },
-                { role: 'hide' },
-                { role: 'hideothers' },
-                { role: 'unhide' },
-                { type: 'separator' },
-                { role: 'quit' }
-            ]
-        });
-
-        // Window menu
-        template[3].submenu = [
-            { role: 'close' },
-            { role: 'minimize' },
-            { role: 'zoom' },
-            { type: 'separator' },
-            { role: 'front' }
-        ]
-
-        Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-    }
+function registerIpcListeners(){
+    ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, listServices);
+    ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, callService);
+    ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, validatePaths);
+    ipcMain.on(ipcConstants.CANCEL_REQUEST, killChildProcess);
 }
 
 //*** Calling polyglot and returning results to browser window ***//
 
 let pathToPolyglotBinary;
 
-// Keep references to the child process we spawn, we can kill them in the future if we need
+// Keep references to the child process we spawn, so we can kill them in the future if we need
 let childProcesses = {};
 
 if (process.env.NODE_ENV === "development") {
@@ -169,9 +109,8 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // TODO: Add use_tls flag 
-ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
-
-    console.log(listServicesRequest);
+function listServices(event, listServicesRequest) {
+    console.log("Received list services request ", listServicesRequest);
     const { polyglotSettings, listServicesOptions } = listServicesRequest;
 
     // Build polyglot command
@@ -187,7 +126,6 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
     if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
 
     event.sender.send(ipcConstants.POST_LOGS, {log: "Running polyglot command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: "info"});
-
     console.log(`Command: ${polyglotCommand} Args: ${polyglotCommandLineArgs}`);
 
     var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
@@ -215,9 +153,9 @@ ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, (event, listServicesRequest) => {
             event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: null, response: polyglotStdout });
         }
     });
-});
+}
 
-ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
+function callService (event, callServiceRequest) {
     const { polyglotSettings, callServiceOptions } = callServiceRequest;
 
     const echoCommandLineArgs = [callServiceOptions.jsonBody];
@@ -293,17 +231,15 @@ ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, (event, callServiceRequest) => {
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
         } 
     });
-});
+}
 
 //****************************************************************//
 
 //******* Node process communication for renderer process ********//
 
-/* A method for checking if local paths are valid, takes a list of strings and should return a list of booleans which correspond to 
-   the validity of the path. Identical indices should correspond such that the boolean at index i represents the validity of path at
-   index i. The id is passed straight back to allow the renderer to identify which component sent the request */
-
-ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, (event, validatePathsRequest) => {
+/* A method for checking if local paths are valid, takes a list of strings and returns a list of booleans.
+   The id is passed straight back to allow the renderer to identify which component sent the request */
+function validatePaths(event, validatePathsRequest) {
     console.log("Request to validate paths: ", validatePathsRequest);
     var validPathList = [];
     for(i = 0; i < validatePathsRequest.paths.length; i++) {
@@ -317,10 +253,11 @@ ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, (event, validatePathsRequest) =>
     }
     console.log(validPathList);
     event.sender.send(ipcConstants.VALIDATE_PATHS_RESPONSE, {id: validatePathsRequest.id, validPaths: validPathList});
-});
+}
 
+/* Users can cancel long running requests. This will remove all running child processes and return success. */
 function killChildProcess(event) {
-    console.warn("Killing current child process\n", childProcesses);
+    console.warn("Killing current child process");
     var successfullyKilled = true;
 
     for (var procId in childProcesses) {
@@ -336,6 +273,70 @@ function killChildProcess(event) {
     event.sender.send(ipcConstants.CANCEL_REQUEST_RESPONSE, successfullyKilled);
 }
 
-ipcMain.on(ipcConstants.CANCEL_REQUEST, killChildProcess);
-
 //****************************************************************//
+
+const setupElectronMenu = () => {
+    const template = [
+        {
+            label: 'Edit',
+            submenu: [
+                { role: 'cut' },
+                { role: 'copy' },
+                { role: 'paste' },
+                { role: 'delete' },
+                { role: 'selectall' }
+            ]
+        }, {
+            label: 'View',
+            submenu: [
+                { role: 'resetzoom' },
+                { role: 'zoomin' },
+                { role: 'zoomout' },
+                { type: 'separator' },
+                { role: 'togglefullscreen' },
+                { type: 'separator' },
+                { role: 'reload' },
+                { role: 'forcereload' },
+                { role: 'toggledevtools' }
+            ]
+        }, {
+            label: 'Window',
+            submenu: [
+                { role: 'minimize' },
+                { role: 'close' }
+            ]
+        }, {
+            role: 'help',
+            submenu: [
+                {
+                    label: 'Learn More',
+                    click() { shell.openExternal('https://github.com/peteboothroyd/dragoman') }
+                }]
+        }];
+
+    if (process.platform === 'darwin') {
+        template.unshift({
+            label: app.getName(),
+            submenu: [
+                { role: 'about' },
+                { type: 'separator' },
+                { role: 'hide' },
+                { role: 'hideothers' },
+                { role: 'unhide' },
+                { type: 'separator' },
+                { role: 'quit' }
+            ]
+        });
+
+        // Window menu
+        template[3].submenu = [
+            { role: 'close' },
+            { role: 'minimize' },
+            { role: 'zoom' },
+            { type: 'separator' },
+            { role: 'front' }
+        ]
+
+        Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+    }
+}
