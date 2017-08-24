@@ -1,11 +1,11 @@
-let configureStore: any;
+import { Store } from 'redux';
 
-// if (process.env.NODE_ENV === 'production') {
-//   configureStore = require('./configureStore.production'); //tslint:disable-line
-// } else {
-//   configureStore = require('./configureStore.development'); //tslint:disable-line
-// }
+let configureStore: (initialState?: object) => Store<object | void>;
 
-configureStore = require('./configureStore.development'); //tslint:disable-line
+if (process.env.NODE_ENV === 'production') {
+  configureStore = require('./configureStore.production').default; //tslint:disable-line 
+} else {
+  configureStore = require('./configureStore.development').default; //tslint:disable-line  
+}
 
 export default configureStore;

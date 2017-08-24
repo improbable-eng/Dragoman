@@ -25,8 +25,6 @@ const initialPolyglotSettings: PolyglotSettings = {
 export default function polyglotSettings(state: PolyglotSettings = initialPolyglotSettings, action: Action<any>) {
   let partialState: Partial<PolyglotSettings> | undefined;
 
-  console.log(action); // tslint:disable-line
-
   if (isActionOfType(action, changeProtoDiscoveryRoot)) {
     partialState = {
       protoDiscoveryRoot: action.payload,

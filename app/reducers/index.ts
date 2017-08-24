@@ -20,5 +20,3 @@ const rootReducer = combineReducers<AppState>({
 });
 
 export default rootReducer;
-
-export { default as rootReducer };
