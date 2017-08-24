@@ -1,63 +1,60 @@
-import * as React from "react";
-import * as ReactMD from "react-md";
-import { Provider } from "react-redux";
+/* tslint:disable:no-console */
+import * as React from 'react';
+import * as ReactMD from 'react-md';
+import { Dispatch, connect } from 'react-redux';
 
-import SideBar from "../components/sideBar";
-import RequestBuilder from "../components/requestBuilder";
-import ResponseViewer from "../components/responseViewer";
+import SideBar from '../components/sideBar';
+import RequestBuilder from '../components/requestBuilder';
+import ResponseViewer from '../components/responseViewer';
+import { toggleSettingsOpen } from '../actions/uiSettings';
 
 import {
-  Service, Method, PolyglotSettings,
-  ListServicesOptions, SettingsUIState, AppUIState, ListServicesRequest,
+  Service, Method,  ListServicesRequest,
   PolyglotResponse, CallServiceRequest, CallServiceOptions, ValidatePathsRequest,
-  ValidatePathsResponse, PolyglotLog
-} from "../types/index";
+  ValidatePathsResponse, PolyglotLog, StoreState,
+} from '../types/index';
 
-const ipcConstants = require("../constants/ipcConstants"); // tslint:disable-line
+import { AppState } from '../reducers/index';
 
-import { remote, ipcRenderer } from "electron";
+const ipcConstants = require('../constants/ipcConstants'); // tslint:disable-line
+
+import { remote, ipcRenderer } from 'electron';
 
 // TODO: Add option to get information about service, eg whether it is streaming or unary, display in UI
-const checkConsoleErrorMessage = "Check console for full log (Console can be reached from View" +
-  " -> Toggle Developer Tools -> Console)";
+const checkConsoleErrorMessage = 'Check console for full log (Console can be reached from View' +
+  ' -> Toggle Developer Tools -> Console)';
 
-// TODO: Decide which of these should be optional
-class RootState {
-  public serviceMap: Map<string, Service> = new Map();
-  public polyglotSettings: PolyglotSettings = new PolyglotSettings();
-  public listServicesOptions: ListServicesOptions = new ListServicesOptions();
-  public callServiceOptions: CallServiceOptions = new CallServiceOptions();
-  public response: string = "";
-  public settingsUIState: SettingsUIState = new SettingsUIState();
-  public appUIState: AppUIState = new AppUIState();
-}
+type AppProps = AppState & {dispatch: Dispatch<{}>};
 
-export class Root extends React.Component<{}, RootState> {
-  constructor() {
+class App extends React.Component<AppProps, StoreState> {
+  constructor(props: AppProps) {
     super();
-    this.state = new RootState();
     this.registerIpcListeners();
+
+    this.state = new StoreState();
+    console.log(props);
+
   }
 
   public handlePathBlur = (stateId: string) => {
-    console.log("Handling path blur from ", stateId);
+    console.log('Handling path blur from ', stateId);
     const paths = this.state.polyglotSettings[stateId];
     console.log(paths);
-    console.assert((typeof(paths) === "string" || paths.constructor === Array)); // tslint:disable-line
+    console.assert((typeof(paths) === 'string' || paths.constructor === Array)); // tslint:disable-line
 
     let pathArray: string[];
 
     if (paths.constructor === Array) {
       pathArray = paths as string[];
-      if (pathArray.length === 1 && pathArray[0] === "") { // We don't want to validate an empty text field
+      if (pathArray.length === 1 && pathArray[0] === '') { // We don't want to validate an empty text field
         this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-          {[stateId + "Errors"]: []})});
+          {[`${stateId}Errors`]: []})});
         return;
       }
     } else {
-      if (paths === "") {
+      if (paths === '') {
         this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-          {[stateId + "Error"]: false})});
+          {[`${stateId}Error`]: false})});
         return;
       }
       pathArray = [paths as string];
@@ -67,46 +64,46 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public validateSystemPathRequest = (validatePathsRequest: ValidatePathsRequest) => {
-    console.log("Validating paths ", validatePathsRequest.paths, " from: ", validatePathsRequest.id);
+    console.log('Validating paths ', validatePathsRequest.paths, ' from: ', validatePathsRequest.id);
     ipcRenderer.send(ipcConstants.VALIDATE_PATHS_REQUEST, validatePathsRequest);
   }
 
   // TODO: Implement this validation response for the paths
   public validateSystemPathResponse = (event: Event, res: ValidatePathsResponse) => {
-    console.log("Received validate paths response: ", res);
+    console.log('Received validate paths response: ', res);
     const state = this.state.polyglotSettings[res.id];
     console.assert(res.validPaths instanceof Array);
-    if (typeof(state) === "string") {
+    if (typeof(state) === 'string') {
       console.assert(res.validPaths.length >= 1);
       this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-        { [res.id + "Error"]: !res.validPaths[0]})});
+        { [`${res.id}Error`]: !res.validPaths[0]})});
     } else if (state.constructor === Array) {
       this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-        { [res.id + "Errors"]: res.validPaths})});
+        { [`${res.id}Errors`]: res.validPaths})});
     } else {
-      console.log("SHOULD NOT REACH THIS");
+      console.log('SHOULD NOT REACH THIS');
     }
   }
 
   public listServices = () => {
-    this.setState({callServiceOptions: new CallServiceOptions(), response: "", serviceMap: new Map()});
+    this.setState({callServiceOptions: new CallServiceOptions(), response: '', serviceMap: new Map()});
 
     const listServicesRequest: ListServicesRequest = {
       polyglotSettings: this.state.polyglotSettings,
-      listServicesOptions: this.state.listServicesOptions
+      listServicesOptions: this.state.listServicesOptions,
     };
 
-    console.log("Sending request to list services with options: ", listServicesRequest);
+    console.log('Sending request to list services with options: ', listServicesRequest);
     ipcRenderer.send(ipcConstants.LIST_SERVICES_REQUEST, listServicesRequest);
   }
 
   public listServicesResponse = (event: Event, res: PolyglotResponse) => {
-    console.log("Received list service response: ", res);
+    console.log('Received list service response: ', res);
 
     if (!res.error) {
       try {
         const parsedResponse = JSON.parse(res.response as string);
-        console.log("List service response parsed to: ", parsedResponse);
+        console.log('List service response parsed to: ', parsedResponse);
 
         const mappedServices: Map<string, Service> = new Map();
 
@@ -122,27 +119,27 @@ export class Root extends React.Component<{}, RootState> {
 
         this.setState({serviceMap: mappedServices});
       } catch (e) {
-        this.openErrorDialog("Error parsing list-services response:", checkConsoleErrorMessage);
+        this.openErrorDialog('Error parsing list-services response:', checkConsoleErrorMessage);
         console.error(`Error ${e}\n${res.response}`);
       }
     } else {
-      this.openErrorDialog("Error listing services: ", checkConsoleErrorMessage);
+      this.openErrorDialog('Error listing services: ', checkConsoleErrorMessage);
       console.error(`Error ${res.error}\n${res.response}`);
     }
   }
 
-  public showDirectoryDialog = (id: string, macMessage: string = "", multiSelection: boolean = false) => {
-    const customProperties = ["openDirectory", "openFile", "showHiddenFiles"];
+  public showDirectoryDialog = (id: string, macMessage: string = '', multiSelection: boolean = false) => {
+    const customProperties = ['openDirectory', 'openFile', 'showHiddenFiles'];
 
     if (multiSelection) {
-      customProperties.push("multiSelections");
+      customProperties.push('multiSelections');
     }
 
     const pathList = remote.dialog.showOpenDialog({
       properties: customProperties,
       message: macMessage,
     } as Electron.OpenDialogOptions);
-    console.log("Paths ", pathList, " selected using path finder dialog");
+    console.log('Paths ', pathList, ' selected using path finder dialog');
 
     if (multiSelection) {
       this.setState({polyglotSettings: Object.assign({}, this.state.polyglotSettings, {[id]: pathList})});
@@ -160,7 +157,7 @@ export class Root extends React.Component<{}, RootState> {
 
     // Remove the annotations [<optioal> <repeated>] from the request.
     // Note (Edge Case): If the actual JSON body contains these strings they will be removed.
-    const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, "");
+    const redactedJsonInput = jsonInput.replace(/\[<(optional|required)> <(single|repeated)>\]/g, '');
 
     // Testing whether it is valid JSON. This will not work when constructing streaming responses
     // TODO: Change this to deal with streaming requests
@@ -178,7 +175,7 @@ export class Root extends React.Component<{}, RootState> {
         fullMethod: this.state.callServiceOptions.fullMethod,
       })});
 
-    console.log("Calling service with request", callServiceRequest);
+    console.log('Calling service with request', callServiceRequest);
     ipcRenderer.send(ipcConstants.CALL_SERVICE_REQUEST, callServiceRequest);
   }
 
@@ -189,20 +186,20 @@ export class Root extends React.Component<{}, RootState> {
 
     if (!res.error) {
        // The response can be an array encoded in utf-8
-      if (typeof res.response  !== "string") {
-        res.response = new TextDecoder("utf-8").decode(res.response as ArrayBuffer).trim();
+      if (typeof res.response  !== 'string') {
+        res.response = new TextDecoder('utf-8').decode(res.response as ArrayBuffer).trim();
       }
 
       this.setState({response: res.response});
     } else {
-      this.openErrorDialog("Error calling service: ", checkConsoleErrorMessage);
+      this.openErrorDialog('Error calling service: ', checkConsoleErrorMessage);
       console.error(`Error ${res.error} \n${res.response}`);
     }
   }
 
   // TODO: This is not working properly, fix
   public openJsonParseErrorDialog = () => {
-    this.openErrorDialog("Error parsing request", "Ensure that the request is valid JSON");
+    this.openErrorDialog('Error parsing request', 'Ensure that the request is valid JSON');
   }
 
   public closeErrorDialog = () => {
@@ -214,7 +211,7 @@ export class Root extends React.Component<{}, RootState> {
     this.setState({
       appUIState: Object.assign({}, this.state.appUIState,
         { errorDialogVisible: false, errorDialogTitle: title,
-          errorDialogExplanation: explanation})
+          errorDialogExplanation: explanation}),
     });
   }
 
@@ -224,15 +221,15 @@ export class Root extends React.Component<{}, RootState> {
 
   public handleRunClick = () => {
     // Up until this point the endpoint did not need to be filled in.
-    if (this.state.polyglotSettings.endpoint === "") {
+    if (this.state.polyglotSettings.endpoint === '') {
       this.setState({
         settingsUIState: Object.assign({}, this.state.settingsUIState, {
-          settingsOpen: true, endpointError: true, endpointRequired: true})
+          settingsOpen: true, endpointError: true, endpointRequired: true}),
       });
     } else {
       this.setState({
         settingsUIState: Object.assign({}, this.state.settingsUIState, { endpointRequired: true }),
-        appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: true })
+        appUIState: Object.assign({}, this.state.appUIState, { callRequestInProgress: true }),
       });
 
       this.callService();
@@ -240,7 +237,7 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public handleCancelClick = () => {
-    console.warn("Cancelling request");
+    console.warn('Cancelling request');
     ipcRenderer.send(ipcConstants.CANCEL_REQUEST);
   }
 
@@ -249,9 +246,10 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   public handleSettingsClick = () => {
-    const newSettingsUIState: SettingsUIState = Object.assign({}, this.state.settingsUIState,
-      { settingsOpen: !this.state.settingsUIState.settingsOpen });
-    this.setState({settingsUIState: newSettingsUIState});
+    // const newSettingsUIState: SettingsUIState = Object.assign({}, this.state.settingsUIState,
+    //   { settingsOpen: !this.state.settingsUIState.settingsOpen });
+    // this.setState({settingsUIState: newSettingsUIState});
+    this.props.dispatch(toggleSettingsOpen());
   }
 
   // Should we check that this is a valid path? This would have to deal
@@ -259,15 +257,15 @@ export class Root extends React.Component<{}, RootState> {
   // TODO: Implement path validation
   public handleTextFieldInputChange = (stateId: string, newVal: string | number) => {
     let processedNewVal: any;
-    console.log("Handling text field change with new value: ", newVal, " from ", stateId);
+    console.log('Handling text field change with new value: ', newVal, ' from ', stateId);
     switch (stateId) {
-      case "endpoint":
+      case 'endpoint':
         this.handleEndpointChange(newVal as string);
         processedNewVal = newVal;
         break;
-      case "addProtocIncludes":
-        processedNewVal = (newVal as string).split(",");
-        console.log("processedNewVal ", processedNewVal);
+      case 'addProtocIncludes':
+        processedNewVal = (newVal as string).split(',');
+        console.log('processedNewVal ', processedNewVal);
         break;
       default:
         processedNewVal = newVal;
@@ -281,11 +279,11 @@ export class Root extends React.Component<{}, RootState> {
 
   // TODO: Change this pattern. We want to validate all text inputs not just the endpoint
   public handleEndpointChange = (newEndpoint: string) => {
-    console.log("Handling endpoint change with newEndpoint ", newEndpoint);
+    console.log('Handling endpoint change with newEndpoint ', newEndpoint);
     const endpointValid = /[^\:]+:[0-9]+/.test(newEndpoint);
     this.setState({
       settingsUIState: Object.assign({}, this.state.settingsUIState,
-        {endpointError: !endpointValid})
+        {endpointError: !endpointValid}),
     });
   }
 
@@ -294,7 +292,7 @@ export class Root extends React.Component<{}, RootState> {
       const clickedService = this.state.serviceMap.get(serviceName) as Service;
       const clickedMethod = clickedService.methodMap.get(methodName) as Method;
 
-      console.log("Method clicked ", clickedMethod);
+      console.log('Method clicked ', clickedMethod);
 
       // Initially pretty print the templates to make it easy for users to vew the templates.
       // Store and display as simple strings to make subsequent editing easier.
@@ -304,10 +302,10 @@ export class Root extends React.Component<{}, RootState> {
       this.setState({
         callServiceOptions: Object.assign({},
           this.state.callServiceOptions,
-          {fullMethod: serviceName + "/" + methodName, jsonBody: prettyPrintedRequestTemplate}),
+          {fullMethod: `${serviceName}\\${methodName}`, jsonBody: prettyPrintedRequestTemplate}),
         response: prettyPrintedResponseTemplate,
         appUIState: Object.assign({}, this.state.appUIState,
-          {clientStreaming: clickedMethod.clientStreaming, serverStreaming: clickedMethod.serverStreaming})
+          {clientStreaming: clickedMethod.clientStreaming, serverStreaming: clickedMethod.serverStreaming}),
       });
     } catch (e) {
       // TODO: Present error dialog?
@@ -319,8 +317,8 @@ export class Root extends React.Component<{}, RootState> {
     return (
       <div>
         <ReactMD.Toolbar
-          title="Dragoman"
-          className="md-toolbar--fixed"
+          title='Dragoman'
+          className='md-toolbar--fixed'
           colored={true}
         />
         <div>
@@ -337,10 +335,10 @@ export class Root extends React.Component<{}, RootState> {
             handlePathBlur={this.handlePathBlur}
           />
           <div
-            style={{ display: "flex" }}
+            style={{ display: 'flex' }}
             className={
-              "md-navigation-drawer-content md-navigation-drawer-content--prominent-offset" +
-              "md-transition--decceleration md-drawer-relative md-toolbar-relative"
+              'md-navigation-drawer-content md-navigation-drawer-content--prominent-offset' +
+              'md-transition--decceleration md-drawer-relative md-toolbar-relative'
             }
           >
             <RequestBuilder
@@ -358,7 +356,7 @@ export class Root extends React.Component<{}, RootState> {
           </div>
         </div>
         <ReactMD.DialogContainer
-          id="errorDialog"
+          id='errorDialog'
           // visible and modal are not defined by default in the current alpha version of react-md, if there is
           // an error paste visible?: boolean; modal?: boolean; into DialogProps in the Dialog.d.ts file
           // this should be fixed in future versions of react-md
@@ -369,7 +367,7 @@ export class Root extends React.Component<{}, RootState> {
             [{
               onClick: this.closeErrorDialog,
               primary: true,
-              label: "Ok",
+              label: 'Ok',
             }]
           }
           children={this.state.appUIState.errorDialogExplanation}
@@ -387,12 +385,12 @@ export class Root extends React.Component<{}, RootState> {
   }
 
   private processPolyglotLog = (event: Event, polyglotLog: PolyglotLog) => {
-    if (typeof polyglotLog.log  !== "string") {
-      polyglotLog.log = new TextDecoder("utf-8").decode(polyglotLog.log as ArrayBuffer).trim();
+    if (typeof polyglotLog.log  !== 'string') {
+      polyglotLog.log = new TextDecoder('utf-8').decode(polyglotLog.log as ArrayBuffer).trim();
     }
-    if (polyglotLog.log !== "") {
+    if (polyglotLog.log !== '') {
       switch (polyglotLog.level) {
-        case "warn":
+        case 'warn':
           console.warn(polyglotLog.log);
           break;
         default:
@@ -403,4 +401,8 @@ export class Root extends React.Component<{}, RootState> {
   }
 }
 
-export default Root;
+function mapStateToProps(state: AppProps): AppProps {
+  return state;
+}
+
+export default connect(mapStateToProps)(App);

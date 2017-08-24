@@ -1,8 +1,8 @@
-import * as React from "react";
-import * as ReactMD from "react-md";
+import * as React from 'react';
+import * as ReactMD from 'react-md';
 
-// import MonacoEditor from "react-monaco-editor";
-import MonacoEditor from "./reactMonacoEditor";
+// import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor from './reactMonacoEditor';
 
 export interface IResponseViewerProps {
     response: string;
@@ -10,33 +10,33 @@ export interface IResponseViewerProps {
     serverStreaming?: boolean;
 }
 
-export function ResponseViewer({ response, serviceMethodIdentifier, serverStreaming }: IResponseViewerProps) {
+export default function ResponseViewer({ response, serviceMethodIdentifier, serverStreaming }: IResponseViewerProps) {
     return (
-        <ReactMD.Card style={{ width: "50%", padding: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center" }}>
+        <ReactMD.Card style={{ width: '50%', padding: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
                 <ReactMD.CardTitle
-                    title="Response Viewer"
+                    title='Response Viewer'
                     subtitle={serviceMethodIdentifier}
                     style={{ padding: 24 }}
                 />
                 <ReactMD.Button
                         icon={true}
                         tooltipLabel={serverStreaming !== undefined ?
-                            (serverStreaming ? "streaming response" : "unary response")
-                            : ""}
-                        tooltipPosition="right"
+                            (serverStreaming ? 'streaming response' : 'unary response')
+                            : ''}
+                        tooltipPosition='right'
                     >
                         {serverStreaming !== undefined ?
-                            (serverStreaming ? "more_horiz" : "lens")
-                            : ""}
+                            (serverStreaming ? 'more_horiz' : 'lens')
+                            : ''}
                 </ReactMD.Button>
             </div>
             <div style={{height: 3}}/>
-            <ReactMD.Card className="md-block-centered">
+            <ReactMD.Card className='md-block-centered'>
                 <MonacoEditor
-                    language="json"
-                    theme="vs"
-                    height="500"
+                    language='json'
+                    theme='vs'
+                    height='500'
                     value={response}
                     options={{ wordWrap: true, readOnly: true }}
                 />
@@ -44,5 +44,3 @@ export function ResponseViewer({ response, serviceMethodIdentifier, serverStream
         </ReactMD.Card>
     );
 }
-
-export default ResponseViewer;

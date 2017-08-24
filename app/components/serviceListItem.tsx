@@ -1,7 +1,7 @@
-import * as React from "react";
-import * as ReactMD from "react-md";
+import * as React from 'react';
+import * as ReactMD from 'react-md';
 
-import { Service, Method } from "../types/index";
+import { Service, Method } from '../types/index';
 
 export interface IServiceListProps {
     service: Service;

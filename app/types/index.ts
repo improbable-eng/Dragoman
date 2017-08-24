@@ -1,16 +1,16 @@
 // ***** Interfacing with Polyglot ******* //
 
 export class Method {
-    public name: string = "";
-    public request: string = "";
-    public response: string = "";
-    public clientStreaming: string = "false";
-    public serverStreaming: string = "false";
+    public name: string = '';
+    public request: string = '';
+    public response: string = '';
+    public clientStreaming: string = 'false';
+    public serverStreaming: string = 'false';
 }
 
 export class Service {
-    public name: string = "";
-    public path: string = "";
+    public name: string = '';
+    public path: string = '';
     public methodMap: Map<string, Method> = new Map();
 
     public constructor(init?: Partial<PolyglotSettings>) {
@@ -19,12 +19,12 @@ export class Service {
 }
 
 export class PolyglotSettings {
-    public protoDiscoveryRoot: string = "";
-    public endpoint: string = "";
-    public configSetPath: string = "";
+    public protoDiscoveryRoot: string = '';
+    public endpoint: string = '';
+    public configSetPath: string = '';
     public addProtocIncludes: string[] = [];
-    public configName: string = "";
-    public tlsCaCertPath: string = "";
+    public configName: string = '';
+    public tlsCaCertPath: string = '';
     public deadlineMs: number = -1;
     [key: string]: string | number | string[];
 
@@ -34,8 +34,8 @@ export class PolyglotSettings {
 }
 
 export class ListServicesOptions {
-    public serviceFilter: string = "";
-    public methodFilter: string = "";
+    public serviceFilter: string = '';
+    public methodFilter: string = '';
 
     public constructor(init?: Partial<ListServicesOptions>) {
         Object.assign(this, init);
@@ -43,8 +43,8 @@ export class ListServicesOptions {
 }
 
 export class CallServiceOptions {
-    public jsonBody: string = "";
-    public fullMethod: string = "";
+    public jsonBody: string = '';
+    public fullMethod: string = '';
 
     public constructor(init?: Partial<CallServiceOptions>) {
         Object.assign(this, init);
@@ -103,7 +103,18 @@ export class ValidatePathsResponse {
 
 // ************************************** //
 
-// ************ App UI State ************ //\
+// ************ App State ************ //
+
+// TODO: Decide which of these should be optional
+export class StoreState {
+    public serviceMap: Map<string, Service> = new Map();
+    public polyglotSettings: PolyglotSettings = new PolyglotSettings();
+    public listServicesOptions: ListServicesOptions = new ListServicesOptions();
+    public callServiceOptions: CallServiceOptions = new CallServiceOptions();
+    public response: string = '';
+    public settingsUIState: SettingsUIState = new SettingsUIState();
+    public appUIState: AppUIState = new AppUIState();
+}
 
 export class SettingsUIState {
     public settingsOpen: boolean = true;
@@ -123,8 +134,8 @@ export class SettingsUIState {
 
 export class AppUIState {
     public errorDialogVisible: boolean = false;
-    public errorDialogTitle: string = "";
-    public errorDialogExplanation: string = "";
+    public errorDialogTitle: string = '';
+    public errorDialogExplanation: string = '';
     public callRequestInProgress: boolean = false;
     public clientStreaming?: boolean = undefined;
     public serverStreaming?: boolean = undefined;

@@ -1,33 +1,42 @@
-import * as React from "react";
-import { render } from "react-dom";
-import { AppContainer } from "react-hot-loader";
-import Root from "./containers/Root";
-import * as WebFontLoader from "webfontloader";
-import "./app.global.scss";
+import * as React from 'react';
+import { render } from 'react-dom';
+import { AppContainer } from 'react-hot-loader';
+import * as WebFontLoader from 'webfontloader';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 
-// Redux code
-import { configureStore } from "./store/configureStore";
-const store = configureStore();
+import './app.global.scss';
+// import configureStore from './store/configureStore';
+import App from './containers/App';
+import rootReducer, { AppState } from './reducers/index';
+// const store = configureStore();
 
+const store = createStore<AppState>(rootReducer);
+
+// TODO: Don't want to load fonts from the web, they should be stored locally.
 WebFontLoader.load({
   google: {
-    families: ["Roboto:300,400,500,700", "Material Icons"],
+    families: ['Roboto:300,400,500,700', 'Material Icons'],
   },
 });
 
 render(
   <AppContainer>
-    <Root store={store} />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </AppContainer>,
-  document.getElementById("root"));
+  document.getElementById('root'));
 
 if ((module as any).hot) {
-  (module as any).hot.accept("./containers/Root", () => {
-    const NextRoot = require("./containers/Root").default;
+  (module as any).hot.accept('./containers/App', () => {
+    const NextApp = require('./containers/App').default;
     render(
       <AppContainer>
-        <NextRoot store={store}/>
+        <Provider store={store}>
+          <NextApp />
+        </Provider>
       </AppContainer>,
-      document.getElementById("root"));
+      document.getElementById('root'));
   });
 }

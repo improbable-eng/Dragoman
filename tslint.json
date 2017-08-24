@@ -1,17 +1,133 @@
-// VSCode tslint config
 {
-  "extends": "tslint:recommended",
-  "rules": {
-    "ordered-imports": [
-      false
-    ],
-    "object-literal-sort-keys": false,
-    "no-console": [
-      false
-    ],
-    "trailing-comma": [
-      false
-    ],
-    "max-classes-per-file": [false]
-  }
+    "jsRules": { // WARNING: these jsRules are currently not enforced because tslint is only run on ts/tsx files
+        "class-name": true,
+        "comment-format": [
+            true,
+            "check-space"
+        ],
+        "indent": [
+            true,
+            "spaces"
+        ],
+        "no-duplicate-variable": true,
+        "no-eval": true,
+        "no-trailing-whitespace": true,
+        "no-unsafe-finally": true,
+        "one-line": [
+            true,
+            "check-open-brace",
+            "check-whitespace"
+        ],
+        "quotemark": [
+            true,
+            "single"
+        ],
+        "semicolon": [
+            true,
+            "always"
+        ],
+        "triple-equals": [
+            true,
+            "allow-null-check"
+        ],
+        "variable-name": [
+            true,
+            "ban-keywords"
+        ],
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type"
+        ]
+    },
+    "rules": {
+        "trailing-comma": [
+          true,
+          {
+            "multiline": "always"
+          }
+        ],
+        "no-conditional-assignment": true, // disallow assignment in conditionals
+        "no-empty": true, // disallow empty blocks
+        "class-name": true, // requries PascalCase class names
+        "no-irregular-whitespace": true, // disallow non-space/tab whitespace characters
+        "use-isnan": true, // prefer isNan() rather than comparison to NaN
+        "typeof-compare": true, // require typeof compared to string
+        "curly": true, // enforce braces
+        "no-string-literal": true, // force dot notation for property access
+        "no-arg": true, // disallow use of arguments.callee
+        "no-switch-case-fall-through": true,
+        "number-literal-format": false, // disallow leading/trailing decimal places: disabled because it banned "2.0"
+        "no-invalid-this": true, // disallow using this outside of classes
+        "label-position": true, // only allow labels in loops
+        "no-unused-variable": true,
+        "no-unused-expression": true,
+        "no-construct": true, // disallow constructing String, Number, Boolean
+        "eofline": true, // ensure file ends with newline
+        "radix": true, // require radix parameter for parseInt
+        "no-shadowed-variable": true,
+        "no-var-requires": false, // only allow require() in import statements
+        "new-parens": true, // require parentheses when invoking constructors
+        "no-duplicate-super": true, // enforce only a single super() in constructors
+        "prefer-const": true, // require const if possible
+        "prefer-spread": true, // prefer spread operator over Object.assign()
+        "prefer-template": true, // prefer templates over string literal concatenation
+        "comment-format": [
+            true,
+            "check-space"
+        ],
+        "indent": [
+            true,
+            "spaces"
+        ],
+        "no-eval": true,
+        "no-internal-module": true,
+        "no-trailing-whitespace": true,
+        "no-unsafe-finally": true,
+        "no-var-keyword": true,
+        "one-line": [
+            true,
+            "check-open-brace",
+            "check-whitespace"
+        ],
+        "quotemark": [
+            true,
+            "single"
+        ],
+        "semicolon": [
+            true,
+            "always"
+        ],
+        "triple-equals": [
+            true,
+            "allow-null-check"
+        ],
+        "typedef-whitespace": [
+            true,
+            {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace"
+            }
+        ],
+        "variable-name": [
+            true,
+            "ban-keywords"
+        ],
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type"
+        ],
+        "no-debugger": true,
+        "no-console": true
+    }
 }
