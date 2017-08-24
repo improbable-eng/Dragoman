@@ -3,7 +3,7 @@ const url = require('url');
 const path = require('path'); 
 const { spawn } = require('child_process');
 const { accessSync } = require('fs');
-const ipcConstants = require('./constants/ipcConstants');
+const ipcConstants = require('./ipc/constants');
 const updater = require('electron-updater');
 
 const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +

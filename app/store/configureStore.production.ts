@@ -9,5 +9,3 @@ function configureStore(initialState?: object) {
 }
 
 export default configureStore;
-
-// export { default as configureStore };

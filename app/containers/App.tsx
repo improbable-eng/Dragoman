@@ -6,17 +6,17 @@ import { Dispatch, connect } from 'react-redux';
 import SideBar from '../components/sideBar';
 import RequestBuilder from '../components/requestBuilder';
 import ResponseViewer from '../components/responseViewer';
-import { toggleSettingsOpen } from '../actions/uiSettings';
+import * as uiSettingsActions from '../actions/settingsUI';
 
 import {
   Service, Method,  ListServicesRequest,
-  PolyglotResponse, CallServiceRequest, CallServiceOptions, ValidatePathsRequest,
-  ValidatePathsResponse, PolyglotLog, StoreState,
+  PolyglotResponse, CallServiceRequest, CallServiceOptions, PolyglotLog, StoreState,
+  ValidatePathsRequest, ValidatePathsResponse,
 } from '../types/index';
 
 import { AppState } from '../reducers/index';
 
-const ipcConstants = require('../constants/ipcConstants'); // tslint:disable-line
+const ipcConstants = require('../ipc/constants'); // tslint:disable-line
 
 import { remote, ipcRenderer } from 'electron';
 
@@ -24,65 +24,13 @@ import { remote, ipcRenderer } from 'electron';
 const checkConsoleErrorMessage = 'Check console for full log (Console can be reached from View' +
   ' -> Toggle Developer Tools -> Console)';
 
-type AppProps = AppState & {dispatch: Dispatch<{}>};
+type AppProps = AppState & {dispatch: Dispatch<{}>, getState: () => AppState};
 
 class App extends React.Component<AppProps, StoreState> {
   constructor(props: AppProps) {
     super();
     this.registerIpcListeners();
-
     this.state = new StoreState();
-    console.log(props);
-
-  }
-
-  public handlePathBlur = (stateId: string) => {
-    console.log('Handling path blur from ', stateId);
-    const paths = this.state.polyglotSettings[stateId];
-    console.log(paths);
-    console.assert((typeof(paths) === 'string' || paths.constructor === Array)); // tslint:disable-line
-
-    let pathArray: string[];
-
-    if (paths.constructor === Array) {
-      pathArray = paths as string[];
-      if (pathArray.length === 1 && pathArray[0] === '') { // We don't want to validate an empty text field
-        this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-          {[`${stateId}Errors`]: []})});
-        return;
-      }
-    } else {
-      if (paths === '') {
-        this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-          {[`${stateId}Error`]: false})});
-        return;
-      }
-      pathArray = [paths as string];
-    }
-
-    this.validateSystemPathRequest({id: stateId, paths: pathArray});
-  }
-
-  public validateSystemPathRequest = (validatePathsRequest: ValidatePathsRequest) => {
-    console.log('Validating paths ', validatePathsRequest.paths, ' from: ', validatePathsRequest.id);
-    ipcRenderer.send(ipcConstants.VALIDATE_PATHS_REQUEST, validatePathsRequest);
-  }
-
-  // TODO: Implement this validation response for the paths
-  public validateSystemPathResponse = (event: Event, res: ValidatePathsResponse) => {
-    console.log('Received validate paths response: ', res);
-    const state = this.state.polyglotSettings[res.id];
-    console.assert(res.validPaths instanceof Array);
-    if (typeof(state) === 'string') {
-      console.assert(res.validPaths.length >= 1);
-      this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-        { [`${res.id}Error`]: !res.validPaths[0]})});
-    } else if (state.constructor === Array) {
-      this.setState({settingsUIState: Object.assign({}, this.state.settingsUIState,
-        { [`${res.id}Errors`]: res.validPaths})});
-    } else {
-      console.log('SHOULD NOT REACH THIS');
-    }
   }
 
   public listServices = () => {
@@ -125,30 +73,6 @@ class App extends React.Component<AppProps, StoreState> {
     } else {
       this.openErrorDialog('Error listing services: ', checkConsoleErrorMessage);
       console.error(`Error ${res.error}\n${res.response}`);
-    }
-  }
-
-  public showDirectoryDialog = (id: string, macMessage: string = '', multiSelection: boolean = false) => {
-    const customProperties = ['openDirectory', 'openFile', 'showHiddenFiles'];
-
-    if (multiSelection) {
-      customProperties.push('multiSelections');
-    }
-
-    const pathList = remote.dialog.showOpenDialog({
-      properties: customProperties,
-      message: macMessage,
-    } as Electron.OpenDialogOptions);
-    console.log('Paths ', pathList, ' selected using path finder dialog');
-
-    if (multiSelection) {
-      this.setState({polyglotSettings: Object.assign({}, this.state.polyglotSettings, {[id]: pathList})});
-    } else {
-      if (pathList.length >= 1) {
-        const path = pathList[0];
-        this.setState({ polyglotSettings:
-          Object.assign({}, this.state.polyglotSettings, {[id]: path})});
-      }
     }
   }
 
@@ -226,6 +150,7 @@ class App extends React.Component<AppProps, StoreState> {
         settingsUIState: Object.assign({}, this.state.settingsUIState, {
           settingsOpen: true, endpointError: true, endpointRequired: true}),
       });
+      this.props.dispatch(uiSettingsActions.setEndpointError(true));
     } else {
       this.setState({
         settingsUIState: Object.assign({}, this.state.settingsUIState, { endpointRequired: true }),
@@ -249,7 +174,7 @@ class App extends React.Component<AppProps, StoreState> {
     // const newSettingsUIState: SettingsUIState = Object.assign({}, this.state.settingsUIState,
     //   { settingsOpen: !this.state.settingsUIState.settingsOpen });
     // this.setState({settingsUIState: newSettingsUIState});
-    this.props.dispatch(toggleSettingsOpen());
+    this.props.dispatch(uiSettingsActions.toggleSettingsOpen());
   }
 
   // Should we check that this is a valid path? This would have to deal
@@ -313,6 +238,76 @@ class App extends React.Component<AppProps, StoreState> {
     }
   }
 
+  public handlePathBlur = (stateId: string) => {
+    console.log('Handling path blur from ', stateId);
+    const paths = this.state.polyglotSettings[stateId];
+    console.log(paths);
+
+    let pathArray: string[];
+
+    if (paths === '') {
+      this.setState({
+        settingsUIState: Object.assign({}, this.state.settingsUIState,
+          { [`${stateId}Error`]: false }),
+      });
+      return;
+    }
+    pathArray = [paths as string];
+
+    this.validateSystemPathRequest({ id: stateId, paths: pathArray });
+  }
+
+  public validateSystemPathRequest = (validatePathsRequest: ValidatePathsRequest) => {
+    console.log('Validating paths ', validatePathsRequest.paths, ' from: ', validatePathsRequest.id);
+    ipcRenderer.send(ipcConstants.VALIDATE_PATHS_REQUEST, validatePathsRequest);
+  }
+
+  // TODO: Implement this validation response for the paths
+  public validateSystemPathResponse = (event: Event, res: ValidatePathsResponse) => {
+    console.log('Received validate paths response: ', res);
+    const state = this.state.polyglotSettings[res.id];
+    console.assert(res.validPaths instanceof Array);
+    if (typeof (state) === 'string') {
+      console.assert(res.validPaths.length >= 1);
+      this.setState({
+        settingsUIState: Object.assign({}, this.state.settingsUIState,
+          { [`${res.id}Error`]: !res.validPaths[0] }),
+      });
+    } else if (state.constructor === Array) {
+      this.setState({
+        settingsUIState: Object.assign({}, this.state.settingsUIState,
+          { [`${res.id}Errors`]: res.validPaths }),
+      });
+    } else {
+      console.log('SHOULD NOT REACH THIS');
+    }
+  }
+
+  public showDirectoryDialog = (id: string, macMessage: string = '', multiSelection: boolean = false) => {
+    console.log('showingDirectoryDialog');
+    const customProperties = ['openDirectory', 'openFile', 'showHiddenFiles'];
+
+    if (multiSelection) {
+      customProperties.push('multiSelections');
+    }
+
+    const pathList = remote.dialog.showOpenDialog({
+      properties: customProperties,
+      message: macMessage,
+    } as Electron.OpenDialogOptions);
+    console.log('Paths ', pathList, ' selected using path finder dialog');
+
+    if (multiSelection) {
+      this.setState({polyglotSettings: Object.assign({}, this.state.polyglotSettings, {[id]: pathList})});
+    } else {
+      if (pathList.length >= 1) {
+        const path = pathList[0];
+        this.setState({ polyglotSettings:
+          Object.assign({}, this.state.polyglotSettings, {[id]: path})});
+      }
+    }
+  }
+
   public render() {
     return (
       <div>
@@ -324,13 +319,10 @@ class App extends React.Component<AppProps, StoreState> {
         <div>
           <SideBar
             serviceMap={this.state.serviceMap}
-            polyglotSettings={this.state.polyglotSettings}
             settingsUIState={this.state.settingsUIState}
             handleMethodClick={this.handleMethodClick}
             handleSettingsClick={this.handleSettingsClick}
             handleListServicesClick={this.handleListServicesClick}
-            handleTextFieldInputChange={this.handleTextFieldInputChange}
-            handleEndpointChange={this.handleEndpointChange}
             handlePathDoubleClick={this.showDirectoryDialog}
             handlePathBlur={this.handlePathBlur}
           />

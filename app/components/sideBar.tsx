@@ -2,25 +2,22 @@ import * as React from 'react';
 import * as ReactMD from 'react-md';
 
 import ServiceListItem from './serviceListItem';
-import Settings from './settings';
-import { Service, PolyglotSettings, SettingsUIState } from '../types/index';
+import Settings from '../containers/settings';
+import { Service,  SettingsUIState } from '../types/index';
 
 export interface ISideBarProps {
     serviceMap: Map<string, Service>;
-    polyglotSettings: PolyglotSettings;
     settingsUIState: SettingsUIState;
     handleMethodClick: (serviceName: string, methodName: string) => void;
     handleListServicesClick: () => void;
     handleSettingsClick: () => void;
-    handleTextFieldInputChange: (settingStateId: string, newValue: string | number) => void;
     handlePathDoubleClick: (stateId: string, message: string, allowMultiSelect: boolean) => void;
-    handleEndpointChange: (newValue: string) => void;
     handlePathBlur: (id: string) => void;
 }
 
-function SideBar({ serviceMap, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick,
-                   handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange,
-                   handleEndpointChange, handlePathBlur}: ISideBarProps) {
+function SideBar({ serviceMap, settingsUIState, handleMethodClick, handleListServicesClick,
+                   handleSettingsClick, handlePathDoubleClick,
+                   handlePathBlur}: ISideBarProps) {
 
     const serviceList: JSX.Element[] = [];
 
@@ -33,15 +30,6 @@ function SideBar({ serviceMap, polyglotSettings, settingsUIState, handleMethodCl
         />);
     });
 
-    const settings =
-            <Settings
-                polyglotSettings={polyglotSettings}
-                settingsUIState={settingsUIState}
-                handleTextFieldInputChange={handleTextFieldInputChange}
-                handleListServicesClick={handleListServicesClick}
-                handlePathDoubleClick={handlePathDoubleClick}
-                handlePathBlur={handlePathBlur}
-            />;
     return (
         <div>
             <ReactMD.List
@@ -71,7 +59,7 @@ function SideBar({ serviceMap, polyglotSettings, settingsUIState, handleMethodCl
                 <ReactMD.ListItem
                     primaryText='Settings'
                     key='settings'
-                    nestedItems={[settings]}
+                    nestedItems={[<Settings handlePathBlur={handlePathBlur} handlePathDoubleClick={handlePathDoubleClick}/>]}
                     visible={settingsUIState.settingsOpen}
                     onClick={handleSettingsClick}
                     tileClassName='list-subheader'

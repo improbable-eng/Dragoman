@@ -1,24 +1,37 @@
 import * as React from 'react';
 
-import { PolyglotSettings, SettingsUIState } from '../types/index';
-
 import SingleLineTextEntry from './singleLineTextEntry';
 import MultiLineTextEntry from './multiLineTextEntry';
 
+import { PolyglotSettings } from '../reducers/polyglotSettings';
+import { SettingsUIState } from '../reducers/settingsUI';
+
 // TODO: Change to using local .scss files?
 
-export interface ISettingsProps {
+export type SettingsProps = SettingsState & SettingsMethods;
+
+export interface SettingsState {
     polyglotSettings: PolyglotSettings;
     settingsUIState: SettingsUIState;
-    handleTextFieldInputChange: (settingStateId: string, newValue: string | number) => void;
-    handleListServicesClick: () => void;
+}
+
+export interface SettingsMethods {
+    handleEndpointChange: (newEndpoint: string) => void;
+    handleProtoDiscoveryRootChange: (newProtoDiscoveryRoot: string) => void;
+    handleConfigSetPathChange: (newConfigSetPath: string) => void;
+    handleConfigNameChange: (newConfigName: string) => void;
+    handleTlsCaCertPathChange: (newTlsCaCertPath: string) => void;
+    handleDeadlineMsChange: (newDeadlineMs: number) => void;
+    handleAddProtocIncludesChange: (newAddProtocIncludes: string) => void;
     handlePathDoubleClick: (stateId: string, message: string, allowMultiSelect: boolean) => void;
     handlePathBlur: (id: string) => void;
 }
 
 export default function Settings({ polyglotSettings, settingsUIState,
-    handleTextFieldInputChange, handlePathDoubleClick, handleListServicesClick,
-    handlePathBlur }: ISettingsProps) {
+    handleEndpointChange, handleProtoDiscoveryRootChange, handleConfigSetPathChange,
+    handleConfigNameChange, handleTlsCaCertPathChange, handleDeadlineMsChange,
+    handleAddProtocIncludesChange, handlePathDoubleClick,
+    handlePathBlur}: SettingsProps) {
     return (
         <div>
             <SingleLineTextEntry
@@ -27,14 +40,14 @@ export default function Settings({ polyglotSettings, settingsUIState,
                 value={polyglotSettings.endpoint}
                 errorText='Format must be host:port'
                 placeholder='<host>:<port>'
-                handleChange={handleTextFieldInputChange}
+                handleChange={handleEndpointChange}
                 required={settingsUIState.endpointRequired}
                 error={settingsUIState.endpointError}
             />
             <SingleLineTextEntry
                 id='protoDiscoveryRoot'
                 value={polyglotSettings.protoDiscoveryRoot}
-                handleChange={handleTextFieldInputChange}
+                handleChange={handleProtoDiscoveryRootChange}
                 label='Proto Root Path'
                 placeholder='/path/to/protoRoot'
                 errorText='Proto Root Path is invalid'
@@ -48,7 +61,7 @@ export default function Settings({ polyglotSettings, settingsUIState,
             <SingleLineTextEntry
                 id='configSetPath'
                 value={polyglotSettings.configSetPath}
-                handleChange={handleTextFieldInputChange}
+                handleChange={handleConfigSetPathChange}
                 label='Config Path'
                 placeholder='/path/to/config.pb.json'
                 errorText='Config Path is invalid'
@@ -62,14 +75,14 @@ export default function Settings({ polyglotSettings, settingsUIState,
             <SingleLineTextEntry
                 id='configName'
                 value={polyglotSettings.configName}
-                handleChange={handleTextFieldInputChange}
+                handleChange={handleConfigNameChange}
                 label='Config Name'
                 placeholder='development'
             />
             <SingleLineTextEntry
                 id='tlsCaCertPath'
                 value={polyglotSettings.tlsCaCertPath}
-                handleChange={handleTextFieldInputChange}
+                handleChange={handleTlsCaCertPathChange}
                 label='TLS CA Certificate Path'
                 placeholder='/path/to/tlsCaCertificate'
                 errorText='TLS CA Certificate Path is invalid'
@@ -83,14 +96,14 @@ export default function Settings({ polyglotSettings, settingsUIState,
             <SingleLineTextEntry
                 id='deadlineMs'
                 value={polyglotSettings.deadlineMs <= 0 ? undefined : polyglotSettings.deadlineMs}
-                handleChange={handleTextFieldInputChange}
+                handleChange={handleDeadlineMsChange}
                 label='Deadline (milliseconds)'
                 placeholder='5000'
             />
             <MultiLineTextEntry
                 id='addProtocIncludes'
-                value={polyglotSettings.addProtocIncludes.join(',')}
-                handleChange={handleTextFieldInputChange}
+                value={polyglotSettings.addProtocIncludes}
+                handleChange={handleAddProtocIncludesChange}
                 label='Add Protoc Includes'
                 placeholder='<path1>, <path2>'
                 // Searches the array of booleans, if any of the booleans are false then the overall

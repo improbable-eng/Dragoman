@@ -3,8 +3,8 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import { createLogger } from 'redux-logger';
 import rootReducer from '../reducers/index';
 
-import * as uiSettingsActions from '../actions/uiSettings';
-import * as polyglotSettingsActions from '../actions/polyglotSettings';
+// import * as uiSettingsActions from '../actions/uiSettings';
+// import * as polyglotSettingsActions from '../actions/polyglotSettings';
 
 declare const window: Window & {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?(a: any): void;
@@ -15,7 +15,7 @@ declare const module: NodeModule & {
   },
 };
 
-const actionCreators = Object.assign({}, uiSettingsActions, polyglotSettingsActions);
+// const actionCreators = Object.assign({}, uiSettingsActions, polyglotSettingsActions);
 
 const logger = (createLogger)({
   level: 'info',
@@ -26,7 +26,7 @@ const logger = (createLogger)({
 const composeEnhancers: typeof compose = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
     // Options: http://zalmoxisus.github.io/redux-devtools-extension/API/Arguments.html
-    actionCreators,
+    // actionCreators,
   }) as any :
   compose;
 const enhancer = composeEnhancers(

@@ -13,7 +13,7 @@ export class Service {
     public path: string = '';
     public methodMap: Map<string, Method> = new Map();
 
-    public constructor(init?: Partial<PolyglotSettings>) {
+    public constructor(init?: Partial<Service>) {
         Object.assign(this, init);
     }
 }

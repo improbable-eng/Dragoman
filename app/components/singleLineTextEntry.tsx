@@ -15,7 +15,7 @@ export interface ISingleLineTextEntryProps {
     errorText?: string;
     required?: boolean;
     error?: boolean;
-    handleChange: (id: string, newValue: string | number) => void;
+    handleChange: (newValue: string | number) => void;
     handleDoubleClick?: () => void;
     handleBlur?: (id: string) => void;
 }
@@ -33,9 +33,7 @@ export function SingleLineTextEntry({ id, label, value, placeholder = '', errorT
                 required={required}
                 error={error}
                 errorText={errorText}
-                onChange={(newValue) => handleChange(id, newValue)}
-                // react-md@next does not have doubleClick defined for ts by default
-                // if so add onDoubleClick?: (event: React.MouseEvent<HTMLElement>) => void;  to the main index.d.ts
+                onChange={handleChange}
                 onBlur={handleBlur ? () => handleBlur(id) : undefined}
                 onDoubleClick={handleDoubleClick}
                 style={{ flex: '1', margin: '0px 8px 0px 8px' }}

@@ -9,7 +9,7 @@ export interface IMultiLineTextEntryProps {
     errorText?: string;
     error?: boolean;
     required?: boolean;
-    handleChange: (id: string, newValue: string) => void;
+    handleChange: (newValue: string) => void;
     handleDoubleClick?: () => void;
     handleBlur?: () => void;
 }
@@ -26,7 +26,7 @@ function MultiLineTextEntry({id, handleChange, handleDoubleClick, handleBlur, la
                 required={required}
                 error={error}
                 errorText={errorText}
-                onChange={(newValue) => handleChange(id, newValue as string)}
+                onChange={handleChange}
                 onDoubleClick={handleDoubleClick}
                 onBlur={handleBlur}
                 rows={1}
