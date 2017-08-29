@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`settings UI actions setEndpointError should create set endpoint error action 1`] = `
+Object {
+  "error": false,
+  "payload": false,
+  "type": "SET_ENDPOINT_ERROR",
+}
+`;

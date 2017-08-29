@@ -1,12 +1,6 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
-// declare module 'react-md' {
-//    interface ExtendedTextFieldProps extends ReactMD.TextFieldProps {
-//         onDoubleClick?: (event: React.MouseEvent<HTMLElement>) => void;
-//    }
-// }
-
 export interface ISingleLineTextEntryProps {
     id: string;
     value?: string | number;
