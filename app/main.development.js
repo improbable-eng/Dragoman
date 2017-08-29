@@ -1,9 +1,8 @@
-const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain, Notification } = require('electron');
 const url = require('url');
 const path = require('path');
 const { spawn } = require('child_process');
 const { accessSync } = require('fs');
-const notifier = require('node-notifier');
 const ipcConstants = require('./ipc/constants');
 const { autoUpdater } = require('electron-updater');
 
@@ -95,25 +94,6 @@ autoUpdater.on('checking-for-update', () => {
 
 autoUpdater.on('update-available', (info) => {
     console.log('Update available.');
-    notifier.notify({
-        title: 'Dragoman',
-        subtitle: 'Auto Updater',
-        message: 'Update Available',
-        icon: path.join(__dirname, '../resources/dragoman-logo.png'),
-        timeout: 10,
-        closeLabel: 'Close',
-        actions: 'Ok'
-    },
-        function (err, response, metadata) {
-            if (err) throw err;
-            console.log('metadata: ', metadata);
-            if (metadata.activationValue === 'Ok') {
-                console.log('Pressed ok');
-            } else {
-                console.log('Did not press ok');
-            }
-        }
-    );
 });
 
 autoUpdater.on('update-not-available', (info) => {
@@ -121,7 +101,7 @@ autoUpdater.on('update-not-available', (info) => {
 });
 
 autoUpdater.on('error', (err) => {
-    console.log('Error in auto-updater.');
+    console.log('Error in auto-updater.', err);
 });
 
 autoUpdater.on('download-progress', (progressObj) => {
@@ -133,25 +113,30 @@ autoUpdater.on('download-progress', (progressObj) => {
 
 autoUpdater.on('update-downloaded', (info) => {
     console.log('Update downloaded');
-    notifier.notify({
+    const myNotification = new Notification({
         title: 'Dragoman',
-        subtitle: 'Auto Updater',
-        message: 'Quit and install update?',
-        wait: true,
-        closeLabel: 'Cancel',
-        actions: 'Ok'
-    },
-        function (err, response, metadata) {
-            if (err) throw err;
-            console.log('metadata: ', metadata);
-            if (metadata.activationValue === 'Ok') {
-                console.log('Pressed ok');
-                autoUpdater.quitAndInstall();
-            } else {
-                console.log('Did not press ok');
-            }
+        subtitle: 'Auto Update',
+        body: 'Updated downloaded, quit and install? ',
+        icon: '../resources/dragoman-logo.png',
+        actions: [{text: 'Ok', type:'button'}]
+    });
+
+    myNotification.show();
+
+    myNotification.once('action', (event, index) => {
+        console.log('Action clicked ', index)
+        if (index === 0) { // Selected ok
+            autoUpdater.quitAndInstall();
         }
-    );
+    });
+
+    myNotification.once('click', (event, index) => {
+        console.log('Notification clicked', event, index)
+    });
+
+    myNotification.once('close', (event, index) => {
+        console.log('Notification closed', event, index)
+    });
 });
 
 function registerIpcListeners() {

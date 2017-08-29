@@ -1,7 +1,7 @@
 {
   "name": "dragoman",
   "productName": "Dragoman",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Dragoman, a GUI for polyglot",
   "main": "main.js",
   "scripts": {
@@ -90,7 +90,12 @@
         "AppImage"
       ],
       "category": "Development",
-      "icon":"./Icons"
+      "icon": "./Icons"
+    },
+    "mac": {
+      "extendInfo": {
+        "NSUserNotificationAlertStyle": "alert"
+      }
     }
   },
   "bin": {
