@@ -1,14 +1,19 @@
 import * as React from 'react';
 
 import ServiceListItem from './serviceListItem';
-import { DragomanService } from '../reducers/listServices';
+import { DragomanService } from '../reducers/serviceList';
 
-export interface ServiceListProps {
-    serviceMap: Map<string, DragomanService>;
+export type ServiceListComponentProps = ServiceListComponentMethods & ServiceListComponentState;
+
+export interface ServiceListComponentMethods {
     handleMethodClick: (serviceName: string, methodName: string) => void;
 }
 
-function SideBar({ serviceMap, handleMethodClick}: ServiceListProps) {
+export interface ServiceListComponentState {
+    serviceMap: Map<string, DragomanService>;
+}
+
+function serviceList({ serviceMap, handleMethodClick}: ServiceListComponentProps) {
     return (
         <div className='md-list--drawer'>
             {
@@ -25,4 +30,4 @@ function SideBar({ serviceMap, handleMethodClick}: ServiceListProps) {
     );
 }
 
-export default SideBar;
+export default serviceList;

@@ -126,7 +126,8 @@ function listServices(event, listServicesRequest) {
     if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
     if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
 
-    event.sender.send(ipcConstants.POST_LOGS, {log: "Running polyglot command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: "info"});
+    event.sender.send(ipcConstants.POST_LOGS,
+        {log: "Running polyglot command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO});
     console.log(`Command: ${polyglotCommand} Args: ${polyglotCommandLineArgs}`);
 
     var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
@@ -137,7 +138,7 @@ function listServices(event, listServicesRequest) {
 
     polyglot.stderr.on('data', (data) => {
         polyglotStderr += data;
-        event.sender.send(ipcConstants.POST_LOGS, {log: data, level: "warn"});
+        event.sender.send(ipcConstants.POST_LOGS, {log: data, level: ipcConstants.LOG_LEVELS.WARN});
     });
 
     polyglot.stdout.on('data', (data) => {
@@ -177,7 +178,8 @@ function callService (event, callServiceRequest) {
     if(polyglotSettings.endpoint !== "") javaCommandLineArgs.push('--endpoint=' + polyglotSettings.endpoint);
     if(callServiceOptions.fullMethod !== "") javaCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
 
-    event.sender.send(ipcConstants.POST_LOGS, {log: "Running command " + javaCommand + " " + javaCommandLineArgs.join(" "), level: "info"});
+    event.sender.send(ipcConstants.POST_LOGS,
+        {log: "Running command " + javaCommand + " " + javaCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO});
 
     var polyglot = spawn(javaCommand, javaCommandLineArgs);
     console.log("polyglot spawned with id ", polyglot.pid, polyglot.stdio.pause);
@@ -211,7 +213,7 @@ function callService (event, callServiceRequest) {
     polyglot.stderr.on('data', (data) => {
         console.warn(`polyglotStdErr: ${data}`);
         polyglotStderr += data;
-        event.sender.send(ipcConstants.POST_LOGS, {log: data, level: "warn"});
+        event.sender.send(ipcConstants.POST_LOGS, {log: data, level: ipcConstants.LOG_LEVELS.WARN});
     });
 
     polyglot.stdout.on('data', (data) => {
@@ -225,11 +227,11 @@ function callService (event, callServiceRequest) {
         if (code !== 0){
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr }); 
         } else {
-            if (polyglotStdout === '' && polyglotStderr !== '') {
-                // Sometimes the code is 0 but polyglot has had an error. Is this the best way to do this? 
-                // The text of Error is meant to be a stack trace.
-                event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
-            }
+            // if (polyglotStdout === '' && polyglotStderr !== '') {
+            //     // Sometimes the code is 0 but polyglot has had an error. Is this the best way to do this? 
+            //     // The text of Error is meant to be a stack trace.
+            //     event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
+            // }
             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
         } 
     });

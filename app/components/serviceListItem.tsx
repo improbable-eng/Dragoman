@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
-import { DragomanService} from '../reducers/listServices';
+import { DragomanService} from '../reducers/serviceList';
 
 export interface IServiceListProps {
     dragomanService: DragomanService;

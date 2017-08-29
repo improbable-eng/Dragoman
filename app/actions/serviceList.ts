@@ -1,5 +1,5 @@
 import * as actionHelpers from './actions';
-import { PolyglotService } from '../reducers/listServices';
+import { PolyglotService } from '../reducers/serviceList';
 
 const CHANGE_SERVICE_FILTER = 'CHANGE_SERVICE_FILTER';
 const CHANGE_METHOD_FILTER = 'CHANGE_METHOD_FILTER';

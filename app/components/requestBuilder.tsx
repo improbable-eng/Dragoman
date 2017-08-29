@@ -73,7 +73,7 @@ export default function RequestBuilder({requestBuilderState, handleRunClick,
                         onChange={(val: string) => handleRequestChange(val)}
                         height='500'
                         value={requestBuilderState.request}
-                        // options={{ wordWrap: true }}
+                        options={{ wordWrap: true }}
                         requireConfig={{url: (process.env.NODE_ENV === 'production') ?
                         `file:///${__dirname}/dist/monaco-editor/min/vs/loader.js` :
                         './dist/monaco-editor/dev/vs/loader.js',

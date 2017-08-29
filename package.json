@@ -15,7 +15,7 @@
     "build": "npm run build-main && npm run build-renderer",
     "start": "cross-env NODE_ENV=production electron ./app/",
     "start-hot": "cross-env HOT=1 NODE_ENV=development electron ./app/main.development",
-    "postinstall": "npm run build",
+    "postinstall": "npm run copy && npm run build",
     "dev": "npm run hot-server -- --start-hot",
     "copy": "cp ./Tooltipped.d.ts ./node_modules/react-md/lib/Tooltips/Tooltipped.d.ts && cp ./TextField.d.ts ./node_modules/react-md/lib/TextFields/TextField.d.ts",
     "package": "npm run copy && npm run build && build --publish never",

@@ -1,5 +1,5 @@
 import { isActionOfType, Action } from '../actions/actions';
-import * as ListServicesActions from '../actions/listServices';
+import * as ServiceListActions from '../actions/serviceList';
 
 import { SettingsDataState as PolyglotSettings,
     initialSettingsDataState as initialPolyglotSettings } from './settingsData';
@@ -53,7 +53,7 @@ export class ListServicesOptions {
     }
 }
 
-export type ListServicesState = Readonly<{
+export type ServiceListState = Readonly<{
     serviceFilter: string;
     methodFilter: string;
     serviceMap: Map<string, DragomanService>;
@@ -68,29 +68,29 @@ export class ListServicesRequest {
     }
 }
 
-const initialListServicesState: ListServicesState = {
+const initialServiceListState: ServiceListState = {
     serviceFilter: '',
     methodFilter: '',
     serviceMap: new Map<string, DragomanService>(),
 };
 
-export default function listServicesReducer(state: ListServicesState = initialListServicesState, action: Action<any>): ListServicesState {
+export default function listServicesReducer(state: ServiceListState = initialServiceListState, action: Action<any>): ServiceListState {
 
-    if (isActionOfType(action, ListServicesActions.changeServiceFilter)) {
+    if (isActionOfType(action, ServiceListActions.changeServiceFilter)) {
         return {
             ...state,
             serviceFilter: action.payload,
         };
     }
 
-    if (isActionOfType(action, ListServicesActions.changeMethodFilter)) {
+    if (isActionOfType(action, ServiceListActions.changeMethodFilter)) {
         return {
             ...state,
             methodFilter: action.payload,
         };
     }
 
-    if (isActionOfType(action, ListServicesActions.importServices)) {
+    if (isActionOfType(action, ServiceListActions.importServices)) {
         return {
             ...state,
             serviceMap: new Map(action.payload.map((polyglotService: PolyglotService) => {

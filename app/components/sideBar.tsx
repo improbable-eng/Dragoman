@@ -3,28 +3,19 @@ import * as ReactMD from 'react-md';
 
 // import ServiceListItem from './serviceListItem';
 import Settings from '../containers/settings';
-import ServiceList from '../components/ServiceList';
-import { DragomanService } from '../reducers/listServices';
+import ServiceList from '../containers/ServiceList';
+import { DragomanService } from '../reducers/serviceList';
 import { AppUIState } from '../reducers/appUI';
 
 export interface ISideBarProps {
     serviceMap: Map<string, DragomanService>;
     appState: AppUIState;
-    handleMethodClick: (serviceName: string, methodName: string) => void;
     handleListServicesClick: () => void;
     handleSettingsClick: () => void;
 }
 
-function SideBar({ serviceMap, appState, handleMethodClick, handleListServicesClick,
+function SideBar({ serviceMap, appState, handleListServicesClick,
     handleSettingsClick }: ISideBarProps) {
-
-    // const serviceList: JSX.Element[] = Array.from(serviceMap, ([key, val]) => {
-    //     return (<ServiceListItem
-    //         onMethodClick={handleMethodClick}
-    //         key={key}
-    //         dragomanService={val} />);
-    // });
-
     return (
         <div>
             <ReactMD.List
@@ -33,7 +24,6 @@ function SideBar({ serviceMap, appState, handleMethodClick, handleListServicesCl
                     'md-drawer md-drawer--left md-drawer--fixed md-drawer--active ' +
                     'md-transition--decceleration md-background--card'}
             >
-
                 <ReactMD.ListItem
                     key='listServicesButton'
                     primaryText=''
@@ -49,10 +39,7 @@ function SideBar({ serviceMap, appState, handleMethodClick, handleListServicesCl
                             style={{ width: '100%', height: '100%', borderRadius: 0 }}
                         />}
                 />
-                <ServiceList
-                    serviceMap={serviceMap}
-                    handleMethodClick={handleMethodClick}
-                />
+                <ServiceList />
                 <ReactMD.ListItem
                     primaryText='Settings'
                     key='settings'

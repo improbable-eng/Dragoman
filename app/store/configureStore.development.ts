@@ -8,7 +8,7 @@ import * as settingsDataActions from '../actions/settingsData';
 import * as appUIActions from '../actions/appUI';
 import * as requestBuilderActions from '../actions/requestBuilder';
 import * as responseViewerActions from '../actions/responseViewer';
-import * as listServicesActions from '../actions/listServices';
+import * as listServicesActions from '../actions/serviceList';
 
 declare const window: Window & {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?(a: any): void;
