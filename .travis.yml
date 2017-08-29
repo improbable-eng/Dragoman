@@ -10,4 +10,4 @@ node_js:
 jobs:
   include: 
     - stage: package
-    - script: npm run package-all
+    - script: npm run package-ml

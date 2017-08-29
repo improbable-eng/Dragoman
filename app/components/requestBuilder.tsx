@@ -75,7 +75,7 @@ export default function RequestBuilder({requestBuilderState, handleRunClick,
                         value={requestBuilderState.request}
                         options={{ wordWrap: true }}
                         requireConfig={{url: (process.env.NODE_ENV === 'production') ?
-                        `file:///${__dirname}/dist/monaco-editor/min/vs/loader.js` :
+                        `./dist/monaco-editor/min/vs/loader.js` :
                         './dist/monaco-editor/dev/vs/loader.js',
                         }}
                     />

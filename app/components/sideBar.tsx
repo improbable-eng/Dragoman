@@ -3,7 +3,7 @@ import * as ReactMD from 'react-md';
 
 // import ServiceListItem from './serviceListItem';
 import Settings from '../containers/settings';
-import ServiceList from '../containers/ServiceList';
+import ServiceList from '../containers/serviceList';
 import { DragomanService } from '../reducers/serviceList';
 import { AppUIState } from '../reducers/appUI';
 

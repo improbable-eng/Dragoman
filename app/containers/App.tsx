@@ -32,10 +32,9 @@ type AppProps = AppState & { dispatch: Dispatch<{}> };
 
 class App extends React.Component<AppProps> {
   constructor(props: AppProps) {
-    super();
+    super(props);
     this.registerIpcListeners();
   }
-
 
   public closeErrorDialog = () => {
     this.props.dispatch(AppUIActions.setErrorDialogVisible(false));

@@ -39,6 +39,10 @@ export default function ResponseViewer({ responseViewerState, fullMethod }: IRes
                     height='500'
                     value={responseViewerState.responseBody}
                     options={{ wordWrap: true, readOnly: true }}
+                    requireConfig={{url: (process.env.NODE_ENV === 'production') ?
+                        `./dist/monaco-editor/min/vs/loader.js` :
+                        './dist/monaco-editor/dev/vs/loader.js',
+                        }}
                 />
             </ReactMD.Card>
         </ReactMD.Card>
