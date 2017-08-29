@@ -3,7 +3,7 @@ const url = require('url');
 const path = require('path'); 
 const { spawn } = require('child_process');
 const { accessSync } = require('fs');
-const ipcConstants = require('./constants/ipcConstants');
+const ipcConstants = require('./ipc/constants');
 const updater = require('electron-updater');
 
 const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
@@ -27,8 +27,8 @@ const installExtensions = () => {
         const installer = require('electron-devtools-installer');
 
         const extensions = [
-            "REACT_DEVELOPER_TOOLS"
-            // 'REDUX_DEVTOOLS'
+            "REACT_DEVELOPER_TOOLS",
+            'REDUX_DEVTOOLS'
         ];
         const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
         return Promise.all(extensions.map(name => installer.default(installer[name], forceDownload)));

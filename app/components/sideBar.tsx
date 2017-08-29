@@ -1,80 +1,65 @@
-import * as React from "react";
-import * as ReactMD from "react-md";
+import * as React from 'react';
+import * as ReactMD from 'react-md';
 
-import ServiceListItem from "./serviceListItem";
-import Settings from "./settings";
-import { Service, PolyglotSettings, SettingsUIState } from "../types/index";
+// import ServiceListItem from './serviceListItem';
+import Settings from '../containers/settings';
+import ServiceList from '../components/ServiceList';
+import { DragomanService } from '../reducers/listServices';
+import { AppUIState } from '../reducers/appUI';
 
 export interface ISideBarProps {
-    serviceMap: Map<string, Service>;
-    polyglotSettings: PolyglotSettings;
-    settingsUIState: SettingsUIState;
+    serviceMap: Map<string, DragomanService>;
+    appState: AppUIState;
     handleMethodClick: (serviceName: string, methodName: string) => void;
     handleListServicesClick: () => void;
     handleSettingsClick: () => void;
-    handleTextFieldInputChange: (settingStateId: string, newValue: string | number) => void;
-    handlePathDoubleClick: (stateId: string, message: string, allowMultiSelect: boolean) => void;
-    handleEndpointChange: (newValue: string) => void;
-    handlePathBlur: (id: string) => void;
 }
 
-function SideBar({ serviceMap, polyglotSettings, settingsUIState, handleMethodClick, handleListServicesClick,
-                   handleSettingsClick, handlePathDoubleClick, handleTextFieldInputChange,
-                   handleEndpointChange, handlePathBlur}: ISideBarProps) {
+function SideBar({ serviceMap, appState, handleMethodClick, handleListServicesClick,
+    handleSettingsClick }: ISideBarProps) {
 
-    const serviceList: JSX.Element[] = [];
+    // const serviceList: JSX.Element[] = Array.from(serviceMap, ([key, val]) => {
+    //     return (<ServiceListItem
+    //         onMethodClick={handleMethodClick}
+    //         key={key}
+    //         dragomanService={val} />);
+    // });
 
-    serviceMap.forEach((service: Service, key: string) => {
-        serviceList.push(
-        <ServiceListItem
-        service={service}
-        key={service.name}
-        onMethodClick={handleMethodClick}
-        />);
-    });
-
-    const settings =
-            <Settings
-                polyglotSettings={polyglotSettings}
-                settingsUIState={settingsUIState}
-                handleTextFieldInputChange={handleTextFieldInputChange}
-                handleListServicesClick={handleListServicesClick}
-                handlePathDoubleClick={handlePathDoubleClick}
-                handlePathBlur={handlePathBlur}
-            />;
     return (
         <div>
             <ReactMD.List
-                style={{ display: "flex", flexFlow: "column", paddingTop: 0 }}
-                className={"md-toolbar-relative md-paper md-paper--1 " +
-                    "md-drawer md-drawer--left md-drawer--fixed md-drawer--active " +
-                    "md-transition--decceleration md-background--card"}
+                style={{ display: 'flex', flexFlow: 'column', paddingTop: 0 }}
+                className={'md-toolbar-relative md-paper md-paper--1 ' +
+                    'md-drawer md-drawer--left md-drawer--fixed md-drawer--active ' +
+                    'md-transition--decceleration md-background--card'}
             >
+
                 <ReactMD.ListItem
-                    key="listServicesButton"
-                    primaryText=""
-                    className="list-services-item-button"
+                    key='listServicesButton'
+                    primaryText=''
+                    className='list-services-item-button'
                     children={
                         <ReactMD.Button
-                            key="button"
+                            key='button'
                             secondary={true}
                             flat={true}
                             swapTheming={true}
-                            children={"List Services"}
+                            children={'List Services'}
                             onClick={handleListServicesClick}
-                            style={{ width: "100%", height: "100%", borderRadius: 0 }}
+                            style={{ width: '100%', height: '100%', borderRadius: 0 }}
                         />}
                 />
-                <div className="md-list--drawer" key="services">
-                    {serviceList}
-                </div>
+                <ServiceList
+                    serviceMap={serviceMap}
+                    handleMethodClick={handleMethodClick}
+                />
                 <ReactMD.ListItem
-                    primaryText="Settings"
-                    key="settings"
-                    nestedItems={[settings]}
-                    visible={settingsUIState.settingsOpen}
+                    primaryText='Settings'
+                    key='settings'
+                    nestedItems={[<Settings />]}
+                    visible={appState.settingsOpen}
                     onClick={handleSettingsClick}
-                    tileClassName="list-subheader"
+                    tileClassName='list-subheader'
                 />
             </ReactMD.List>
         </div>
