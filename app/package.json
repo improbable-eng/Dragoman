@@ -1,7 +1,7 @@
 {
   "name": "dragoman",
   "productName": "dragoman",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GUI for polyglot",
   "main": "./main.js",
   "author": {

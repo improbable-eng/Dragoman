@@ -21,7 +21,7 @@
     "package": "npm run copy && npm run build && build --publish onTagOrDraft",
     "package-win": "npm run copy && npm run build && build --win --x64",
     "package-linux": "npm run copy && npm run build && build --linux --publish onTagOrDraft",
-    "package-ml": "npm run copy && npm run build && build -ml --publish never"
+    "package-mac": "npm run copy && npm run build && build --mac --publish onTagOrDraft"
   },
   "jest": {
     "moduleNameMapper": {
@@ -89,7 +89,8 @@
         "deb",
         "AppImage"
       ],
-      "category": "Development"
+      "category": "Development",
+      "icon":"./Icons"
     }
   },
   "bin": {
@@ -117,7 +118,6 @@
   ],
   "homepage": "https://github.com/peteboothroyd/dragoman#readme",
   "devDependencies": {
-    "@types/electron": "^1.6.10",
     "@types/enzyme": "^2.8.6",
     "@types/history": "^4.5.2",
     "@types/jest": "^20.0.7",
