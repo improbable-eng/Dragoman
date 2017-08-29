@@ -139,12 +139,6 @@ var MonacoEditor = function (_React$Component) {
             
             const monacoPath = path.join(context.__dirname, 'dist/monaco-editor/min');
 
-            // if (process.env.NODE_ENV === "production") {
-            //   monacoPath = path.join(context.__dirname, 'dist/monaco-editor/min');
-            // } else {
-            //   monacoPath = path.join(context.__dirname + '/dist/monaco-editor/dev');
-            // }
-
             const amdRequireBaseUrl = uriFromPath(monacoPath);
 
             context.require.config({

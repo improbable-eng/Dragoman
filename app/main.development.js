@@ -39,14 +39,12 @@ const installExtensions = () => {
 };
 
 const createWindow = () => {
-    // console.log("creating window");
     mainWindow = new BrowserWindow({
         show: false,
         width: 2000,
         height: 1400
     });
 
-    // and load the app.html of the app.
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, '/app.html'),
         protocol: 'file:',
@@ -92,7 +90,7 @@ app.on('activate', function () {
 });
 
 autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for update...');
+    console.log('Checking for update');
 });
 
 autoUpdater.on('update-available', (info) => {
