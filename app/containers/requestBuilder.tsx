@@ -17,7 +17,7 @@ import { AppState } from '../reducers/index';
 import RequestBuilder,
 { RequestBuilderComponentMethods, RequestBuilderComponentState } from '../components/requestBuilder';
 
-import { checkConsoleErrorMessage } from './App';
+import { checkConsoleErrorMessage } from './app';
 
 export interface RequestBuilderProps {
     openErrorDialog: (title: string, explanation: string) => void;

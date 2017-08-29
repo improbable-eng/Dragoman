@@ -2,7 +2,7 @@
 // import { spy } from 'sinon';
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { SingleLineTextEntry, ISingleLineTextEntryProps} from '../../app/components/SingleLineTextEntry';
+import { SingleLineTextEntry, ISingleLineTextEntryProps} from '../../app/components/singleLineTextEntry';
 
 // const CounterAny = Counter as any;
 
