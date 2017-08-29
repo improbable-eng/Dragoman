@@ -1,34 +1,29 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
-import ServiceListItem from './serviceListItem';
+// import ServiceListItem from './serviceListItem';
 import Settings from '../containers/settings';
-import { Service,  SettingsUIState } from '../types/index';
+import ServiceList from '../components/ServiceList';
+import { DragomanService } from '../reducers/listServices';
+import { AppUIState } from '../reducers/appUI';
 
 export interface ISideBarProps {
-    serviceMap: Map<string, Service>;
-    settingsUIState: SettingsUIState;
+    serviceMap: Map<string, DragomanService>;
+    appState: AppUIState;
     handleMethodClick: (serviceName: string, methodName: string) => void;
     handleListServicesClick: () => void;
     handleSettingsClick: () => void;
-    handlePathDoubleClick: (stateId: string, message: string, allowMultiSelect: boolean) => void;
-    handlePathBlur: (id: string) => void;
 }
 
-function SideBar({ serviceMap, settingsUIState, handleMethodClick, handleListServicesClick,
-                   handleSettingsClick, handlePathDoubleClick,
-                   handlePathBlur}: ISideBarProps) {
+function SideBar({ serviceMap, appState, handleMethodClick, handleListServicesClick,
+    handleSettingsClick }: ISideBarProps) {
 
-    const serviceList: JSX.Element[] = [];
-
-    serviceMap.forEach((service: Service, key: string) => {
-        serviceList.push(
-        <ServiceListItem
-        service={service}
-        key={service.name}
-        onMethodClick={handleMethodClick}
-        />);
-    });
+    // const serviceList: JSX.Element[] = Array.from(serviceMap, ([key, val]) => {
+    //     return (<ServiceListItem
+    //         onMethodClick={handleMethodClick}
+    //         key={key}
+    //         dragomanService={val} />);
+    // });
 
     return (
         <div>
@@ -38,6 +33,7 @@ function SideBar({ serviceMap, settingsUIState, handleMethodClick, handleListSer
                     'md-drawer md-drawer--left md-drawer--fixed md-drawer--active ' +
                     'md-transition--decceleration md-background--card'}
             >
+
                 <ReactMD.ListItem
                     key='listServicesButton'
                     primaryText=''
@@ -53,14 +49,15 @@ function SideBar({ serviceMap, settingsUIState, handleMethodClick, handleListSer
                             style={{ width: '100%', height: '100%', borderRadius: 0 }}
                         />}
                 />
-                <div className='md-list--drawer' key='services'>
-                    {serviceList}
-                </div>
+                <ServiceList
+                    serviceMap={serviceMap}
+                    handleMethodClick={handleMethodClick}
+                />
                 <ReactMD.ListItem
                     primaryText='Settings'
                     key='settings'
-                    nestedItems={[<Settings handlePathBlur={handlePathBlur} handlePathDoubleClick={handlePathDoubleClick}/>]}
-                    visible={settingsUIState.settingsOpen}
+                    nestedItems={[<Settings />]}
+                    visible={appState.settingsOpen}
                     onClick={handleSettingsClick}
                     tileClassName='list-subheader'
                 />

@@ -1,30 +1,26 @@
 
 import { combineReducers } from 'redux';
-import uiSettings, { SettingsUIState } from '../reducers/settingsUI';
-import polyglotSettings, { PolyglotSettings } from '../reducers/polyglotSettings';
-import appUIState, { AppUIState } from '../reducers/appUI';
-import callServiceOptions, { CallServiceOptions } from '../reducers/callServiceOptions';
-import listServicesOptions, { ListServicesOptions } from '../reducers/listServicesOptions';
-import response, { Response } from '../reducers/response';
+import settingsReducer, { SettingsState } from './settings';
+import appUIReducer, { AppUIState } from './appUI';
+import requestBuilderReducer, { RequestBuilderState } from './requestBuilder';
+import listServicesReducer, { ListServicesState } from './listServices';
+import responseViewerReducer, { ResponseViewerState } from './responseViewer';
 
 export interface AppState {
-    // public serviceMap: Map<string, Service> = new Map();
-    polyglotSettings: PolyglotSettings;
-    listServicesOptions: ListServicesOptions;
-    callServiceOptions: CallServiceOptions;
-    response: Response;
-    settingsUIState: SettingsUIState;
-    appUIState: AppUIState;
+    listServicesState: ListServicesState;
+    requestBuilderState: RequestBuilderState;
+    responseViewerState: ResponseViewerState;
+    settingsState: SettingsState;
+    appState: AppUIState;
 }
 
 
 const rootReducer = combineReducers<AppState>({
-  settingsUIState: uiSettings,
-  polyglotSettings: polyglotSettings,
-  appUIState: appUIState,
-  callServiceOptions: callServiceOptions,
-  listServicesOptions: listServicesOptions,
-  response: response,
+  settingsState: settingsReducer,
+  appState: appUIReducer,
+  requestBuilderState: requestBuilderReducer,
+  listServicesState: listServicesReducer,
+  responseViewerState: responseViewerReducer,
 });
 
 export default rootReducer;

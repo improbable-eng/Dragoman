@@ -2,24 +2,29 @@ import { isActionOfType, Action } from '../actions/actions';
 import * as AppUIActions from '../actions/appUI';
 
 export type AppUIState = Readonly<{
+    settingsOpen: boolean;
     errorDialogVisible: boolean;
     errorDialogTitle: string;
     errorDialogExplanation: string;
-    callRequestInProgress: boolean;
-    clientStreaming?: boolean;
     serverStreaming?: boolean;
 }>;
 
-const initialAppUIState: AppUIState = {
+const initialAppState: AppUIState = {
+    settingsOpen: true,
     errorDialogVisible: false,
     errorDialogTitle: '',
     errorDialogExplanation: '',
-    callRequestInProgress: false,
-    clientStreaming: undefined,
     serverStreaming: undefined,
 };
 
-export default function uiSettings(state: AppUIState = initialAppUIState, action: Action<any>): AppUIState {
+export default function appReducer(state: AppUIState = initialAppState, action: Action<any>): AppUIState {
+
+    if (isActionOfType(action, AppUIActions.setSettingsOpen)) {
+        return {
+            ...state,
+            settingsOpen: action.payload,
+        };
+    }
 
     if (isActionOfType(action, AppUIActions.setErrorDialogVisible)) {
         return {
@@ -39,27 +44,6 @@ export default function uiSettings(state: AppUIState = initialAppUIState, action
         return {
             ...state,
             errorDialogExplanation: action.payload,
-        };
-    }
-
-    if (isActionOfType(action, AppUIActions.setCallRequestInProgress)) {
-        return {
-            ...state,
-            callRequestInProgress: action.payload,
-        };
-    }
-
-    if (isActionOfType(action, AppUIActions.setClientStreamingRequest)) {
-        return {
-            ...state,
-            serverStreaming: action.payload,
-        };
-    }
-
-    if (isActionOfType(action, AppUIActions.setClientStreamingRequest)) {
-        return {
-            ...state,
-            clientStreaming: action.payload,
         };
     }
 

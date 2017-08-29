@@ -1,27 +1,26 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
-import { Service, Method } from '../types/index';
+import { DragomanService} from '../reducers/listServices';
 
 export interface IServiceListProps {
-    service: Service;
+    dragomanService: DragomanService;
     onMethodClick: (serviceName: string, methodName: string) => void;
 }
 
-function ServiceListItem({ service, onMethodClick }: IServiceListProps) {
-    const methodList: JSX.Element[] = [];
-
-    service.methodMap.forEach((method: Method, key: string) => {
-        methodList.push(
+function ServiceListItem({ dragomanService, onMethodClick }: IServiceListProps) {
+    const methodList: JSX.Element[] = Array.from(dragomanService.methodMap, ([key, val]) => {
+        return (
         <ReactMD.ListItem
-        primaryText={method.name}
-        key={method.name}
-        onClick={() => onMethodClick(service.name, method.name)}
-    />);
+            onClick={() => onMethodClick(dragomanService.name, key)}
+            key={key}
+            primaryText={key}
+        />);
     });
+
     return (
         <ReactMD.ListItem
-            primaryText={service.name}
+            primaryText={dragomanService.name}
             active={true}
             nestedItems={methodList}
         />

@@ -1,8 +1,7 @@
 import { isActionOfType, Action } from '../actions/actions';
-import * as UISettingsActions from '../actions/settingsUI';
+import * as SettingsUIActions from '../actions/settingsUI';
 
 export type SettingsUIState = Readonly<{
-  settingsOpen: boolean;
   endpointRequired: boolean;
   endpointError: boolean;
   protoDiscoveryRootError: boolean;
@@ -14,7 +13,6 @@ export type SettingsUIState = Readonly<{
 }>;
 
 const initialSettingsUIState: SettingsUIState = {
-  settingsOpen: true,
   endpointRequired: false,
   endpointError: false,
   protoDiscoveryRootError: false,
@@ -23,45 +21,39 @@ const initialSettingsUIState: SettingsUIState = {
   addProtocIncludesErrors: [],
 };
 
-export default function uiSettings(state: SettingsUIState = initialSettingsUIState, action: Action<any>): SettingsUIState {
+export default function settingsUIReducer(state: SettingsUIState = initialSettingsUIState, action: Action<any>): SettingsUIState {
 
-  if (isActionOfType(action, UISettingsActions.toggleSettingsOpen)) {
-    return {
-      ...state,
-      settingsOpen: !state.settingsOpen,
-    };
-  }
-  if (isActionOfType(action, UISettingsActions.setEndpointRequired)) {
+  if (isActionOfType(action, SettingsUIActions.setEndpointRequired)) {
     return {
       ...state,
       endpointRequired: action.payload,
     };
   }
-  if (isActionOfType(action, UISettingsActions.setEndpointError)) {
+  if (isActionOfType(action, SettingsUIActions.setEndpointError)) {
     return {
       ...state,
       endpointError: action.payload,
     };
   }
-  if (isActionOfType(action, UISettingsActions.setProtoDiscoveryRootError)) {
+  if (isActionOfType(action, SettingsUIActions.setProtoDiscoveryRootError)) {
     return {
       ...state,
       protoDiscoveryRootError: action.payload,
     };
   }
-  if (isActionOfType(action, UISettingsActions.setConfigSetPathError)) {
+  if (isActionOfType(action, SettingsUIActions.setConfigSetPathError)) {
     return {
       ...state,
       configSetPathError: action.payload,
     };
   }
-  if (isActionOfType(action, UISettingsActions.setTlsCaCertPathError)) {
+  if (isActionOfType(action, SettingsUIActions.setTlsCaCertPathError)) {
     return {
       ...state,
       tlsCaCertPathError: action.payload,
     };
   }
-  if (isActionOfType(action, UISettingsActions.setAddProtocIncludesError)) {
+  if (isActionOfType(action, SettingsUIActions.setAddProtocIncludesError)) {
     return {
       ...state,
       addProtocIncludesErrors: action.payload,
