@@ -30,10 +30,14 @@ type AppProps = AppState & { dispatch: Dispatch<{}> };
 
 // ********************************** APP START ************************************** //
 
+// import { Visitor } from 'universal-analytics';
+// const visitor = new Visitor('UA-105606228-1');
+
 class App extends React.Component<AppProps> {
   constructor(props: AppProps) {
     super(props);
     this.registerIpcListeners();
+    // visitor.event('appContainer', 'lifecycle', 'constructor').send();
   }
 
   public closeErrorDialog = () => {
@@ -44,10 +48,12 @@ class App extends React.Component<AppProps> {
     this.props.dispatch(AppUIActions.setErrorDialogTitle(title));
     this.props.dispatch(AppUIActions.setErrorDialogExplanation(explanation));
     this.props.dispatch(AppUIActions.setErrorDialogVisible(true));
+    // visitor.event('appContainer', 'error', 'errorDialogOpened').send();
   }
 
   public handleSettingsClick = () => {
     this.props.dispatch(AppUIActions.setSettingsOpen(!this.props.appState.settingsOpen));
+    // visitor.event('appContainer', 'interaction', 'settingsClicked').send();
   }
 
   // ********************************** APP END ***************************************** //
@@ -69,6 +75,7 @@ class App extends React.Component<AppProps> {
     };
 
     console.log('Sending request to list services with options: ', listServicesRequest);
+    // visitor.event('appContainer', 'interaction', 'listServicesRequest').send();
     ipcRenderer.send(ipcConstants.LIST_SERVICES_REQUEST, listServicesRequest);
   }
 
@@ -87,6 +94,7 @@ class App extends React.Component<AppProps> {
       this.openErrorDialog('Error listing services: ', checkConsoleErrorMessage);
       console.error(`Error ${res.error}\n${res.response}`);
     }
+    // visitor.event('appContainer', 'interaction', 'listServicesResponse').send();
   }
 
   public handleListServicesClick = () => {
@@ -101,7 +109,7 @@ class App extends React.Component<AppProps> {
         <ReactMD.Toolbar
           title='Dragoman'
           className='md-toolbar--fixed'
-          colored={false}
+          colored={true}
         />
         <div>
           <SideBar

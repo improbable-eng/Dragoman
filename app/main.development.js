@@ -8,6 +8,9 @@ const { autoUpdater } = require('electron-updater');
 
 const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar";
 
+const Visitor  =require('universal-analytics').Visitor;
+const visitor = new Visitor('UA-105606228-1');
+
 let mainWindow;
 
 if (process.env.NODE_ENV === 'production') {
@@ -59,6 +62,9 @@ const createWindow = () => {
     });
 
     setupElectronMenu()
+    visitor.event('main', 'lifecycle', 'createWindow', (error, count) => {
+        console.log(error, count);
+    }).send();
 }
 
 app.on('ready', () => {
@@ -71,7 +77,8 @@ app.on('ready', () => {
             if (process.env.NODE_ENV !== 'development') {
                 autoUpdater.checkForUpdates()
             }
-        })
+        });
+    visitor.event('dragoman', 'lifecycle', 'ready').send();
 });
 
 // Quit when all windows are closed.
@@ -105,6 +112,7 @@ autoUpdater.on('update-not-available', (info) => {
 
 autoUpdater.on('error', (err) => {
     console.log('Error in auto-updater.', err);
+    visitor.event('main', 'autoUpdate', 'error').send();
 });
 
 autoUpdater.on('download-progress', (progressObj) => {
@@ -115,13 +123,14 @@ autoUpdater.on('download-progress', (progressObj) => {
 });
 
 autoUpdater.on('update-downloaded', (info) => {
+    visitor.event('main', 'autoUpdate', 'updateDownloaded').send();
     console.log('Update downloaded');
     const myNotification = new Notification({
         title: 'Dragoman',
         subtitle: 'Auto Update',
         body: 'Updated downloaded, quit and install? ',
         icon: '../resources/dragoman-logo.png',
-        actions: [{text: 'Ok', type:'button'}]
+        actions: [{ text: 'Ok', type: 'button' }]
     });
 
     myNotification.show();
@@ -130,6 +139,7 @@ autoUpdater.on('update-downloaded', (info) => {
         console.log('Action clicked ', index)
         if (index === 0) { // Selected ok
             autoUpdater.quitAndInstall();
+            visitor.event('main', 'autoUpdate', 'updatedInstalled').send();
         }
     });
 
@@ -179,7 +189,8 @@ function listServices(event, listServicesRequest) {
     if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
     if (polyglotSettings.addProtocIncludes !== "") {
         polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
-    )};
+        )
+    };
 
     event.sender.send(ipcConstants.POST_LOGS,
         { log: "Running polyglot command: " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
@@ -233,7 +244,8 @@ function callService(event, callServiceRequest) {
     if (callServiceOptions.fullMethod !== "") polyglotCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
     if (polyglotSettings.addProtocIncludes !== "") {
         polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
-    )};
+        )
+    };
 
     event.sender.send(ipcConstants.POST_LOGS,
         { log: "Running command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
