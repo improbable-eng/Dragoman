@@ -15,32 +15,32 @@ This is an open source project to allow easy debugging of gRPC services, and lev
 - An example config might be (remember to insert the OAuth secret, path to refresh token, and update the proto discovery paths as appropriate): 
 ```json
 {
-"configurations": [
-{
-"name": "production",
-"call_config": {
-"use_tls": "true",
-"oauth_config": {
-"refresh_token_credentials": {
-"token_endpoint_url": "https://auth.improbable.io/auth/v1/token",
-"client": {
-"id": "improbable_cli_client_go",
-"secret": "{{INSERT CLIENT SECRET HERE}}"
-},
-"refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
-}
-}
-},
-"proto_config": {
-"proto_discovery_root": "/Users/peteboothroyd/Projects/platform/proto",
-"include_paths": [
-"/Users/peteboothroyd/Projects/platform/go/src",
-"/Users/peteboothroyd/Projects/platform/go/src/github.com/gogo/protobuf/protobuf",
-"/Users/peteboothroyd/Projects/platform/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
-]
-}
-}
-]
+    "configurations": [
+        {
+            "name": "production",
+            "call_config": {
+                "use_tls": "true",
+                "oauth_config": {
+                    "refresh_token_credentials": {
+                        "token_endpoint_url": "https://auth.improbable.io/auth/v1/token",
+                        "client": {
+                            "id": "improbable_cli_client_go",
+                            "secret": "{{INSERT CLIENT SECRET HERE}}"
+                        },
+                        "refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
+                    }
+                }
+            },
+            "proto_config": {
+                "proto_discovery_root": "/Users/peteboothroyd/Projects/platform/proto",
+                "include_paths": [
+                    "/Users/peteboothroyd/Projects/platform/go/src",
+                    "/Users/peteboothroyd/Projects/platform/go/src/github.com/gogo/protobuf/protobuf",
+                    "/Users/peteboothroyd/Projects/platform/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
+                ]
+            }
+        }
+    ]
 }
 ```
 - Logs can be viewed from View/Toggle Developer Tools/Console. 
