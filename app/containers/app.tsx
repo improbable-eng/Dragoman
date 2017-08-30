@@ -101,7 +101,7 @@ class App extends React.Component<AppProps> {
         <ReactMD.Toolbar
           title='Dragoman'
           className='md-toolbar--fixed'
-          colored={true}
+          colored={false}
         />
         <div>
           <SideBar

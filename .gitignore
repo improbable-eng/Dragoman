@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-/public/polyglot_deploy.jar
 
 # testing
 /coverage
@@ -26,5 +25,4 @@ yarn-error.log*
 /vs
 /app/vs
 /release
-app/polyglot_deploy.jar
 monaco-editor/
