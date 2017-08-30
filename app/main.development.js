@@ -6,8 +6,7 @@ const { accessSync } = require('fs');
 const ipcConstants = require('./ipc/constants');
 const { autoUpdater } = require('electron-updater');
 
-const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/polyglot/bazel-bin/src/main/java/me/" +
-    "dinowernli/grpc/polyglot/polyglot_deploy.jar";
+const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar";
 
 let mainWindow;
 
@@ -68,7 +67,11 @@ app.on('ready', () => {
             console.log("Error installing extensions");
         })
         .then(registerIpcListeners())
-        .then(autoUpdater.checkForUpdates())
+        .then(() => {
+            if (process.env.NODE_ENV !== 'development') {
+                autoUpdater.checkForUpdates()
+            }
+        })
 });
 
 // Quit when all windows are closed.
@@ -167,17 +170,19 @@ function listServices(event, listServicesRequest) {
     // Build polyglot command
     const polyglotCommand = 'java';
     const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=list_services', '--with_message=true', '--list_output_format=json'];
-    if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push(' --proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
+    if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push('--proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
     if (listServicesOptions.serviceFilter !== "") polyglotCommandLineArgs.push('--service_filter=' + listServicesOptions.serviceFilter);
     if (listServicesOptions.methodFilter !== "") polyglotCommandLineArgs.push('--method_filter=' + listServicesOptions.methodFilter);
     if (polyglotSettings.configSetPath !== "") polyglotCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
     if (polyglotSettings.configName !== "") polyglotCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
-    if (polyglotSettings.addProtocIncludes !== "") polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes);
     if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
     if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
+    if (polyglotSettings.addProtocIncludes !== "") {
+        polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
+    )};
 
     event.sender.send(ipcConstants.POST_LOGS,
-        { log: "Running polyglot command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
+        { log: "Running polyglot command: " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
     console.log(`Command: ${polyglotCommand} Args: ${polyglotCommandLineArgs}`);
 
     var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
@@ -216,22 +221,24 @@ function callService(event, callServiceRequest) {
     console.log("echo spawned ", echo);
 
     // Build polyglot command
-    const javaCommand = 'java';
-    const javaCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=call'];
+    const polyglotCommand = 'java';
+    const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=call'];
 
-    if (polyglotSettings.protoDiscoveryRoot !== "") javaCommandLineArgs.push('--proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
-    if (polyglotSettings.configSetPath !== "") javaCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
-    if (polyglotSettings.configName !== "") javaCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
-    if (polyglotSettings.addProtocIncludes !== "") javaCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes);
-    if (polyglotSettings.deadlineMs > 0) javaCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
-    if (polyglotSettings.tlsCaCertPath !== "") javaCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
-    if (polyglotSettings.endpoint !== "") javaCommandLineArgs.push('--endpoint=' + polyglotSettings.endpoint);
-    if (callServiceOptions.fullMethod !== "") javaCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
+    if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push('--proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
+    if (polyglotSettings.configSetPath !== "") polyglotCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
+    if (polyglotSettings.configName !== "") polyglotCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
+    if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
+    if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
+    if (polyglotSettings.endpoint !== "") polyglotCommandLineArgs.push('--endpoint=' + polyglotSettings.endpoint);
+    if (callServiceOptions.fullMethod !== "") polyglotCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
+    if (polyglotSettings.addProtocIncludes !== "") {
+        polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
+    )};
 
     event.sender.send(ipcConstants.POST_LOGS,
-        { log: "Running command " + javaCommand + " " + javaCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
+        { log: "Running command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
 
-    var polyglot = spawn(javaCommand, javaCommandLineArgs);
+    var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
     console.log("polyglot spawned with id ", polyglot.pid);
     childProcesses[polyglot.pid] = polyglot;
 

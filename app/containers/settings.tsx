@@ -12,7 +12,7 @@ import {
 } from '../ipc/index';
 
 const ipcConstants = require('../ipc/constants');
-import { ipcRenderer, dialog } from 'electron';
+import { ipcRenderer, remote } from 'electron';
 
 import * as SettingsDataActions from '../actions/settingsData';
 import * as SettingsUIActions from '../actions/settingsUI';
@@ -131,15 +131,20 @@ function validateSystemPathResponse(res: ValidatePathsResponse, dispatch: Dispat
  * @returns {void}
   */
 function showDirectoryDialog(id: string, macMessage: string = '', multiSelection: boolean = false, dispatch: Dispatch<AppState>) {
-  console.log('showingDirectoryDialog');
+  console.log('showingDirectoryDialog', remote.dialog);
   const customProperties = ['openDirectory', 'openFile', 'showHiddenFiles'];
 
   if (multiSelection) { customProperties.push('multiSelections'); }
 
-  const pathList = dialog.showOpenDialog({
+  const pathList = remote.dialog.showOpenDialog({
     properties: customProperties,
     message: macMessage,
   } as Electron.OpenDialogOptions);
+
+  // Pressed cancel
+  if (pathList === undefined) {
+    return;
+  }
 
   console.log('Paths ', pathList, ' selected using path finder dialog');
 
@@ -153,6 +158,7 @@ function showDirectoryDialog(id: string, macMessage: string = '', multiSelection
         return;
     }
   } else {
+    console.log(pathList);
     const path = (pathList.length >= 1) ? pathList[0] : '';
     switch (id) {
       case SETTINGS_IDS.PROTO_DISCOVERY_ROOT:
