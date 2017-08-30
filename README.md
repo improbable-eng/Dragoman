@@ -1,63 +1,62 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.png" height="64">
-  <h3 align="center">Dragoman</h3>
-  <p align="center">An open source GUI for polyglot, a universal gRPC client<p>
-  <p align="center"><a href="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master"><img src="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master" alt="Build Status"></a></p>
+<img src="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.png" height="64">
+<h3 align="center">Dragoman</h3>
+<p align="center">An open source GUI for polyglot, a universal gRPC client<p>
+<p align="center"><a href="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master"><img src="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master" alt="Build Status"></a></p>
 </p>
 
 ## Overview
-This project is based on the [react-typescript-electron-boilerplate](https://github.com/iRath96/electron-react-typescript-boilerplate) project. It is powered by [Electron](https://electron.atom.io/).
+This is an open source project to allow easy debugging of gRPC services, and leverages [polyglot](https://github.com/grpc-ecosystem/polyglot). It is powered by [Electron](https://electron.atom.io/), [react](https://facebook.github.io/react/) and [redux](http://redux.js.org/).
 
-# How to use:
-- Polyglot by default looks to ~/.polyglot/config.pb.json for its configuration. Define settings here for or override them in the UI.
+## Getting Started
+- If you have no polyglot experience/setup consider reading through the readme [here](https://github.com/grpc-ecosystem/polyglot)
+- Polyglot by default looks to ~/.polyglot/config.pb.json for its configuration. Define settings here or override them in the UI.
 - Note not all settings can be defined in the UI currently.
 - An example config might be (remember to insert the OAuth secret, path to refresh token, and update the proto discovery paths as appropriate): 
 ```json
 {
-	"configurations": [
-		{
-			"name": "production",
-			"call_config": {
-				"use_tls": "true",
-				"oauth_config": {
-					"refresh_token_credentials": {
-						"token_endpoint_url": "https://auth.improbable.io/auth/v1/token",
-						"client": {
-							"id": "improbable_cli_client_go",
-							"secret": "{{INSERT CLIENT SECRET HERE}}"
-						},
-						"refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
-					}
-				}
-			},
-			"proto_config": {
-				"proto_discovery_root": "/Users/peteboothroyd/Projects/platform/proto",
-				"include_paths": [
-					"/Users/peteboothroyd/Projects/platform/go/src",
-					"/Users/peteboothroyd/Projects/platform/go/src/github.com/gogo/protobuf/protobuf",
-					"/Users/peteboothroyd/Projects/platform/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
-				]
-			}
-		}
-	]
+"configurations": [
+{
+"name": "production",
+"call_config": {
+"use_tls": "true",
+"oauth_config": {
+"refresh_token_credentials": {
+"token_endpoint_url": "https://auth.improbable.io/auth/v1/token",
+"client": {
+"id": "improbable_cli_client_go",
+"secret": "{{INSERT CLIENT SECRET HERE}}"
+},
+"refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
+}
+}
+},
+"proto_config": {
+"proto_discovery_root": "/Users/peteboothroyd/Projects/platform/proto",
+"include_paths": [
+"/Users/peteboothroyd/Projects/platform/go/src",
+"/Users/peteboothroyd/Projects/platform/go/src/github.com/gogo/protobuf/protobuf",
+"/Users/peteboothroyd/Projects/platform/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
+]
+}
+}
+]
 }
 ```
 - Logs can be viewed from View/Toggle Developer Tools/Console. 
 
 ## Known Issues
-### Run
-- Polyglot is known to hang if authentication fails, causing the request to soin indefinitely. Get a new refresh token, reload the page and try again.
-- Text editors do not resize
-- Run request button is not centered
-- No option to define whether to use TLS or not yet
-- No filtering of services/methods yet
-### Build
-- The current material design library has typescript definition issues. In the meantime the TypeScript definition files can be fixed manually to allow compilation and building. I am investigating moving to [material-ui](http://www.material-ui.com/#/).
+- Polyglot is known to hang if authentication fails, causing the request to hang indefinitely. Cancel the request, get a new refresh token and try again.
+- Text editors do not automatically resize. Reload the page (View -> Reload).
+- No option to define whether to use TLS in UI
+- No filtering of services/methods in UI
+- Difficult to read service/method name
+- Configuration setup is awkward and error prone
 
 ## Screenshot
 ![Dragoman Demo](https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-demo.gif)
 
-## Getting Started
+## Development
 To get start clone the repo:
 ```bash
 git clone https://github.com/peteboothroyd/Dragoman.git your-project-name
@@ -92,10 +91,11 @@ This boilerplate is included following DevTools extensions:
 
 * [Devtron](https://github.com/electron/devtron) - Install via [electron-debug](https://github.com/sindresorhus/electron-debug).
 * [React Developer Tools](https://github.com/facebook/react-devtools) - Install via [electron-devtools-installer](https://github.com/GPMDP/electron-devtools-installer).
-* 
+* [Redux DevTools](https://github.com/zalmoxisus/redux-devtools-extension) - Install via [electron-devtools-installer](https://github.com/GPMDP/electron-devtools-installer).
+
 You can find the tabs on Chrome DevTools.
 
-If you want to update extensions version, please set `UPGRADE_EXTENSIONS` env, just run:
+If you want to update extension versions, please set `UPGRADE_EXTENSIONS` env, just run:
 
 ```bash
 # For macOS
