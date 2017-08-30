@@ -60,7 +60,7 @@ function callServiceResponse(res: PolyglotResponse, dispatch: Dispatch<AppState>
     openErrorDialog: (title: string, explanation: string) => void) {
     dispatch(RequestBuilderActions.setCallRequestInProgress(false));
 
-    console.log(`Received call service response \n${res}`);
+    console.log(`Received call service response`, res);
 
     if (!res.error) {
         // The response can be an array encoded in utf-8

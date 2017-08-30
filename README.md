@@ -12,7 +12,7 @@ This project is based on the [react-typescript-electron-boilerplate](https://git
 - Polyglot by default looks to ~/.polyglot/config.pb.json for its configuration. Define settings here for or override them in the UI.
 - Note not all settings can be defined in the UI currently.
 - An example config might be (remember to insert the OAuth secret, path to refresh token, and update the proto discovery paths as appropriate): 
-```
+```json
 {
 	"configurations": [
 		{
