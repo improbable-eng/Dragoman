@@ -5,13 +5,25 @@
 <p align="center"><a href="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master"><img src="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master" alt="Build Status"></a></p>
 </p>
 
-## Overview
+## Dragoman 
 This is an open source project to allow easy debugging of gRPC services, and leverages [polyglot](https://github.com/grpc-ecosystem/polyglot). It is powered by [Electron](https://electron.atom.io/), [react](https://facebook.github.io/react/) and [redux](http://redux.js.org/).
 
 ## Getting Started
-- If you have no polyglot experience/setup consider reading through the readme [here](https://github.com/grpc-ecosystem/polyglot)
+### Prerequisites
+Polyglot requires java runtime 1.8.
+If on mac use 
+```bash
+brew update
+brew cask install java
+```
+Or [download](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) from oracle.
+
+### Installing
+Download the latest version from the [releases](https://github.com/peteboothroyd/Dragoman/releases) tab.
+- If you have no polyglot experience/setup consider reading through this [readme](https://github.com/grpc-ecosystem/polyglot).
 - Polyglot by default looks to ~/.polyglot/config.pb.json for its configuration. Define settings here or override them in the UI.
 - Note not all settings can be defined in the UI currently.
+- Logs can be viewed from View/Toggle Developer Tools/Console. 
 - An example config might be (remember to insert the OAuth secret, path to refresh token, and update the proto discovery paths as appropriate): 
 ```json
 {
@@ -43,7 +55,6 @@ This is an open source project to allow easy debugging of gRPC services, and lev
     ]
 }
 ```
-- Logs can be viewed from View/Toggle Developer Tools/Console. 
 
 ## Known Issues
 - Polyglot is known to hang if authentication fails, causing the request to hang indefinitely. Cancel the request, get a new refresh token and try again.

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import SingleLineTextEntry from './singleLineTextEntry';
-import MultiLineTextEntry from './multiLineTextEntry';
+import TextEntry from './textEntry';
 
 import { SettingsDataState, SETTINGS_IDS } from '../reducers/settingsData';
 import { SettingsUIState } from '../reducers/settingsUI';
@@ -32,8 +31,9 @@ export default function Settings({ settingsDataState, settingsUIState,
     handlePathBlur }: SettingsComponentProps) {
     return (
         <div>
-            <SingleLineTextEntry
+            <TextEntry
                 id={SETTINGS_IDS.ENDPOINT}
+                multiline={false}
                 label='gRPC Endpoint'
                 value={settingsDataState.endpoint}
                 errorText='Format must be host:port'
@@ -42,8 +42,9 @@ export default function Settings({ settingsDataState, settingsUIState,
                 required={settingsUIState.endpointRequired}
                 error={settingsUIState.endpointError}
             />
-            <SingleLineTextEntry
+            <TextEntry
                 id={SETTINGS_IDS.PROTO_DISCOVERY_ROOT}
+                multiline={false}
                 value={settingsDataState.protoDiscoveryRoot}
                 handleChange={handleProtoDiscoveryRootChange}
                 label='Proto Root Path'
@@ -56,8 +57,9 @@ export default function Settings({ settingsDataState, settingsUIState,
                         false)}
                 handleBlur={() => handlePathBlur(SETTINGS_IDS.PROTO_DISCOVERY_ROOT)}
             />
-            <SingleLineTextEntry
+            <TextEntry
                 id={SETTINGS_IDS.CONFIG_SET_PATH}
+                multiline={false}
                 value={settingsDataState.configSetPath}
                 handleChange={handleConfigSetPathChange}
                 label='Config Path'
@@ -70,15 +72,17 @@ export default function Settings({ settingsDataState, settingsUIState,
                         false)}
                 error={settingsUIState.configSetPathError}
             />
-            <SingleLineTextEntry
+            <TextEntry
                 id={SETTINGS_IDS.CONFIG_NAME}
+                multiline={false}
                 value={settingsDataState.configName}
                 handleChange={handleConfigNameChange}
                 label='Config Name'
                 placeholder='development'
             />
-            <SingleLineTextEntry
+            <TextEntry
                 id={SETTINGS_IDS.TLS_CA_CERT_PATH}
+                multiline={false}
                 value={settingsDataState.tlsCaCertPath}
                 handleChange={handleTlsCaCertPathChange}
                 label='TLS CA Certificate Path'
@@ -91,15 +95,17 @@ export default function Settings({ settingsDataState, settingsUIState,
                         'Select TLS CA Certificate Path',
                         false)}
             />
-            <SingleLineTextEntry
+            <TextEntry
                 id={SETTINGS_IDS.DEADLINE_MS}
+                multiline={false}
                 value={settingsDataState.deadlineMs <= 0 ? undefined : settingsDataState.deadlineMs}
                 handleChange={handleDeadlineMsChange}
                 label='Deadline (milliseconds)'
                 placeholder='5000'
             />
-            <MultiLineTextEntry
+            <TextEntry
                 id={SETTINGS_IDS.ADD_PROTOC_INCLUDES}
+                multiline={true}
                 value={settingsDataState.addProtocIncludes}
                 handleChange={handleAddProtocIncludesChange}
                 label='Add Protoc Includes'

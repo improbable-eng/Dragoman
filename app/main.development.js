@@ -6,9 +6,10 @@ const { accessSync } = require('fs');
 const ipcConstants = require('./ipc/constants');
 const { autoUpdater } = require('electron-updater');
 
-const DEV_PATH_TO_POLYGLOT_BINARY = "/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar";
+const DEV_PATH_TO_POLYGLOT_BINARY = path.join(__dirname, "polyglot_deploy.jar");
+console.log(DEV_PATH_TO_POLYGLOT_BINARY);
 
-const Visitor  =require('universal-analytics').Visitor;
+const Visitor = require('universal-analytics').Visitor;
 const visitor = new Visitor('UA-105606228-1');
 
 let mainWindow;
@@ -62,9 +63,7 @@ const createWindow = () => {
     });
 
     setupElectronMenu()
-    visitor.event('main', 'lifecycle', 'createWindow', (error, count) => {
-        console.log(error, count);
-    }).send();
+    visitor.event('main', 'lifecycle', 'createWindow').send();
 }
 
 app.on('ready', () => {

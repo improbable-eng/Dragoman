@@ -1,21 +1,22 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
-export interface IMultiLineTextEntryProps {
+export interface ITextEntryProps {
     id: string;
-    value?: string;
+    multiline: boolean;
+    value?: string | number;
     label?: string;
     placeholder?: string;
     errorText?: string;
     error?: boolean;
     required?: boolean;
-    handleChange: (newValue: string) => void;
+    handleChange: (newValue: string | number) => void;
     handleDoubleClick?: () => void;
     handleBlur?: () => void;
 }
 
-function MultiLineTextEntry({id, handleChange, handleDoubleClick, handleBlur, label, value,
-    placeholder = '', errorText, error = false, required = false}: IMultiLineTextEntryProps) {
+function TextEntry({id, multiline, handleChange, handleDoubleClick, handleBlur, label, value,
+    placeholder = '', errorText, error = false, required = false}: ITextEntryProps) {
     return (
         <div style={{ display: 'flex', padding: '0px 10px 0px 10px' }}>
             <ReactMD.TextField
@@ -29,8 +30,8 @@ function MultiLineTextEntry({id, handleChange, handleDoubleClick, handleBlur, la
                 onChange={handleChange}
                 onDoubleClick={handleDoubleClick}
                 onBlur={handleBlur}
-                rows={1}
-                maxRows={-1}
+                rows={multiline ? 1 : undefined}
+                maxRows={multiline ? -1 : undefined}
                 style={{ flex: '1', margin: '0px 8px 0px 8px' }}
                 lineDirection='center'
                 className='md-cell md-cell--bottom'
@@ -39,4 +40,4 @@ function MultiLineTextEntry({id, handleChange, handleDoubleClick, handleBlur, la
     );
 }
 
-export default MultiLineTextEntry;
+export default TextEntry;

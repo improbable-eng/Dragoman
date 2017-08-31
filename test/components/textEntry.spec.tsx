@@ -2,17 +2,18 @@
 // import { spy } from 'sinon';
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { SingleLineTextEntry, ISingleLineTextEntryProps} from '../../app/components/singleLineTextEntry';
+import TextEntry, { ITextEntryProps} from '../../app/components/textEntry';
 
 // const CounterAny = Counter as any;
 
 function setup() {
-  const singleLineTextEntryProps: ISingleLineTextEntryProps = {
+  const textEntryProps: ITextEntryProps = {
     id: 'testID',
+    multiline: false,
     handleChange: (newValue: string | number) => { console.log(`newValue: ${newValue}`); },
   };
 
-  const component = shallow(<SingleLineTextEntry {...singleLineTextEntryProps} />);
+  const component = shallow(<TextEntry {...textEntryProps} />);
 
   return {
     component,
