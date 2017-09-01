@@ -1,13 +1,12 @@
 const { app, BrowserWindow, Menu, shell, ipcMain, Notification } = require('electron');
 const url = require('url');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const { accessSync } = require('fs');
 const ipcConstants = require('./ipc/constants');
 const { autoUpdater } = require('electron-updater');
 
 const DEV_PATH_TO_POLYGLOT_BINARY = path.join(__dirname, "polyglot_deploy.jar");
-console.log(DEV_PATH_TO_POLYGLOT_BINARY);
 
 const Visitor = require('universal-analytics').Visitor;
 const visitor = new Visitor('UA-105606228-1');
@@ -58,6 +57,10 @@ const createWindow = () => {
         mainWindow.focus();
     });
 
+    mainWindow.webContents.on('will-navigate', ev => {
+        ev.preventDefault()
+    })
+
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
@@ -76,7 +79,8 @@ app.on('ready', () => {
             if (process.env.NODE_ENV !== 'development') {
                 autoUpdater.checkForUpdates()
             }
-        });
+        })
+        .then(checkRuntimeJavaVersion());
     visitor.event('dragoman', 'lifecycle', 'ready').send();
 });
 
@@ -154,8 +158,26 @@ autoUpdater.on('update-downloaded', (info) => {
 function registerIpcListeners() {
     ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, listServices);
     ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, callService);
-    ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, validatePaths);
+    // ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, validatePaths);
     ipcMain.on(ipcConstants.CANCEL_REQUEST, killChildProcess);
+}
+
+function checkRuntimeJavaVersion() {
+    var rJV = exec("java -version", (error, stdout, stderr) => {
+        if (error) {
+            console.error("Error checking java version")
+        } else {
+            console.log(stdout, stderr);
+            const regex = /java version "([0-9]+.[0-9]+.[_0-9]*)"/g;
+            const myNotification = new Notification({
+                title: 'Dragoman',
+                subtitle: 'Java Version',
+                body: stdout,
+                icon: '../resources/dragoman-logo.png',
+                actions: [{ text: 'Ok', type: 'button' }]
+            });
+        }
+    });
 }
 
 //*** Calling polyglot and returning results to browser window ***//
@@ -311,21 +333,21 @@ function callService(event, callServiceRequest) {
 
 /* A method for checking if local paths are valid, takes a list of strings and returns a list of booleans.
    The id is passed straight back to allow the renderer to identify which component sent the request */
-function validatePaths(event, validatePathsRequest) {
-    console.log("Request to validate paths: ", validatePathsRequest);
-    var validPathList = [];
-    for (i = 0; i < validatePathsRequest.paths.length; i++) {
-        try {
-            accessSync(validatePathsRequest.paths[i]);
-            validPathList.push(true);
-        } catch (err) {
-            console.warn("path ", validatePathsRequest.paths[i], " does not exist");
-            validPathList.push(false);
-        }
-    }
-    console.log(validPathList);
-    event.sender.send(ipcConstants.VALIDATE_PATHS_RESPONSE, { id: validatePathsRequest.id, validPaths: validPathList });
-}
+// function validatePaths(event, validatePathsRequest) {
+//     console.log("Request to validate paths: ", validatePathsRequest);
+//     var validPathList = [];
+//     for (i = 0; i < validatePathsRequest.paths.length; i++) {
+//         try {
+//             accessSync(validatePathsRequest.paths[i]);
+//             validPathList.push(true);
+//         } catch (err) {
+//             console.warn("path ", validatePathsRequest.paths[i], " does not exist");
+//             validPathList.push(false);
+//         }
+//     }
+//     console.log(validPathList);
+//     event.sender.send(ipcConstants.VALIDATE_PATHS_RESPONSE, { id: validatePathsRequest.id, validPaths: validPathList });
+// }
 
 /* Users can cancel long running requests. This will remove all running child processes and return 
    the success of the operation. */

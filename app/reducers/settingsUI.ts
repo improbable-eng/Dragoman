@@ -7,9 +7,10 @@ export type SettingsUIState = Readonly<{
   protoDiscoveryRootError: boolean;
   configSetPathError: boolean;
   tlsCaCertPathError: boolean;
-  // There can be multiple paths for the addProtocIncludes field, we want to be able to validate each one to provide
-  // hints to users as to which path is wrong.
   addProtocIncludesErrors: boolean[];
+  oauthRefreshTokenEndpointUrlError: boolean;
+  oauthRefreshTokenPathError: boolean;
+  oauthAccessTokenPathError: boolean;
 }>;
 
 const initialSettingsUIState: SettingsUIState = {
@@ -19,6 +20,9 @@ const initialSettingsUIState: SettingsUIState = {
   configSetPathError: false,
   tlsCaCertPathError: false,
   addProtocIncludesErrors: [],
+  oauthRefreshTokenEndpointUrlError: false,
+  oauthRefreshTokenPathError: false,
+  oauthAccessTokenPathError: false,
 };
 
 export default function settingsUIReducer(state: SettingsUIState = initialSettingsUIState, action: Action<any>): SettingsUIState {
@@ -57,6 +61,24 @@ export default function settingsUIReducer(state: SettingsUIState = initialSettin
     return {
       ...state,
       addProtocIncludesErrors: action.payload,
+    };
+  }
+  if (isActionOfType(action, SettingsUIActions.setOauthRefreshTokenEndpointUrlError)) {
+    return {
+      ...state,
+      oauthRefreshTokenEndpointUrlError: action.payload,
+    };
+  }
+  if (isActionOfType(action, SettingsUIActions.setOauthRefreshTokenPathError)) {
+    return {
+      ...state,
+      oauthRefreshTokenPathError: action.payload,
+    };
+  }
+  if (isActionOfType(action, SettingsUIActions.setOauthAccessTokenPathError)) {
+    return {
+      ...state,
+      oauthAccessTokenPathError: action.payload,
     };
   }
   return state;

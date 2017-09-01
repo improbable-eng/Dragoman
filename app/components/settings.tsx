@@ -13,70 +13,51 @@ export interface SettingsComponentState {
 }
 
 export interface SettingsComponentMethods {
-    handleEndpointChange: (newEndpoint: string) => void;
-    handleProtoDiscoveryRootChange: (newProtoDiscoveryRoot: string) => void;
-    handleConfigSetPathChange: (newConfigSetPath: string) => void;
-    handleConfigNameChange: (newConfigName: string) => void;
-    handleTlsCaCertPathChange: (newTlsCaCertPath: string) => void;
-    handleDeadlineMsChange: (newDeadlineMs: number) => void;
-    handleAddProtocIncludesChange: (newAddProtocIncludes: string) => void;
-    handlePathDoubleClick: (settingsId: string, message: string, allowMultiSelect: boolean) => void;
-    handlePathBlur: (settingsId: string) => void;
+    handleChange: (newValue: string | number, stateId: string) => void;
+    handlePathDoubleClick: (settingsId: string, message: string, allowMultiSelect?: boolean) => void;
+    handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => void;
 }
 
 export default function Settings({ settingsDataState, settingsUIState,
-    handleEndpointChange, handleProtoDiscoveryRootChange, handleConfigSetPathChange,
-    handleConfigNameChange, handleTlsCaCertPathChange, handleDeadlineMsChange,
-    handleAddProtocIncludesChange, handlePathDoubleClick,
-    handlePathBlur }: SettingsComponentProps) {
+    handlePathDoubleClick, handleChange, handleDrop }: SettingsComponentProps) {
     return (
         <div>
             <TextEntry
                 id={SETTINGS_IDS.ENDPOINT}
-                multiline={false}
                 label='gRPC Endpoint'
                 value={settingsDataState.endpoint}
                 errorText='Format must be host:port'
                 placeholder='<host>:<port>'
-                handleChange={handleEndpointChange}
+                handleChange={handleChange}
                 required={settingsUIState.endpointRequired}
                 error={settingsUIState.endpointError}
             />
             <TextEntry
                 id={SETTINGS_IDS.PROTO_DISCOVERY_ROOT}
-                multiline={false}
                 value={settingsDataState.protoDiscoveryRoot}
-                handleChange={handleProtoDiscoveryRootChange}
+                handleChange={handleChange}
                 label='Proto Root Path'
                 placeholder='/path/to/protoRoot'
                 errorText='Proto Root Path is invalid'
                 error={settingsUIState.protoDiscoveryRootError}
-                handleDoubleClick={() =>
-                    handlePathDoubleClick(SETTINGS_IDS.PROTO_DISCOVERY_ROOT,
-                        'Select Proto Discovery Root',
-                        false)}
-                handleBlur={() => handlePathBlur(SETTINGS_IDS.PROTO_DISCOVERY_ROOT)}
+                handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.PROTO_DISCOVERY_ROOT, 'Select Proto Discovery Root')}
+                handleDrop={handleDrop}
             />
             <TextEntry
                 id={SETTINGS_IDS.CONFIG_SET_PATH}
-                multiline={false}
                 value={settingsDataState.configSetPath}
-                handleChange={handleConfigSetPathChange}
+                handleChange={handleChange}
                 label='Config Path'
                 placeholder='/path/to/config.pb.json'
                 errorText='Config Path is invalid'
-                handleBlur={() => handlePathBlur(SETTINGS_IDS.CONFIG_SET_PATH)}
-                handleDoubleClick={() =>
-                    handlePathDoubleClick(SETTINGS_IDS.CONFIG_SET_PATH,
-                        'Select Config Path',
-                        false)}
+                handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.CONFIG_SET_PATH, 'Select Config Path')}
                 error={settingsUIState.configSetPathError}
+                handleDrop={handleDrop}
             />
             <TextEntry
                 id={SETTINGS_IDS.CONFIG_NAME}
-                multiline={false}
                 value={settingsDataState.configName}
-                handleChange={handleConfigNameChange}
+                handleChange={handleChange}
                 label='Config Name'
                 placeholder='development'
             />
@@ -84,22 +65,18 @@ export default function Settings({ settingsDataState, settingsUIState,
                 id={SETTINGS_IDS.TLS_CA_CERT_PATH}
                 multiline={false}
                 value={settingsDataState.tlsCaCertPath}
-                handleChange={handleTlsCaCertPathChange}
+                handleChange={handleChange}
                 label='TLS CA Certificate Path'
                 placeholder='/path/to/tlsCaCertificate'
                 errorText='TLS CA Certificate Path is invalid'
                 error={settingsUIState.tlsCaCertPathError}
-                handleBlur={() => handlePathBlur(SETTINGS_IDS.TLS_CA_CERT_PATH)}
-                handleDoubleClick={() =>
-                    handlePathDoubleClick(SETTINGS_IDS.TLS_CA_CERT_PATH,
-                        'Select TLS CA Certificate Path',
-                        false)}
+                handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.TLS_CA_CERT_PATH, 'Select TLS CA Certificate Path')}
+                handleDrop={handleDrop}
             />
             <TextEntry
                 id={SETTINGS_IDS.DEADLINE_MS}
-                multiline={false}
-                value={settingsDataState.deadlineMs <= 0 ? undefined : settingsDataState.deadlineMs}
-                handleChange={handleDeadlineMsChange}
+                value={settingsDataState.deadlineMs <= 0 ? '' : settingsDataState.deadlineMs}
+                handleChange={handleChange}
                 label='Deadline (milliseconds)'
                 placeholder='5000'
             />
@@ -107,7 +84,7 @@ export default function Settings({ settingsDataState, settingsUIState,
                 id={SETTINGS_IDS.ADD_PROTOC_INCLUDES}
                 multiline={true}
                 value={settingsDataState.addProtocIncludes}
-                handleChange={handleAddProtocIncludesChange}
+                handleChange={handleChange}
                 label='Add Protoc Includes'
                 placeholder='<path1>, <path2>'
                 // TODO: Move this logic out of the presentational component
@@ -122,7 +99,53 @@ export default function Settings({ settingsDataState, settingsUIState,
                     handlePathDoubleClick(SETTINGS_IDS.ADD_PROTOC_INCLUDES,
                         'Add Protoc Include Paths',
                         true)}
-                handleBlur={() => handlePathBlur(SETTINGS_IDS.ADD_PROTOC_INCLUDES)}
+                handleDrop={(event, id) => handleDrop(event, id, true)}
+            />
+            <TextEntry
+                id={SETTINGS_IDS.OAUTH_REFRESH_TOKEN_ENDPOINT_URL}
+                value={settingsDataState.oauthRefreshTokenEndpointUrl}
+                handleChange={handleChange}
+                label='Oauth refresh token endpoint url'
+                placeholder='https://example.com/oauth/endpoint'
+                errorText='Not a valid url'
+                error={settingsUIState.oauthRefreshTokenEndpointUrlError}
+            />
+            <TextEntry
+                id={SETTINGS_IDS.OAUTH_CLIENT_ID}
+                value={settingsDataState.oauthClientId}
+                handleChange={handleChange}
+                label='Oauth client id'
+                placeholder='id'
+            />
+            <TextEntry
+                id={SETTINGS_IDS.OAUTH_CLIENT_SECRET}
+                type={'password'}
+                value={settingsDataState.oauthClientSecret}
+                handleChange={handleChange}
+                label='Oauth Client Secret'
+                placeholder='secret'
+            />
+            <TextEntry
+                id={SETTINGS_IDS.OAUTH_REFRESH_TOKEN_PATH}
+                value={settingsDataState.oauthRefreshTokenPath}
+                handleChange={handleChange}
+                label='Oauth refresh token path'
+                placeholder='path/to/refresh_token'
+                error={settingsUIState.oauthRefreshTokenPathError}
+                errorText='Oaut Refresh Token Path is invalid'
+                handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.OAUTH_REFRESH_TOKEN_PATH, 'Add Oauth Refresh Token Path')}
+                handleDrop={handleDrop}
+            />
+            <TextEntry
+                id={SETTINGS_IDS.OAUTH_ACCESS_TOKEN_PATH}
+                value={settingsDataState.oauthAccessTokenPath}
+                handleChange={handleChange}
+                label='Oauth access token path'
+                placeholder='path/to/access_token'
+                error={settingsUIState.oauthAccessTokenPathError}
+                errorText='Oauth Access Token Path is invalid'
+                handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.OAUTH_ACCESS_TOKEN_PATH, 'Add Oauth Access Token Path')}
+                handleDrop={handleDrop}
             />
         </div>);
 }

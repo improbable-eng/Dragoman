@@ -1,21 +1,119 @@
 /* tslint:disable:no-console */
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import { remote } from 'electron';
+import { accessSync } from 'fs';
+import * as validUrl from 'valid-url';
 
 import Settings, { SettingsComponentMethods, SettingsComponentState } from '../components/settings';
 
 import { AppState } from '../reducers/index';
 import { SETTINGS_IDS } from '../reducers/settingsData';
 
-import {
-  ValidatePathsRequest, ValidatePathsResponse,
-} from '../ipc/index';
-
-const ipcConstants = require('../ipc/constants');
-import { ipcRenderer, remote } from 'electron';
-
 import * as SettingsDataActions from '../actions/settingsData';
 import * as SettingsUIActions from '../actions/settingsUI';
+
+function handleChangeAndError(newValue: string, stateId: string, dispatch: Dispatch<AppState>) {
+  switch (stateId) {
+    case SETTINGS_IDS.ENDPOINT:
+      const endpoint = newValue;
+      const endpointError = (endpoint === '') ? false : !validateEndpoint(endpoint);
+      dispatch(SettingsDataActions.setEndpoint(endpoint));
+      dispatch(SettingsUIActions.setEndpointError(endpointError));
+      break;
+    case SETTINGS_IDS.PROTO_DISCOVERY_ROOT:
+      const protoDiscoveryRoot = newValue;
+      const protoDiscoveryRootError = (protoDiscoveryRoot === '') ? false : !validatePath(protoDiscoveryRoot);
+      dispatch(SettingsDataActions.setProtoDiscoveryRoot(protoDiscoveryRoot));
+      dispatch(SettingsUIActions.setProtoDiscoveryRootError(protoDiscoveryRootError));
+      break;
+    case SETTINGS_IDS.CONFIG_SET_PATH:
+      const configSetPath = newValue;
+      const configSetPathError = (configSetPath === '') ? false : !validatePath(configSetPath);
+      dispatch(SettingsDataActions.setConfigSetPath(configSetPath));
+      dispatch(SettingsUIActions.setConfigSetPathError(configSetPathError));
+      break;
+    case SETTINGS_IDS.ADD_PROTOC_INCLUDES:
+      const addProtocIncludes = (newValue);
+      const pathArray = addProtocIncludes.split(',').map(elem => elem.trim());
+      const addProtocIncludesErrors = (addProtocIncludes === '') ? [] : validatePaths(pathArray).map(elem => !elem);
+      dispatch(SettingsDataActions.setAddProtocIncludes(addProtocIncludes));
+      dispatch(SettingsUIActions.setAddProtocIncludesError(addProtocIncludesErrors));
+      break;
+    case SETTINGS_IDS.TLS_CA_CERT_PATH:
+      const tlsCaCertPath = newValue;
+      const tlsCaCertPathError = (tlsCaCertPath === '') ? false : !validatePath(tlsCaCertPath);
+      dispatch(SettingsDataActions.setTlsCaCertPath(tlsCaCertPath));
+      dispatch(SettingsUIActions.setTlsCaCertPathError(tlsCaCertPathError));
+      break;
+    case SETTINGS_IDS.DEADLINE_MS:
+      const deadlineMs = newValue;
+      const parsedDeadline = parseInt(deadlineMs, 10);
+      if (!isNaN(parsedDeadline)) {
+        dispatch(SettingsDataActions.setDeadlineMs(parsedDeadline));
+      } else {
+        // A negative deadline is a placeholder for being unset
+        dispatch(SettingsDataActions.setDeadlineMs(-1));
+      }
+      break;
+    case SETTINGS_IDS.CONFIG_NAME:
+      const configName = newValue;
+      dispatch(SettingsDataActions.setConfigName(configName));
+      break;
+    case SETTINGS_IDS.OAUTH_REFRESH_TOKEN_ENDPOINT_URL:
+      const oauthRefreshTokenEndpointUrl = newValue;
+      const oauthRefreshTokenEndpointUrlError = (oauthRefreshTokenEndpointUrl === '') ? false : !validateUri(oauthRefreshTokenEndpointUrl);
+      dispatch(SettingsDataActions.setOauthRefreshTokenEndpointUrl(oauthRefreshTokenEndpointUrl));
+      dispatch(SettingsUIActions.setOauthRefreshTokenEndpointUrlError(oauthRefreshTokenEndpointUrlError));
+      break;
+    case SETTINGS_IDS.OAUTH_CLIENT_ID:
+      const oauthClientId = newValue;
+      dispatch(SettingsDataActions.setOauthClientId(oauthClientId));
+      break;
+    case SETTINGS_IDS.OAUTH_CLIENT_SECRET:
+      const oauthClientSecret = newValue;
+      dispatch(SettingsDataActions.setOauthClientSecret(oauthClientSecret));
+      break;
+    case SETTINGS_IDS.OAUTH_REFRESH_TOKEN_PATH:
+      const oauthRefreshTokenPath = newValue;
+      const oauthRefreshTokenPathError = (oauthRefreshTokenPath === '') ? false : !validatePath(oauthRefreshTokenPath);
+      dispatch(SettingsDataActions.setOauthRefreshTokenPath(oauthRefreshTokenPath));
+      dispatch(SettingsUIActions.setOauthRefreshTokenPathError(oauthRefreshTokenPathError));
+      break;
+    case SETTINGS_IDS.OAUTH_ACCESS_TOKEN_PATH:
+      const oauthAccessTokenPath = newValue;
+      const oauthAccessTokenPathError = (oauthAccessTokenPath === '') ? false : !validatePath(oauthAccessTokenPath);
+      dispatch(SettingsDataActions.setOauthAccessTokenPath(oauthAccessTokenPath));
+      dispatch(SettingsUIActions.setOauthAccessTokenPathError(oauthAccessTokenPathError));
+      break;
+    default:
+      console.error(`Unknown settings state id ${stateId} passed to handlePathBlur`);
+      break;
+  }
+}
+
+function validateUri(uri: string): boolean {
+  const validatedUri = validUrl.isUri(uri);
+  return validatedUri !== undefined;
+}
+
+function validatePath(path: string): boolean {
+  return validatePaths([path])[0];
+}
+
+function validatePaths(paths: string[]): boolean[] {
+  const validPathList = [];
+  for (const path of paths) {
+    try {
+      accessSync(path);
+      validPathList.push(true);
+    } catch (err) {
+      console.warn(path, ' does not exist');
+      validPathList.push(false);
+    }
+  }
+  return validPathList;
+}
 
 /** Validates that the endpoint is entered in the valid host:port format required by polyglot.
  * @param {string} newEndpoint - The endpoint to test for validity
@@ -23,105 +121,6 @@ import * as SettingsUIActions from '../actions/settingsUI';
   */
 function validateEndpoint(newEndpoint: string) {
   return /[^\:]+:[0-9]+/.test(newEndpoint);
-}
-
-function handleEndpointChangeAndError(newEndpoint: string) {
-  return (dispatch: Dispatch<AppState>) => {
-    dispatch(SettingsDataActions.setEndpoint(newEndpoint));
-    dispatch(SettingsUIActions.setEndpointError(!validateEndpoint(newEndpoint)));
-  };
-}
-
-/** Handles when a text input field corresponding to a path has fired  the onBlur event. The path(s) will be validated
- * to check that they exist. This must be done by the main process. An event is passed to ipcMain which will check validity
- * and then return the result asynchronously.
- * @param {string} stateId - The ID of the text field: one of the IDs defined in '../reducers/settingsData'
- * @returns {void}
-  */
-function handlePathBlur(stateId: string) {
-  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
-    console.log(`Handling path blur from ${stateId}`);
-
-    let pathArray: string[];
-
-    switch (stateId) {
-      case SETTINGS_IDS.PROTO_DISCOVERY_ROOT:
-        if (getState().settingsState.settingsDataState.protoDiscoveryRoot === '') {
-          dispatch(SettingsUIActions.setProtoDiscoveryRootError(false));
-          return;
-        } else {
-          pathArray = [getState().settingsState.settingsDataState.protoDiscoveryRoot];
-        }
-        break;
-      case SETTINGS_IDS.CONFIG_SET_PATH:
-        if (getState().settingsState.settingsDataState.configSetPath === '') {
-          dispatch(SettingsUIActions.setConfigSetPathError(false));
-          return;
-        } else {
-          pathArray = [getState().settingsState.settingsDataState.configSetPath];
-        }
-        break;
-      case SETTINGS_IDS.ADD_PROTOC_INCLUDES:
-        if (getState().settingsState.settingsDataState.addProtocIncludes === '') {
-          dispatch(SettingsUIActions.setAddProtocIncludesError([]));
-          return;
-        } else {
-          pathArray = getState().settingsState.settingsDataState.addProtocIncludes
-            .split(',')
-            .map(elem => elem.trim());
-        }
-        break;
-      case SETTINGS_IDS.TLS_CA_CERT_PATH:
-        if (getState().settingsState.settingsDataState.tlsCaCertPath === '') {
-          dispatch(SettingsUIActions.setTlsCaCertPathError(false));
-          return;
-        } else {
-          pathArray = [getState().settingsState.settingsDataState.tlsCaCertPath];
-        }
-        break;
-      default:
-        console.error(`Unknown settings state id ${stateId} passed to handlePathBlur`);
-        return;
-    }
-
-    console.log(`Validating paths ${pathArray} from  ${stateId}`);
-
-    const validatePathsRequest: ValidatePathsRequest = {
-      paths: pathArray,
-      id: stateId,
-    };
-
-    ipcRenderer.once(ipcConstants.VALIDATE_PATHS_RESPONSE,
-      (event: Event, response: ValidatePathsResponse) => validateSystemPathResponse(response, dispatch));
-    ipcRenderer.send(ipcConstants.VALIDATE_PATHS_REQUEST, validatePathsRequest);
-  };
-}
-
-/** Handles the response from the validate system path request.
- * @param {ValidatePathsResponsestring} res - The response from the main process containing the validity of the paths, and the settings ID.
- * @param {Dispatch<AppState>} dispatch - The dispatch method to alter the store.
- * @returns {void}
-  */
-function validateSystemPathResponse(res: ValidatePathsResponse, dispatch: Dispatch<AppState>) {
-  console.log('Received validate paths response: ', res);
-
-  switch (res.id) {
-    case SETTINGS_IDS.PROTO_DISCOVERY_ROOT:
-      dispatch(SettingsUIActions.setProtoDiscoveryRootError(!res.validPaths[0]));
-      return;
-    case SETTINGS_IDS.CONFIG_SET_PATH:
-      dispatch(SettingsUIActions.setConfigSetPathError(!res.validPaths[0]));
-      return;
-    case SETTINGS_IDS.ADD_PROTOC_INCLUDES:
-      dispatch(SettingsUIActions.setAddProtocIncludesError(res.validPaths.map(elem => !elem)));
-      return;
-    case SETTINGS_IDS.TLS_CA_CERT_PATH:
-      dispatch(SettingsUIActions.setTlsCaCertPathError(!res.validPaths[0]));
-      return;
-    default:
-      console.error(`Unknown settings state id ${res.id} passed to validateSystemPathResponse`);
-      return;
-  }
 }
 
 /** Shows the native directory dialog to allow users to input a file or directory path.
@@ -149,31 +148,20 @@ function showDirectoryDialog(id: string, macMessage: string = '', multiSelection
   console.log('Paths ', pathList, ' selected using path finder dialog');
 
   if (multiSelection) {
-    switch (id) {
-      case SETTINGS_IDS.ADD_PROTOC_INCLUDES:
-        dispatch(SettingsDataActions.setAddProtocIncludes(pathList.join(', ')));
-        return;
-      default:
-        console.error(`Unknown settings state id ${id} passed to showDirectoryDialog`);
-        return;
-    }
+    handleChangeAndError(pathList.join(', '), id, dispatch);
   } else {
-    console.log(pathList);
     const path = (pathList.length >= 1) ? pathList[0] : '';
-    switch (id) {
-      case SETTINGS_IDS.PROTO_DISCOVERY_ROOT:
-        dispatch(SettingsDataActions.setProtoDiscoveryRoot(path));
-        return;
-      case SETTINGS_IDS.CONFIG_SET_PATH:
-        dispatch(SettingsDataActions.setConfigSetPath(path));
-        return;
-      case SETTINGS_IDS.TLS_CA_CERT_PATH:
-        dispatch(SettingsDataActions.setTlsCaCertPath(path));
-        return;
-      default:
-        console.error(`Unknown settings state id ${id} passed to showDirectoryDialog`);
-        return;
-    }
+    handleChangeAndError(path, id, dispatch);
+  }
+}
+
+function handleDrop(event: React.DragEvent<HTMLElement>, id: string, multiSelection = false, dispatch: Dispatch<AppState>) {
+  if (multiSelection) {
+    const pathList = Array.from(event.dataTransfer.files).map(elem => elem.path).join(', ');
+    handleChangeAndError(pathList, id, dispatch);
+  } else {
+    const path = (event.dataTransfer.files.length >= 1) ? event.dataTransfer.files[0].path : '';
+    handleChangeAndError(path, id, dispatch);
   }
 }
 
@@ -196,15 +184,9 @@ function mapStateToProps(state: AppState): SettingsComponentState {
   */
 function mapDispatchToProps(dispatch: Dispatch<AppState>): SettingsComponentMethods {
   return {
-    handleEndpointChange: (newEndpoint: string) => dispatch(handleEndpointChangeAndError(newEndpoint)), // onEndpointChange(dispatch, newEndpoint),
-    handleProtoDiscoveryRootChange: (newProtoDiscoveryRoot: string) => dispatch(SettingsDataActions.setProtoDiscoveryRoot(newProtoDiscoveryRoot)),
-    handleConfigSetPathChange: (newConfigSetPath: string) => dispatch(SettingsDataActions.setConfigSetPath(newConfigSetPath)),
-    handleConfigNameChange: (newConfigName: string) => dispatch(SettingsDataActions.setConfigName(newConfigName)),
-    handleTlsCaCertPathChange: (newTlsCaCertPath: string) => dispatch(SettingsDataActions.setTlsCaCertPath(newTlsCaCertPath)),
-    handleDeadlineMsChange: (newDeadlineMs: number) => dispatch(SettingsDataActions.setDeadlineMs(newDeadlineMs)),
-    handleAddProtocIncludesChange: (newAddProtocIncludes: string) => dispatch(SettingsDataActions.setAddProtocIncludes(newAddProtocIncludes)),
+    handleChange: (newEndpoint: string, stateId: string) => handleChangeAndError(newEndpoint, stateId, dispatch),
     handlePathDoubleClick: (id: string, macMessage?: string, multiSelection?: boolean) => showDirectoryDialog(id, macMessage, multiSelection, dispatch),
-    handlePathBlur: (id: string) => dispatch(handlePathBlur(id)), // Dummy will be overwritten in mergeProps
+    handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => handleDrop(event, id, multiSelection, dispatch),
   };
 }
 
