@@ -1,9 +1,6 @@
 import { isActionOfType, Action } from '../actions/actions';
 import * as ServiceListActions from '../actions/serviceList';
 
-import { SettingsDataState as PolyglotSettings,
-    initialSettingsDataState as initialPolyglotSettings } from './settingsData';
-
 
 export class Method {
     public name: string = '';
@@ -44,29 +41,11 @@ export class DragomanService extends Service {
     }
 }
 
-export class ListServicesOptions {
-    public serviceFilter: string = '';
-    public methodFilter: string = '';
-
-    public constructor(init?: Partial<ListServicesOptions>) {
-        Object.assign(this, init);
-    }
-}
-
 export type ServiceListState = Readonly<{
     serviceFilter: string;
     methodFilter: string;
     serviceMap: Map<string, DragomanService>;
 }>;
-
-export class ListServicesRequest {
-    public polyglotSettings: PolyglotSettings = initialPolyglotSettings;
-    public listServicesOptions: ListServicesOptions = new ListServicesOptions();
-
-    public constructor(init?: Partial<ListServicesRequest>) {
-        Object.assign(this, init);
-    }
-}
 
 const initialServiceListState: ServiceListState = {
     serviceFilter: '',

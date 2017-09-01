@@ -10,12 +10,10 @@ import * as ServiceListActions from '../actions/serviceList';
 import { AppState } from '../reducers/index';
 import { PolyglotService } from '../reducers/serviceList';
 
-// import { ListServicesRequest, ListServicesOptions } from '../reducers/serviceList';
-
 import ServiceList,
 { ServiceListComponentMethods, ServiceListComponentState } from '../components/serviceList';
 
-import { checkConsoleErrorMessage } from './App';
+import { checkConsoleErrorMessage } from './app';
 
 export interface ServiceListContainerProps {
   openErrorDialog: (title: string, explanation: string) => void;

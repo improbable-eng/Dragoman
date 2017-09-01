@@ -18,20 +18,11 @@ $md-tertiary-color: $md-green-200;
   padding: 0px;
 }
 
+html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
+html > body > #root > div > div > #main-content {
+  height: 100%;
+}
+
 body {
-  margin: 0;
-}
-
-// Ace editor
-
-.ace_editor, .ace_editor div {
-    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
-}
-
-.ace_line {
-    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
-}
-
-.ace_line span {
-    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  overflow: hidden;
 }

@@ -101,6 +101,8 @@ function validatePath(path: string): boolean {
   return validatePaths([path])[0];
 }
 
+/* A method for checking if local paths are valid, takes a list of strings and returns a list of booleans.
+   The id is passed straight back to allow the renderer to identify which component sent the request */
 function validatePaths(paths: string[]): boolean[] {
   const validPathList = [];
   for (const path of paths) {

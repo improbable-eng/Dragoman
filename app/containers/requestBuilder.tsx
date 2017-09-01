@@ -1,6 +1,8 @@
 /* tslint:disable:no-console */
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import { spawn } from 'child_process';
+import * as path from 'path';
 
 const ipcConstants = require('../ipc/constants');
 import { ipcRenderer } from 'electron';
@@ -11,7 +13,7 @@ import * as ResponseViewerActions from '../actions/responseViewer';
 import * as SettingsUIActions from '../actions/settingsUI';
 import * as AppUIActions from '../actions/appUI';
 
-import { CallServiceRequest, CallServiceOptions } from '../reducers/requestBuilder';
+// import { CallServiceRequest, CallServiceOptions } from '../reducers/requestBuilder';
 import { AppState } from '../reducers/index';
 
 import RequestBuilder,
@@ -41,37 +43,97 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
         openErrorDialog('Error parsing request', 'Ensure that the request is valid JSON');
     }
 
-    const callServiceRequest = new CallServiceRequest({
-        polyglotSettings: getState().settingsState.settingsDataState,
-        callServiceOptions: new CallServiceOptions({
-            jsonBody: redactedJsonInput,
-            fullMethod: getState().requestBuilderState.fullMethod,
-        }),
+    const DEV_PATH_TO_POLYGLOT_BINARY = '/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar';
+
+    let pathToPolyglotBinary;
+
+    if (process.env.NODE_ENV === 'development') {
+        pathToPolyglotBinary = DEV_PATH_TO_POLYGLOT_BINARY;
+    } else {
+        pathToPolyglotBinary = path.join(__dirname, 'polyglot_deploy.jar').replace('app.asar', 'app.asar.unpacked');
+    }
+
+    const echoCommandLineArgs = [getState().requestBuilderState.request];
+    const echo = spawn('echo', echoCommandLineArgs);
+    // childProcesses[echo.pid] = echo;
+
+    // Build polyglot command
+    const polyglotCommand = 'java';
+    const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=call'];
+    const polyglotSettings = getState().settingsState.settingsDataState;
+    const callServiceOptions = getState().requestBuilderState;
+
+    if (polyglotSettings.protoDiscoveryRoot !== '') {
+        polyglotCommandLineArgs.push(`--proto_discovery_root=${polyglotSettings.protoDiscoveryRoot}`);
+    }
+    if (polyglotSettings.configSetPath !== '') {
+        polyglotCommandLineArgs.push(`--config_set_path=${polyglotSettings.configSetPath}`);
+    }
+    if (polyglotSettings.configName !== '') {
+        polyglotCommandLineArgs.push(`--config_name=${polyglotSettings.configName}`);
+    }
+    if (polyglotSettings.deadlineMs > 0) {
+        polyglotCommandLineArgs.push(`--deadline_ms=${polyglotSettings.deadlineMs}`);
+    }
+    if (polyglotSettings.tlsCaCertPath !== '') {
+        polyglotCommandLineArgs.push(`--tls_ca_certificate= + polyglotSettings.tlsCaCertPath}`);
+    }
+    if (polyglotSettings.endpoint !== '') {
+        polyglotCommandLineArgs.push(`--endpoint=${polyglotSettings.endpoint}`);
+    }
+    if (callServiceOptions.fullMethod !== '') {
+        polyglotCommandLineArgs.push(`--full_method= + callServiceOptions.fullMethod}`);
+    }
+    if (polyglotSettings.addProtocIncludes !== '') {
+        polyglotCommandLineArgs.push(`--add_protoc_includes=${polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')}`);
+    }
+
+    console.log('Running command ', polyglotCommand, ' ', polyglotCommandLineArgs.join(' '));
+
+    const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
+    // childProcesses[polyglot.pid] = polyglot;
+
+    let echoStdErr = '';
+
+    echo.stdout.on('data', (data) => {
+        polyglot.stdin.write(data);
     });
 
-    console.log('Calling service with request', callServiceRequest);
+    echo.stderr.on('data', (data) => {
+        console.error(`echoStdErr: ${new TextDecoder('utf-8').decode(data as Buffer)}`);
+        echoStdErr += data;
+    });
 
-    ipcRenderer.once(ipcConstants.CALL_SERVICE_RESPONSE,
-        (event: Event, response: PolyglotResponse) => callServiceResponse(response, dispatch, openErrorDialog));
-    ipcRenderer.send(ipcConstants.CALL_SERVICE_REQUEST, callServiceRequest);
-}
-
-function callServiceResponse(res: PolyglotResponse, dispatch: Dispatch<AppState>,
-    openErrorDialog: (title: string, explanation: string) => void) {
-    dispatch(RequestBuilderActions.setCallRequestInProgress(false));
-
-    console.log(`Received call service response`, res);
-
-    if (!res.error) {
-        // The response can be an array encoded in utf-8
-        if (typeof res.response !== 'string') {
-            res.response = new TextDecoder('utf-8').decode(res.response as ArrayBuffer).trim();
+    echo.on('close', (code) => {
+        console.log(`echo closing with code: ${code}\n`);
+        // delete childProcesses[echo.pid];
+        if (code === 0) {
+            polyglot.stdin.end();
         }
-        dispatch(ResponseViewerActions.setResponse(res.response));
-    } else {
-        openErrorDialog('Error calling service: ', checkConsoleErrorMessage);
-        console.error(`Error ${res.error} \n${res.response}`);
-    }
+    });
+
+    let polyglotStderr = '';
+    let polyglotStdout = '';
+
+    polyglot.stderr.on('data', (data) => {
+        console.warn(`polyglotStdErr: ${new TextDecoder('utf-8').decode(data as Buffer)}`);
+        polyglotStderr += data;
+        });
+
+    polyglot.stdout.on('data', (data) => {
+        console.log(data);
+        polyglotStdout += data;
+    });
+
+    polyglot.on('close', (code) => {
+        // delete childProcesses[polyglot.pid];
+        dispatch(RequestBuilderActions.setCallRequestInProgress(false));
+        if (code !== 0) {
+            openErrorDialog('Error calling service', checkConsoleErrorMessage);
+        } else {
+            dispatch(ResponseViewerActions.setResponse(polyglotStdout));
+        }
+    });
 }
 
 function handleRunClick(openErrorDialog: (title: string, explanation: string) => void) {

@@ -27,8 +27,8 @@ render(
   document.getElementById('root'));
 
 if ((module as any).hot) {
-  (module as any).hot.accept('./containers/App', () => {
-    const NextApp = require('./containers/App').default;
+  (module as any).hot.accept('./containers/app', () => {
+    const NextApp = require('./containers/app').default;
     render(
       <AppContainer>
         <Provider store={store}>

@@ -23,7 +23,7 @@ function serviceList({ serviceMap, handleMethodClick, handleListServicesClick }:
                 secondary={true}
                 flat={true}
                 swapTheming={true}
-                children={'List Services'}
+                children='List Services'
                 onClick={handleListServicesClick}
                 style={{ width: '100%', height: 40, borderRadius: 0, margin: 0 }}
             />

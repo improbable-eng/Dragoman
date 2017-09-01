@@ -79,8 +79,7 @@ app.on('ready', () => {
             if (process.env.NODE_ENV !== 'development') {
                 autoUpdater.checkForUpdates()
             }
-        })
-        .then(checkRuntimeJavaVersion());
+        });
     visitor.event('dragoman', 'lifecycle', 'ready').send();
 });
 
@@ -141,43 +140,15 @@ autoUpdater.on('update-downloaded', (info) => {
     myNotification.once('action', (event, index) => {
         console.log('Action clicked ', index)
         if (index === 0) { // Selected ok
-            autoUpdater.quitAndInstall();
             visitor.event('main', 'autoUpdate', 'updatedInstalled').send();
+            autoUpdater.quitAndInstall();
         }
-    });
-
-    myNotification.once('click', (event, index) => {
-        console.log('Notification clicked', event, index)
-    });
-
-    myNotification.once('close', (event, index) => {
-        console.log('Notification closed', event, index)
     });
 });
 
 function registerIpcListeners() {
-    ipcMain.on(ipcConstants.LIST_SERVICES_REQUEST, listServices);
     ipcMain.on(ipcConstants.CALL_SERVICE_REQUEST, callService);
-    // ipcMain.on(ipcConstants.VALIDATE_PATHS_REQUEST, validatePaths);
     ipcMain.on(ipcConstants.CANCEL_REQUEST, killChildProcess);
-}
-
-function checkRuntimeJavaVersion() {
-    var rJV = exec("java -version", (error, stdout, stderr) => {
-        if (error) {
-            console.error("Error checking java version")
-        } else {
-            console.log(stdout, stderr);
-            const regex = /java version "([0-9]+.[0-9]+.[_0-9]*)"/g;
-            const myNotification = new Notification({
-                title: 'Dragoman',
-                subtitle: 'Java Version',
-                body: stdout,
-                icon: '../resources/dragoman-logo.png',
-                actions: [{ text: 'Ok', type: 'button' }]
-            });
-        }
-    });
 }
 
 //*** Calling polyglot and returning results to browser window ***//
@@ -193,161 +164,143 @@ if (process.env.NODE_ENV === "development") {
     pathToPolyglotBinary = path.join(__dirname, "polyglot_deploy.jar").replace('app.asar', 'app.asar.unpacked');
 }
 
-// TODO: Add use_tls flag 
-function listServices(event, listServicesRequest) {
-    console.log("Received list services request ", listServicesRequest);
-    const { polyglotSettings, listServicesOptions } = listServicesRequest;
+// // TODO: Add use_tls flag 
+// function listServices(event, listServicesRequest) {
+//     console.log("Received list services request ", listServicesRequest);
+//     const { polyglotSettings, listServicesOptions } = listServicesRequest;
 
-    // Build polyglot command
-    const polyglotCommand = 'java';
-    const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=list_services', '--with_message=true', '--list_output_format=json'];
-    if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push('--proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
-    if (listServicesOptions.serviceFilter !== "") polyglotCommandLineArgs.push('--service_filter=' + listServicesOptions.serviceFilter);
-    if (listServicesOptions.methodFilter !== "") polyglotCommandLineArgs.push('--method_filter=' + listServicesOptions.methodFilter);
-    if (polyglotSettings.configSetPath !== "") polyglotCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
-    if (polyglotSettings.configName !== "") polyglotCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
-    if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
-    if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
-    if (polyglotSettings.addProtocIncludes !== "") {
-        polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
-        )
-    };
+//     // Build polyglot command
+//     const polyglotCommand = 'java';
+//     const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=list_services', '--with_message=true', '--list_output_format=json'];
+//     if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push('--proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
+//     if (listServicesOptions.serviceFilter !== "") polyglotCommandLineArgs.push('--service_filter=' + listServicesOptions.serviceFilter);
+//     if (listServicesOptions.methodFilter !== "") polyglotCommandLineArgs.push('--method_filter=' + listServicesOptions.methodFilter);
+//     if (polyglotSettings.configSetPath !== "") polyglotCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
+//     if (polyglotSettings.configName !== "") polyglotCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
+//     if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
+//     if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
+//     if (polyglotSettings.addProtocIncludes !== "") {
+//         polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
+//         )
+//     };
 
-    event.sender.send(ipcConstants.POST_LOGS,
-        { log: "Running polyglot command: " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
-    console.log(`Command: ${polyglotCommand} Args: ${polyglotCommandLineArgs}`);
+//     event.sender.send(ipcConstants.POST_LOGS,
+//         { log: "Running polyglot command: " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
+//     console.log(`Command: ${polyglotCommand} Args: ${polyglotCommandLineArgs}`);
 
-    var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
-    childProcesses[polyglot.pid] = polyglot;
+//     var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
+//     childProcesses[polyglot.pid] = polyglot;
 
-    var polyglotStderr = "";
-    var polyglotStdout = "";
+//     var polyglotStderr = "";
+//     var polyglotStdout = "";
 
-    polyglot.stderr.on('data', (data) => {
-        polyglotStderr += data;
-        event.sender.send(ipcConstants.POST_LOGS, { log: data, level: ipcConstants.LOG_LEVELS.WARN });
-    });
+//     polyglot.stderr.on('data', (data) => {
+//         polyglotStderr += data;
+//         event.sender.send(ipcConstants.POST_LOGS, { log: data, level: ipcConstants.LOG_LEVELS.WARN });
+//     });
 
-    polyglot.stdout.on('data', (data) => {
-        polyglotStdout += data;
-    });
+//     polyglot.stdout.on('data', (data) => {
+//         polyglotStdout += data;
+//     });
 
-    polyglot.on('close', (code) => {
-        delete childProcesses[polyglot.pid];
-        console.log(`Polyglot command closing with code: ${code}\n`);
-        if (code !== 0) {
-            console.warn("Error code: ", code, ". polyglotStderr: ", polyglotStderr);
-            event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: new Error("Error code: " + code), response: polyglotStderr });
-        } else {
-            event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: null, response: polyglotStdout });
-        }
-    });
-}
+//     polyglot.on('close', (code) => {
+//         delete childProcesses[polyglot.pid];
+//         console.log(`Polyglot command closing with code: ${code}\n`);
+//         if (code !== 0) {
+//             console.warn("Error code: ", code, ". polyglotStderr: ", polyglotStderr);
+//             event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: new Error("Error code: " + code), response: polyglotStderr });
+//         } else {
+//             event.sender.send(ipcConstants.LIST_SERVICES_RESPONSE, { error: null, response: polyglotStdout });
+//         }
+//     });
+// }
 
-function callService(event, callServiceRequest) {
-    const { polyglotSettings, callServiceOptions } = callServiceRequest;
+// function callService(event, callServiceRequest) {
+//     const { polyglotSettings, callServiceOptions } = callServiceRequest;
 
-    const echoCommandLineArgs = [callServiceOptions.jsonBody];
-    var echo = spawn("echo", echoCommandLineArgs);
-    childProcesses[echo.pid] = echo;
-    console.log("echo spawned ", echo);
+//     const echoCommandLineArgs = [callServiceOptions.jsonBody];
+//     var echo = spawn("echo", echoCommandLineArgs);
+//     childProcesses[echo.pid] = echo;
+//     console.log("echo spawned ", echo);
 
-    // Build polyglot command
-    const polyglotCommand = 'java';
-    const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=call'];
+//     // Build polyglot command
+//     const polyglotCommand = 'java';
+//     const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=call'];
 
-    if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push('--proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
-    if (polyglotSettings.configSetPath !== "") polyglotCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
-    if (polyglotSettings.configName !== "") polyglotCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
-    if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
-    if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
-    if (polyglotSettings.endpoint !== "") polyglotCommandLineArgs.push('--endpoint=' + polyglotSettings.endpoint);
-    if (callServiceOptions.fullMethod !== "") polyglotCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
-    if (polyglotSettings.addProtocIncludes !== "") {
-        polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
-        )
-    };
+//     if (polyglotSettings.protoDiscoveryRoot !== "") polyglotCommandLineArgs.push('--proto_discovery_root=' + polyglotSettings.protoDiscoveryRoot);
+//     if (polyglotSettings.configSetPath !== "") polyglotCommandLineArgs.push('--config_set_path=' + polyglotSettings.configSetPath);
+//     if (polyglotSettings.configName !== "") polyglotCommandLineArgs.push('--config_name=' + polyglotSettings.configName);
+//     if (polyglotSettings.deadlineMs > 0) polyglotCommandLineArgs.push('--deadline_ms=' + polyglotSettings.deadlineMs);
+//     if (polyglotSettings.tlsCaCertPath !== "") polyglotCommandLineArgs.push('--tls_ca_certificate=' + polyglotSettings.tlsCaCertPath);
+//     if (polyglotSettings.endpoint !== "") polyglotCommandLineArgs.push('--endpoint=' + polyglotSettings.endpoint);
+//     if (callServiceOptions.fullMethod !== "") polyglotCommandLineArgs.push('--full_method=' + callServiceOptions.fullMethod);
+//     if (polyglotSettings.addProtocIncludes !== "") {
+//         polyglotCommandLineArgs.push('--add_protoc_includes=' + polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')
+//         )
+//     };
 
-    event.sender.send(ipcConstants.POST_LOGS,
-        { log: "Running command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
+//     event.sender.send(ipcConstants.POST_LOGS,
+//         { log: "Running command " + polyglotCommand + " " + polyglotCommandLineArgs.join(" "), level: ipcConstants.LOG_LEVELS.INFO });
 
-    var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
-    console.log("polyglot spawned with id ", polyglot.pid);
-    childProcesses[polyglot.pid] = polyglot;
+//     var polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
+//     console.log("polyglot spawned with id ", polyglot.pid);
+//     childProcesses[polyglot.pid] = polyglot;
 
-    var echoStdErr = ""
+//     var echoStdErr = ""
 
-    echo.stdout.on('data', (data) => {
-        polyglot.stdin.write(data);
-    });
+//     echo.stdout.on('data', (data) => {
+//         polyglot.stdin.write(data);
+//     });
 
-    echo.stderr.on('data', (data) => {
-        // console.error(`echoStdErr: ${data}`);
-        echoStdErr += data;
-    });
+//     echo.stderr.on('data', (data) => {
+//         // console.error(`echoStdErr: ${data}`);
+//         echoStdErr += data;
+//     });
 
-    echo.on('close', (code) => {
-        console.log(`echo closing with code: ${code}\n`);
-        delete childProcesses[echo.pid];
-        if (code === 0) {
-            polyglot.stdin.end();
-        } else {
-            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE,
-                { error: new Error("Error with echo piping json into polyglot"), response: echoStdErr });
-        }
-    });
+//     echo.on('close', (code) => {
+//         console.log(`echo closing with code: ${code}\n`);
+//         delete childProcesses[echo.pid];
+//         if (code === 0) {
+//             polyglot.stdin.end();
+//         } else {
+//             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE,
+//                 { error: new Error("Error with echo piping json into polyglot"), response: echoStdErr });
+//         }
+//     });
 
-    var polyglotStderr = "";
-    var polyglotStdout = "";
+//     var polyglotStderr = "";
+//     var polyglotStdout = "";
 
-    polyglot.stderr.on('data', (data) => {
-        console.warn(`polyglotStdErr: ${data}`);
-        polyglotStderr += data;
-        event.sender.send(ipcConstants.POST_LOGS, { log: data, level: ipcConstants.LOG_LEVELS.WARN });
-    });
+//     polyglot.stderr.on('data', (data) => {
+//         console.warn(`polyglotStdErr: ${data}`);
+//         polyglotStderr += data;
+//         event.sender.send(ipcConstants.POST_LOGS, { log: data, level: ipcConstants.LOG_LEVELS.WARN });
+//     });
 
-    polyglot.stdout.on('data', (data) => {
-        polyglotStdout += data;
-    });
+//     polyglot.stdout.on('data', (data) => {
+//         polyglotStdout += data;
+//     });
 
-    polyglot.on('close', (code) => {
-        console.log(`polyglot closing with code: ${code}\n`);
-        delete childProcesses[polyglot.pid];
+//     polyglot.on('close', (code) => {
+//         console.log(`polyglot closing with code: ${code}\n`);
+//         delete childProcesses[polyglot.pid];
 
-        if (code !== 0) {
-            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr });
-        } else {
-            // if (polyglotStdout === '' && polyglotStderr !== '') {
-            //     // Sometimes the code is 0 but polyglot has had an error. Is this the best way to do this? 
-            //     // The text of Error is meant to be a stack trace.
-            //     event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
-            // }
-            event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
-        }
-    });
-}
+//         if (code !== 0) {
+//             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: code, response: polyglotStderr });
+//         } else {
+//             // if (polyglotStdout === '' && polyglotStderr !== '') {
+//             //     // Sometimes the code is 0 but polyglot has had an error. Is this the best way to do this? 
+//             //     // The text of Error is meant to be a stack trace.
+//             //     event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: new Error('Error'), response: polyglotStderr });
+//             // }
+//             event.sender.send(ipcConstants.CALL_SERVICE_RESPONSE, { error: null, response: polyglotStdout });
+//         }
+//     });
+// }
 
 //****************************************************************//
 
 //******* Node process communication for renderer process ********//
-
-/* A method for checking if local paths are valid, takes a list of strings and returns a list of booleans.
-   The id is passed straight back to allow the renderer to identify which component sent the request */
-// function validatePaths(event, validatePathsRequest) {
-//     console.log("Request to validate paths: ", validatePathsRequest);
-//     var validPathList = [];
-//     for (i = 0; i < validatePathsRequest.paths.length; i++) {
-//         try {
-//             accessSync(validatePathsRequest.paths[i]);
-//             validPathList.push(true);
-//         } catch (err) {
-//             console.warn("path ", validatePathsRequest.paths[i], " does not exist");
-//             validPathList.push(false);
-//         }
-//     }
-//     console.log(validPathList);
-//     event.sender.send(ipcConstants.VALIDATE_PATHS_RESPONSE, { id: validatePathsRequest.id, validPaths: validPathList });
-// }
 
 /* Users can cancel long running requests. This will remove all running child processes and return 
    the success of the operation. */

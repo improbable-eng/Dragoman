@@ -2,6 +2,7 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 import { Dispatch, connect } from 'react-redux';
+import { exec } from 'child_process';
 
 // import SideBar from '../components/sideBar';
 import RequestBuilder from '../containers/requestBuilder';
@@ -32,6 +33,7 @@ class App extends React.Component<AppProps> {
   constructor(props: AppProps) {
     super(props);
     this.registerIpcListeners();
+    this.checkRuntimeJavaVersion();
     // visitor.event('appContainer', 'lifecycle', 'constructor').send();
   }
 
@@ -39,6 +41,7 @@ class App extends React.Component<AppProps> {
     this.props.dispatch(AppUIActions.setErrorDialogVisible(false));
   }
 
+  // TODO: Create history of errors rather than simply overwriting with most recent?
   public openErrorDialog = (title: string, explanation: string) => {
     this.props.dispatch(AppUIActions.setErrorDialogTitle(title));
     this.props.dispatch(AppUIActions.setErrorDialogExplanation(explanation));
@@ -57,9 +60,8 @@ class App extends React.Component<AppProps> {
         <ReactMD.NavigationDrawer
           desktopDrawerType='clipped'
           tabletDrawerType='clipped'
-          // drawerTitle={<p></p>}
           drawerClassName='md-toolbar-relative'
-          drawerHeader={<ServiceList openErrorDialog={this.openErrorDialog}/>}
+          drawerHeader={<ServiceList openErrorDialog={this.openErrorDialog} />}
           toolbarTitle='Dragoman'
           toolbarActions={
             <ReactMD.Button
@@ -68,7 +70,7 @@ class App extends React.Component<AppProps> {
               settings
           </ReactMD.Button>}
           children={
-            <div style={{ display: 'flex', flexFlow: 'row', flexGrow: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
               <RequestBuilder
                 closeErrorDialog={this.closeErrorDialog}
                 openErrorDialog={this.openErrorDialog}
@@ -84,30 +86,48 @@ class App extends React.Component<AppProps> {
           defaultMedia='desktop'
           visible={this.props.appState.settingsOpen}
           position='right'
-          children={<Settings/>}
+          children={<Settings />}
+        />
+        <ReactMD.DialogContainer
+          id='errorDialog'
+          visible={this.props.appState.errorDialogVisible}
+          modal={true}
+          title={this.props.appState.errorDialogTitle}
+          actions={
+            [{
+              onClick: this.closeErrorDialog,
+              secondary: true,
+              label: 'Ok',
+            }]
+          }
+          children={this.props.appState.errorDialogExplanation}
         />
       </div>
-      //   <ReactMD.DialogContainer
-      //     id='errorDialog'
-      //     visible={this.props.appState.errorDialogVisible}
-      //     modal={true}
-      //     title={this.props.appState.errorDialogTitle}
-      //     actions={
-      //       [{
-      //         onClick: this.closeErrorDialog,
-      //         secondary: true,
-      //         label: 'Ok',
-      //       }]
-      //     }
-      //     children={this.props.appState.errorDialogExplanation}
-      //   />
-      // </div>
     );
   }
 
   // Adding event listeners to allow callback from the main process
   private registerIpcListeners(): void {
     ipcRenderer.on(ipcConstants.POST_LOGS, this.processPolyglotLog);
+  }
+
+  private checkRuntimeJavaVersion = () => {
+    exec('java -version', (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error checking java version');
+      } else {
+        const regex = /java version \"([0-9]+.[0-9]+)/g;
+        const match = regex.exec(stderr);
+
+        if (match !== null) {
+          const rawJavaVersion = match[1];
+          const parsedJavaVersion = parseFloat(rawJavaVersion);
+          if (!isNaN(parsedJavaVersion) && parsedJavaVersion < 1.8) {
+            this.openErrorDialog('Java Runtime Version Error', 'Polyglot requires version >= 1.8');
+          }
+        }
+      }
+    });
   }
 
   private processPolyglotLog = (event: Event, polyglotLog: PolyglotLog) => {

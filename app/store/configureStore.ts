@@ -3,9 +3,9 @@ import { Store } from 'redux';
 let configureStore: (initialState?: object) => Store<object | void>;
 
 if (process.env.NODE_ENV === 'production') {
-  configureStore = require('./configureStore.production').default; //tslint:disable-line 
+  configureStore = require('./configureStore.production').default;
 } else {
-  configureStore = require('./configureStore.development').default; //tslint:disable-line  
+  configureStore = require('./configureStore.development').default;
 }
 
 export default configureStore;
