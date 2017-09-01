@@ -1,4 +1,3 @@
-/* tslint:disable:no-console */
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 

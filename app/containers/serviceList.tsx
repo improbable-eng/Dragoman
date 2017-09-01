@@ -1,22 +1,25 @@
 /* tslint:disable:no-console */
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-
-// const ipcConstants = require('../ipc/constants');
-// import { ipcRenderer } from 'electron';
-// import { PolyglotResponse } from '../ipc/index';
+import * as path from 'path';
+import { spawn } from 'child_process';
 
 import * as RequestBuilderActions from '../actions/requestBuilder';
 import * as ResponseViewerActions from '../actions/responseViewer';
-// import * as ServiceListActions from '../actions/serviceList';
+import * as ServiceListActions from '../actions/serviceList';
+import { AppState } from '../reducers/index';
+import { PolyglotService } from '../reducers/serviceList';
 
 // import { ListServicesRequest, ListServicesOptions } from '../reducers/serviceList';
 
 import ServiceList,
 { ServiceListComponentMethods, ServiceListComponentState } from '../components/serviceList';
-import { AppState } from '../reducers/index';
 
-// import { checkConsoleErrorMessage } from './App';
+import { checkConsoleErrorMessage } from './App';
+
+export interface ServiceListContainerProps {
+  openErrorDialog: (title: string, explanation: string) => void;
+}
 
 function handleMethodClick(serviceName: string, methodName: string) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
@@ -49,6 +52,86 @@ function handleMethodClick(serviceName: string, methodName: string) {
   };
 }
 
+
+function listServices(openErrorDialog: (title: string, explanation: string) => void) {
+  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
+    dispatch(RequestBuilderActions.setFullMethod(''));
+    dispatch(RequestBuilderActions.setRequest(''));
+    dispatch(ServiceListActions.importServices([]));
+    dispatch(ResponseViewerActions.setResponse(''));
+
+    // visitor.event('appContainer', 'interaction', 'listServicesRequest').send();
+    const DEV_PATH_TO_POLYGLOT_BINARY = '/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar';
+
+    let pathToPolyglotBinary;
+
+    if (process.env.NODE_ENV === 'development') {
+      pathToPolyglotBinary = DEV_PATH_TO_POLYGLOT_BINARY;
+    } else {
+      pathToPolyglotBinary = path.join(__dirname, 'polyglot_deploy.jar').replace('app.asar', 'app.asar.unpacked');
+    }
+
+    // Build polyglot command
+    const polyglotCommand = 'java';
+    const polyglotCommandLineArgs = ['-jar', pathToPolyglotBinary, '--command=list_services', '--with_message=true', '--list_output_format=json'];
+
+    if (getState().settingsState.settingsDataState.protoDiscoveryRoot !== '') {
+      polyglotCommandLineArgs.push(`--proto_discovery_root=${getState().settingsState.settingsDataState.protoDiscoveryRoot}`);
+    }
+    if (getState().serviceListState.serviceFilter !== '') {
+      polyglotCommandLineArgs.push(`--service_filter=${getState().serviceListState.serviceFilter}`);
+    }
+    if (getState().serviceListState.methodFilter !== '') {
+      polyglotCommandLineArgs.push(`--method_filter=${getState().serviceListState.methodFilter}`);
+    }
+    if (getState().settingsState.settingsDataState.configSetPath !== '') {
+      polyglotCommandLineArgs.push(`--config_set_path=${getState().settingsState.settingsDataState.configSetPath}`);
+    }
+    if (getState().settingsState.settingsDataState.configName !== '') {
+      polyglotCommandLineArgs.push(`--config_name=${getState().settingsState.settingsDataState.configName}`);
+    }
+    if (getState().settingsState.settingsDataState.deadlineMs > 0) {
+      polyglotCommandLineArgs.push(`--deadline_ms=${getState().settingsState.settingsDataState.deadlineMs}`);
+    }
+    if (getState().settingsState.settingsDataState.tlsCaCertPath !== '') {
+      polyglotCommandLineArgs.push(`--tls_ca_certificate=${getState().settingsState.settingsDataState.tlsCaCertPath}`);
+    }
+    if (getState().settingsState.settingsDataState.addProtocIncludes !== '') {
+      polyglotCommandLineArgs.push(`--add_protoc_includes=${getState().settingsState.settingsDataState.addProtocIncludes.split(',').map((elem: string) => elem.trim()).join(',')}`);
+    }
+
+    console.log(`Running polyglot command: ${polyglotCommand} Args: ${polyglotCommandLineArgs.join(' ')}`);
+
+    const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
+
+    let polyglotStderr = '';
+    let polyglotStdout = '';
+
+    polyglot.stderr.on('data', (data) => {
+      polyglotStderr += data;
+      console.warn(new TextDecoder('utf-8').decode(data as Buffer));
+    });
+
+    polyglot.stdout.on('data', (data) => {
+      polyglotStdout += data;
+    });
+
+    polyglot.on('close', (code) => {
+      if (code === 0) {
+        try {
+          const parsedResponse = JSON.parse(polyglotStdout as string) as PolyglotService[];
+          dispatch(ServiceListActions.importServices(parsedResponse));
+        } catch (e) {
+          openErrorDialog('Error parsing list-services response:', checkConsoleErrorMessage);
+        }
+      } else {
+        console.error('Error listing services');
+        openErrorDialog('Error listing services: ', checkConsoleErrorMessage);
+      }
+    });
+  };
+}
+
 /** Function required by react-redux connect, maps from the main state in the redux store to the props required
 * for the settings component.
 * @param {AppState} state - The state of the redux store
@@ -65,9 +148,10 @@ function mapStateToProps(state: AppState): ServiceListComponentState {
  * @param {Dispatch<AppState>} dispatch - The dispatch method to send actions to the reducers for the store.
  * @returns {RequestBuilderComponentMethods} - The methods required by the service list component
   */
-function mapDispatchToProps(dispatch: Dispatch<AppState>): ServiceListComponentMethods {
+function mapDispatchToProps(dispatch: Dispatch<AppState>, ownProps: ServiceListContainerProps): ServiceListComponentMethods {
   return {
     handleMethodClick: (serviceName: string, methodName: string) => dispatch(handleMethodClick(serviceName, methodName)),
+    handleListServicesClick: () => dispatch(listServices(ownProps.openErrorDialog)),
   };
 }
 

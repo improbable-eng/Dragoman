@@ -3,20 +3,17 @@ import * as React from 'react';
 import * as ReactMD from 'react-md';
 import { Dispatch, connect } from 'react-redux';
 
-import SideBar from '../components/sideBar';
+// import SideBar from '../components/sideBar';
 import RequestBuilder from '../containers/requestBuilder';
 import ResponseViewer from '../components/responseViewer';
-import * as RequestBuilderActions from '../actions/requestBuilder';
-import * as ResponseViewerActions from '../actions/responseViewer';
-import * as ServiceListActions from '../actions/serviceList';
-
-import { ListServicesRequest, ListServicesOptions } from '../reducers/serviceList';
+import ServiceList from '../containers/serviceList';
+import Settings from '../containers/settings';
 
 import * as AppUIActions from '../actions/appUI';
 
-import { PolyglotLog, PolyglotResponse } from '../ipc/index';
+import { PolyglotLog } from '../ipc/index';
 import { AppState } from '../reducers/index';
-import { PolyglotService } from '../reducers/serviceList';
+
 
 const ipcConstants = require('../ipc/constants'); // tslint:disable-line
 
@@ -27,8 +24,6 @@ export const checkConsoleErrorMessage = 'Check console for full log (Console can
   ' -> Toggle Developer Tools -> Console)';
 
 type AppProps = AppState & { dispatch: Dispatch<{}> };
-
-// ********************************** APP START ************************************** //
 
 // import { Visitor } from 'universal-analytics';
 // const visitor = new Visitor('UA-105606228-1');
@@ -56,105 +51,62 @@ class App extends React.Component<AppProps> {
     // visitor.event('appContainer', 'interaction', 'settingsClicked').send();
   }
 
-  // ********************************** APP END ***************************************** //
-
-  // ************************** LIST SERVICES START ************************************* //
-
-  public listServices() {
-    this.props.dispatch(RequestBuilderActions.setFullMethod(''));
-    this.props.dispatch(RequestBuilderActions.setRequest(''));
-    this.props.dispatch(ServiceListActions.importServices([]));
-    this.props.dispatch(ResponseViewerActions.setResponse(''));
-
-    const listServicesRequest: ListServicesRequest = {
-      polyglotSettings: this.props.settingsState.settingsDataState,
-      listServicesOptions: new ListServicesOptions({
-        methodFilter: this.props.serviceListState.methodFilter,
-        serviceFilter: this.props.serviceListState.serviceFilter,
-      }),
-    };
-
-    console.log('Sending request to list services with options: ', listServicesRequest);
-    // visitor.event('appContainer', 'interaction', 'listServicesRequest').send();
-    ipcRenderer.send(ipcConstants.LIST_SERVICES_REQUEST, listServicesRequest);
-  }
-
-  public listServicesResponse = (event: Event, res: PolyglotResponse) => {
-    console.log('Received list service response: ', res);
-
-    if (!res.error) {
-      try {
-        const parsedResponse = JSON.parse(res.response as string) as PolyglotService[];
-        this.props.dispatch(ServiceListActions.importServices(parsedResponse));
-      } catch (e) {
-        this.openErrorDialog('Error parsing list-services response:', checkConsoleErrorMessage);
-        console.error(`Error ${e}\n${res.response}`);
-      }
-    } else {
-      this.openErrorDialog('Error listing services: ', checkConsoleErrorMessage);
-      console.error(`Error ${res.error}\n${res.response}`);
-    }
-    // visitor.event('appContainer', 'interaction', 'listServicesResponse').send();
-  }
-
-  public handleListServicesClick = () => {
-    this.listServices();
-  }
-
-  // ************************** LIST SERVICES END ************************************* //
-
   public render() {
     return (
       <div>
-        <ReactMD.Toolbar
-          title='Dragoman'
-          className='md-toolbar--fixed'
-          colored={true}
+        <ReactMD.NavigationDrawer
+          desktopDrawerType='clipped'
+          tabletDrawerType='clipped'
+          // drawerTitle={<p></p>}
+          drawerClassName='md-toolbar-relative'
+          drawerHeader={<ServiceList openErrorDialog={this.openErrorDialog}/>}
+          toolbarTitle='Dragoman'
+          toolbarActions={
+            <ReactMD.Button
+              icon={true}
+              onClick={this.handleSettingsClick}>
+              settings
+          </ReactMD.Button>}
+          children={
+            <div style={{ display: 'flex', flexFlow: 'row', flexGrow: 1 }}>
+              <RequestBuilder
+                closeErrorDialog={this.closeErrorDialog}
+                openErrorDialog={this.openErrorDialog}
+              />
+              <ResponseViewer
+                responseViewerState={this.props.responseViewerState}
+                fullMethod={this.props.requestBuilderState.fullMethod}
+              />
+            </div>}
         />
-        <div>
-          <SideBar
-            serviceMap={this.props.serviceListState.serviceMap}
-            appState={this.props.appState}
-            handleSettingsClick={this.handleSettingsClick}
-            handleListServicesClick={this.handleListServicesClick}
-          />
-          <div
-            style={{ display: 'flex' }}
-            className={
-              'md-navigation-drawer-content md-navigation-drawer-content--prominent-offset' +
-              'md-transition--decceleration md-drawer-relative md-toolbar-relative'
-            }
-          >
-            <RequestBuilder
-              closeErrorDialog={this.closeErrorDialog}
-              openErrorDialog={this.openErrorDialog}
-            />
-            <ResponseViewer
-              responseViewerState={this.props.responseViewerState}
-              fullMethod={this.props.requestBuilderState.fullMethod}
-            />
-          </div>
-        </div>
-        <ReactMD.DialogContainer
-          id='errorDialog'
-          visible={this.props.appState.errorDialogVisible}
-          modal={true}
-          title={this.props.appState.errorDialogTitle}
-          actions={
-            [{
-              onClick: this.closeErrorDialog,
-              secondary: true,
-              label: 'Ok',
-            }]
-          }
-          children={this.props.appState.errorDialogExplanation}
+        <ReactMD.Drawer
+          className='md-toolbar-relative'
+          defaultMedia='desktop'
+          visible={this.props.appState.settingsOpen}
+          position='right'
+          children={<Settings/>}
         />
-      </div>);
+      </div>
+      //   <ReactMD.DialogContainer
+      //     id='errorDialog'
+      //     visible={this.props.appState.errorDialogVisible}
+      //     modal={true}
+      //     title={this.props.appState.errorDialogTitle}
+      //     actions={
+      //       [{
+      //         onClick: this.closeErrorDialog,
+      //         secondary: true,
+      //         label: 'Ok',
+      //       }]
+      //     }
+      //     children={this.props.appState.errorDialogExplanation}
+      //   />
+      // </div>
+    );
   }
 
   // Adding event listeners to allow callback from the main process
   private registerIpcListeners(): void {
-    ipcRenderer.on(ipcConstants.LIST_SERVICES_RESPONSE, this.listServicesResponse);
     ipcRenderer.on(ipcConstants.POST_LOGS, this.processPolyglotLog);
   }
 
