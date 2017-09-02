@@ -1,8 +1,3 @@
-//** Polyglot Commands ***//
-const CALL_SERVICE_REQUEST = "CALL_SERVICE_REQUEST";
-const CALL_SERVICE_RESPONSE = "CALL_SERVICE_RESPONSE";
-//************************//
-
 //** Dragoman Commands ***//
 
 const POST_LOGS = "POST_LOGS";
@@ -18,8 +13,6 @@ const CANCEL_REQUEST_RESPONSE = "CANCEL_REQUEST_RESPONSE";
 //************************//
 
 module.exports = {
-    CALL_SERVICE_REQUEST,
-    CALL_SERVICE_RESPONSE,
     POST_LOGS,
     LOG_LEVELS,
     CANCEL_REQUEST,

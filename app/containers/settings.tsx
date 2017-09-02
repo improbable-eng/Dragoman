@@ -4,6 +4,7 @@ import { Dispatch } from 'redux';
 import { remote } from 'electron';
 import { accessSync } from 'fs';
 import * as validUrl from 'valid-url';
+import * as fs from 'fs';
 
 import Settings, { SettingsComponentMethods, SettingsComponentState } from '../components/settings';
 
@@ -12,6 +13,8 @@ import { SETTINGS_IDS } from '../reducers/settingsData';
 
 import * as SettingsDataActions from '../actions/settingsData';
 import * as SettingsUIActions from '../actions/settingsUI';
+
+import * as polyglotConfig from '../proto/compiled';
 
 function handleChangeAndError(newValue: string, stateId: string, dispatch: Dispatch<AppState>) {
   switch (stateId) {
@@ -167,6 +170,27 @@ function handleDrop(event: React.DragEvent<HTMLElement>, id: string, multiSelect
   }
 }
 
+function importConfig() {
+  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
+    const customProperties = ['openFile', 'showHiddenFiles'];
+
+    const pathList = remote.dialog.showOpenDialog({
+      properties: customProperties,
+      message: 'Open polyglot config file',
+    } as Electron.OpenDialogOptions);
+
+    if (pathList === null || pathList.length === 0) {
+      return;
+    }
+
+    const rawFile = fs.readFileSync(pathList[0]);
+    const decodedFile = new TextDecoder('utf-8').decode(rawFile);
+    const parsedJson = JSON.parse(decodedFile);
+    const fromJson = polyglotConfig.polyglot.ConfigurationSet.fromObject(parsedJson);
+    console.log(fromJson, fromJson.toJSON());
+  };
+}
+
 /** Function required by react-redux connect, maps from the main state in the redux store to the props required
  * for the settings component.
  * @param {AppState} state - The state of the redux store
@@ -189,6 +213,7 @@ function mapDispatchToProps(dispatch: Dispatch<AppState>): SettingsComponentMeth
     handleChange: (newEndpoint: string, stateId: string) => handleChangeAndError(newEndpoint, stateId, dispatch),
     handlePathDoubleClick: (id: string, macMessage?: string, multiSelection?: boolean) => showDirectoryDialog(id, macMessage, multiSelection, dispatch),
     handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => handleDrop(event, id, multiSelection, dispatch),
+    importConfigFile: () => dispatch(importConfig()),
   };
 }
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactMD from 'react-md';
 
 import TextEntry from './textEntry';
 
@@ -16,12 +17,17 @@ export interface SettingsComponentMethods {
     handleChange: (newValue: string | number, stateId: string) => void;
     handlePathDoubleClick: (settingsId: string, message: string, allowMultiSelect?: boolean) => void;
     handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => void;
+    importConfigFile: () => void;
 }
 
 export default function Settings({ settingsDataState, settingsUIState,
-    handlePathDoubleClick, handleChange, handleDrop }: SettingsComponentProps) {
+    handlePathDoubleClick, handleChange, handleDrop, importConfigFile }: SettingsComponentProps) {
     return (
         <div>
+            <ReactMD.Button
+                onClick={importConfigFile}
+                style={{width: 100, height: 30}}
+            />
             <TextEntry
                 id={SETTINGS_IDS.ENDPOINT}
                 label='gRPC Endpoint'

@@ -6,14 +6,12 @@ import * as path from 'path';
 
 const ipcConstants = require('../ipc/constants');
 import { ipcRenderer } from 'electron';
-import { PolyglotResponse } from '../ipc/index';
 
 import * as RequestBuilderActions from '../actions/requestBuilder';
 import * as ResponseViewerActions from '../actions/responseViewer';
 import * as SettingsUIActions from '../actions/settingsUI';
 import * as AppUIActions from '../actions/appUI';
 
-// import { CallServiceRequest, CallServiceOptions } from '../reducers/requestBuilder';
 import { AppState } from '../reducers/index';
 
 import RequestBuilder,
@@ -76,13 +74,13 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
         polyglotCommandLineArgs.push(`--deadline_ms=${polyglotSettings.deadlineMs}`);
     }
     if (polyglotSettings.tlsCaCertPath !== '') {
-        polyglotCommandLineArgs.push(`--tls_ca_certificate= + polyglotSettings.tlsCaCertPath}`);
+        polyglotCommandLineArgs.push(`--tls_ca_certificate=${polyglotSettings.tlsCaCertPath}`);
     }
     if (polyglotSettings.endpoint !== '') {
         polyglotCommandLineArgs.push(`--endpoint=${polyglotSettings.endpoint}`);
     }
     if (callServiceOptions.fullMethod !== '') {
-        polyglotCommandLineArgs.push(`--full_method= + callServiceOptions.fullMethod}`);
+        polyglotCommandLineArgs.push(`--full_method=${callServiceOptions.fullMethod}`);
     }
     if (polyglotSettings.addProtocIncludes !== '') {
         polyglotCommandLineArgs.push(`--add_protoc_includes=${polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')}`);
@@ -116,12 +114,11 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
     let polyglotStdout = '';
 
     polyglot.stderr.on('data', (data) => {
-        console.warn(`polyglotStdErr: ${new TextDecoder('utf-8').decode(data as Buffer)}`);
+        console.warn(new TextDecoder('utf-8').decode(data as Buffer));
         polyglotStderr += data;
         });
 
     polyglot.stdout.on('data', (data) => {
-        console.log(data);
         polyglotStdout += data;
     });
 
@@ -131,6 +128,7 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
         if (code !== 0) {
             openErrorDialog('Error calling service', checkConsoleErrorMessage);
         } else {
+            console.log(polyglotStdout);
             dispatch(ResponseViewerActions.setResponse(polyglotStdout));
         }
     });

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package polyglot;
+
+option java_outer_classname = "ConfigProto";
+
+// Holds multiple named configurations. By default, the first configuration is
+// used, but a command line flag can have Polyglot use a specific config.
+message ConfigurationSet {
+  repeated Configuration configurations = 1;
+}
+
+// Holds parameters used by Polylgot at runtime.
+message Configuration {
+  string name = 1;
+
+  CallConfiguration call_config = 2;
+  ProtoConfiguration proto_config = 3;
+  OutputConfiguration output_config = 4;
+}
+
+// Holds parameters used to make rpc calls.
+message CallConfiguration {
+  uint32 deadline_ms = 1;
+  bool use_tls = 2;
+  OauthConfiguration oauth_config = 3;
+
+  // If set, this file will be used as a root certificate for calls using TLS.
+  string tls_ca_cert_path = 4;
+
+  // If set, this will use client certs for authentication
+  string tls_client_cert_path = 5;
+  string tls_client_key_path = 6;
+  string tls_client_override_authority = 7;
+}
+
+// Holds the necessary parameters for adding authentication to requests using
+// Oauth2.
+message OauthConfiguration {
+  // Credentials obtained by exchanging a refresh token for an access token.
+  message RefreshTokenCredentials {
+    // A url to talk to in order to exchange the refresh token for an access token.
+    string token_endpoint_url = 1;
+
+    // A client identity to use when exchanging tokens.
+    OauthClient client = 2;
+
+    // A path to a file containing a refresh token used for the exchange.
+    string refresh_token_path = 3;
+  }
+
+  // Credentials used directly adding an access token to the rpc.
+  message AccessTokenCredentials {
+    // A path to a file containing an access token.
+    string access_token_path = 1;
+  }
+
+  // Contains the necessary information to identify ourselves as an Oauth2 client.
+  message OauthClient {
+    string id = 1;
+    string secret = 2;
+  }
+
+  oneof credentials {
+    // If present, a refresh token will be exchanged for an access token and
+    // the access token will be used to authenticate the request.
+    RefreshTokenCredentials refresh_token_credentials = 1;
+
+    // If present, the access token will be used to authenticate the request.    
+    AccessTokenCredentials access_token_credentials = 2;
+  }
+}
+
+// Contains parameters controlling the output protos of polyglot.
+message OutputConfiguration {
+  enum Destination {
+    // Content is written to standard output.
+    STDOUT = 0;
+  
+    // Content is written to the execution log, i.e., to standard error.
+    LOG = 1;
+
+    // Content is written to a file.
+    FILE = 2;
+  }
+  Destination destination = 1;
+
+  // When using a destination of type FILE, indicates which file to write to.
+  string file_path = 2;
+}
+
+// Contains the necessary information to locate .proto files for services and
+// analyze them by invoking protoc.
+message ProtoConfiguration {
+  // A root directory to scan for .proto files. All files found this way will
+  // be analyzed for service definitions.
+  string proto_discovery_root = 1;
+
+  // Include paths used to resolve imports of the files being analyzed.
+  repeated string include_paths = 2;
+}

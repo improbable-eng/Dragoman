@@ -19,7 +19,7 @@ export interface RequestBuilderComponentMethods {
 export default function RequestBuilder({requestBuilderState, handleRunClick,
     handleRequestChange, handleCancelClick}: RequestBuilderComponentProps) {
         return (
-            <ReactMD.Card style={{ width: '50%', padding: '20px' }} >
+            <ReactMD.Card style={{ width: '50%', padding: '20px', marginLeft: -8 }} >
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <ReactMD.CardActions
                     >
