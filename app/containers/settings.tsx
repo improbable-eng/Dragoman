@@ -14,7 +14,7 @@ import { SETTINGS_IDS } from '../reducers/settingsData';
 import * as SettingsDataActions from '../actions/settingsData';
 import * as SettingsUIActions from '../actions/settingsUI';
 
-import * as polyglotConfig from '../proto/compiled';
+import * as polyglotConfig from '../proto/config';
 
 function handleChangeAndError(newValue: string, stateId: string, dispatch: Dispatch<AppState>) {
   switch (stateId) {
@@ -172,14 +172,15 @@ function handleDrop(event: React.DragEvent<HTMLElement>, id: string, multiSelect
 
 function importConfig() {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
+    console.log(getState());
     const customProperties = ['openFile', 'showHiddenFiles'];
 
     const pathList = remote.dialog.showOpenDialog({
       properties: customProperties,
       message: 'Open polyglot config file',
     } as Electron.OpenDialogOptions);
-
-    if (pathList === null || pathList.length === 0) {
+    console.log(pathList);
+    if (pathList === undefined || pathList.length === 0) {
       return;
     }
 
@@ -187,7 +188,17 @@ function importConfig() {
     const decodedFile = new TextDecoder('utf-8').decode(rawFile);
     const parsedJson = JSON.parse(decodedFile);
     const fromJson = polyglotConfig.polyglot.ConfigurationSet.fromObject(parsedJson);
+    dispatch(SettingsDataActions.importPolyglotConfigs(fromJson));
     console.log(fromJson, fromJson.toJSON());
+  };
+}
+
+function handleConfigAutoComplete(suggestion: string, suggestionIndex: number) {
+  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
+    const selectedConfig = getState().settingsState.settingsDataState.polyglotConfigs.get(suggestion);
+    if (selectedConfig != null) {
+      dispatch(SettingsDataActions.setSettingsDataStateFromPolyglotConfig(selectedConfig));
+    }
   };
 }
 
@@ -214,6 +225,7 @@ function mapDispatchToProps(dispatch: Dispatch<AppState>): SettingsComponentMeth
     handlePathDoubleClick: (id: string, macMessage?: string, multiSelection?: boolean) => showDirectoryDialog(id, macMessage, multiSelection, dispatch),
     handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => handleDrop(event, id, multiSelection, dispatch),
     importConfigFile: () => dispatch(importConfig()),
+    handleConfigAutoComplete: (suggestion: string, suggestionIndex: number) => dispatch(handleConfigAutoComplete(suggestion, suggestionIndex)),
   };
 }
 

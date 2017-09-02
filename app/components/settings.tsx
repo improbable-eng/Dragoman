@@ -18,15 +18,47 @@ export interface SettingsComponentMethods {
     handlePathDoubleClick: (settingsId: string, message: string, allowMultiSelect?: boolean) => void;
     handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => void;
     importConfigFile: () => void;
+    handleConfigAutoComplete: (suggestion: string | number, suggestionIndex: number) => void;
 }
 
 export default function Settings({ settingsDataState, settingsUIState,
-    handlePathDoubleClick, handleChange, handleDrop, importConfigFile }: SettingsComponentProps) {
+    handlePathDoubleClick, handleChange, handleDrop, importConfigFile,
+    handleConfigAutoComplete }: SettingsComponentProps) {
     return (
         <div>
-            <ReactMD.Button
-                onClick={importConfigFile}
-                style={{width: 100, height: 30}}
+            <div style={{ display: 'flex' }}>
+                <ReactMD.Button
+                    key='loadConfig'
+                    secondary={true}
+                    flat={true}
+                    swapTheming={true}
+                    children='Load Config'
+                    onClick={importConfigFile}
+                    style={{ width: '100%', height: 40, borderRadius: 0, margin: 0, marginRight: 2 }}
+                />
+                <ReactMD.Button
+                    key='saveConfig'
+                    secondary={true}
+                    flat={true}
+                    swapTheming={true}
+                    children='Save Config'
+                    // onClick={importConfigFile}
+                    style={{ width: '100%', height: 40, borderRadius: 0, margin: 0, marginLeft: 2 }}
+                />
+            </div>
+            <ReactMD.Autocomplete
+            style={{padding: '0px 10px 0px 10px'}}
+             data={Array.from(settingsDataState.polyglotConfigs.keys())}
+             id='configName'
+             placeholder='development'
+             onAutocomplete={handleConfigAutoComplete}
+            />
+            <TextEntry
+                id={SETTINGS_IDS.CONFIG_NAME}
+                value={settingsDataState.configName}
+                handleChange={handleChange}
+                label='Config Name'
+                placeholder='development'
             />
             <TextEntry
                 id={SETTINGS_IDS.ENDPOINT}
@@ -59,13 +91,6 @@ export default function Settings({ settingsDataState, settingsUIState,
                 handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.CONFIG_SET_PATH, 'Select Config Path')}
                 error={settingsUIState.configSetPathError}
                 handleDrop={handleDrop}
-            />
-            <TextEntry
-                id={SETTINGS_IDS.CONFIG_NAME}
-                value={settingsDataState.configName}
-                handleChange={handleChange}
-                label='Config Name'
-                placeholder='development'
             />
             <TextEntry
                 id={SETTINGS_IDS.TLS_CA_CERT_PATH}

@@ -1,30 +1,6 @@
 import { isActionOfType, Action } from '../actions/actions';
 import * as RequestBuilderActions from '../actions/requestBuilder';
 
-import { SettingsDataState as PolyglotSettings,
-    initialSettingsDataState as initialPolyglotSettings }
-    from './settingsData';
-
-
-export class CallServiceOptions {
-    public jsonBody: string = '';
-    public fullMethod: string = '';
-
-    public constructor(init?: Partial<CallServiceOptions>) {
-        Object.assign(this, init);
-    }
-}
-
-export class CallServiceRequest {
-    public polyglotSettings: PolyglotSettings = initialPolyglotSettings;
-    public callServiceOptions: CallServiceOptions = new CallServiceOptions();
-
-    public constructor(init?: Partial<CallServiceRequest>) {
-        Object.assign(this, init);
-    }
-}
-
-
 export type RequestBuilderState = Readonly<{
     request: string;
     fullMethod: string;

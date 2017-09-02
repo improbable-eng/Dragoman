@@ -7,6 +7,8 @@ import { spawn } from 'child_process';
 import * as RequestBuilderActions from '../actions/requestBuilder';
 import * as ResponseViewerActions from '../actions/responseViewer';
 import * as ServiceListActions from '../actions/serviceList';
+import * as NodeProcessActions from '../actions/nodeProcess';
+
 import { AppState } from '../reducers/index';
 import { PolyglotService } from '../reducers/serviceList';
 
@@ -101,6 +103,7 @@ function listServices(openErrorDialog: (title: string, explanation: string) => v
     console.log(`Running polyglot command: ${polyglotCommand} Args: ${polyglotCommandLineArgs.join(' ')}`);
 
     const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
+    dispatch(NodeProcessActions.addNodeProcessPid(polyglot.pid));
 
     let polyglotStderr = '';
     let polyglotStdout = '';
@@ -114,7 +117,8 @@ function listServices(openErrorDialog: (title: string, explanation: string) => v
       polyglotStdout += data;
     });
 
-    polyglot.on('close', (code) => {
+    polyglot.on('exit', (code) => {
+      dispatch(NodeProcessActions.removeNodeProcessPid(polyglot.pid));
       if (code === 0) {
         try {
           const parsedResponse = JSON.parse(polyglotStdout as string) as PolyglotService[];

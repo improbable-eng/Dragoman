@@ -1,15 +1,9 @@
-const { app, BrowserWindow, Menu, shell, ipcMain, Notification } = require('electron');
+const { app, BrowserWindow, Menu, shell, Notification } = require('electron');
 const url = require('url');
 const path = require('path');
 const { spawn, exec } = require('child_process');
 const { accessSync } = require('fs');
-const ipcConstants = require('./ipc/constants');
 const { autoUpdater } = require('electron-updater');
-
-const DEV_PATH_TO_POLYGLOT_BINARY = path.join(__dirname, "polyglot_deploy.jar");
-
-const Visitor = require('universal-analytics').Visitor;
-const visitor = new Visitor('UA-105606228-1');
 
 let mainWindow;
 
@@ -66,7 +60,6 @@ const createWindow = () => {
     });
 
     setupElectronMenu()
-    visitor.event('main', 'lifecycle', 'createWindow').send();
 }
 
 app.on('ready', () => {
@@ -74,13 +67,11 @@ app.on('ready', () => {
         .then(createWindow(), () => {
             console.log("Error installing extensions");
         })
-        .then(registerIpcListeners())
         .then(() => {
             if (process.env.NODE_ENV !== 'development') {
                 autoUpdater.checkForUpdates()
             }
         });
-    visitor.event('dragoman', 'lifecycle', 'ready').send();
 });
 
 // Quit when all windows are closed.
@@ -114,7 +105,8 @@ autoUpdater.on('update-not-available', (info) => {
 
 autoUpdater.on('error', (err) => {
     console.log('Error in auto-updater.', err);
-    visitor.event('main', 'autoUpdate', 'error').send();
+    mainWindow.webContents.send('ga', '')
+    // visitor.event('main', 'autoUpdate', 'error').send();
 });
 
 autoUpdater.on('download-progress', (progressObj) => {
@@ -125,7 +117,7 @@ autoUpdater.on('download-progress', (progressObj) => {
 });
 
 autoUpdater.on('update-downloaded', (info) => {
-    visitor.event('main', 'autoUpdate', 'updateDownloaded').send();
+    // visitor.event('main', 'autoUpdate', 'updateDownloaded').send();
     console.log('Update downloaded');
     const myNotification = new Notification({
         title: 'Dragoman',
@@ -140,42 +132,11 @@ autoUpdater.on('update-downloaded', (info) => {
     myNotification.once('action', (event, index) => {
         console.log('Action clicked ', index)
         if (index === 0) { // Selected ok
-            visitor.event('main', 'autoUpdate', 'updatedInstalled').send();
+            // visitor.event('main', 'autoUpdate', 'updatedInstalled').send();
             autoUpdater.quitAndInstall();
         }
     });
 });
-
-function registerIpcListeners() {
-    ipcMain.on(ipcConstants.CANCEL_REQUEST, killChildProcess);
-}
-
-// Keep references to the child process we spawn, so we can kill them in the future if we need
-let childProcesses = {};
-
-
-//******* Node process communication for renderer process ********//
-
-/* Users can cancel long running requests. This will remove all running child processes and return 
-   the success of the operation. */
-function killChildProcess(event) {
-    console.warn("Killing current child process");
-    var successfullyKilled = true;
-
-    for (var procId in childProcesses) {
-        childProcesses[procId].kill();
-        if (!childProcesses[procId].killed) {
-            successfullyKilled = false;
-        } else {
-            delete childProcesses[procId];
-        }
-    }
-
-    console.warn("Processes killed successfully: ", successfullyKilled);
-    event.sender.send(ipcConstants.CANCEL_REQUEST_RESPONSE, successfullyKilled);
-}
-
-//****************************************************************//
 
 const setupElectronMenu = () => {
     const template = [
