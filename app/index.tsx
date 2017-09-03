@@ -21,8 +21,6 @@ WebFontLoader.load({
   },
 });
 
-
-
 render(
   <AppContainer>
     <Provider store={store}>

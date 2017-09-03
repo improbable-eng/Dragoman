@@ -18,12 +18,12 @@ import RequestBuilder,
 import { checkConsoleErrorMessage } from './app';
 
 export interface RequestBuilderProps {
-  openErrorDialog: (title: string, explanation: string) => void;
-  closeErrorDialog: () => void;
+  openDialog: (title: string, explanation: string) => void;
+  closeDialog: () => void;
 }
 
 function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
-  openErrorDialog: (title: string, explanation: string) => void) {
+  openDialog: (title: string, explanation: string) => void) {
   const requestJson = getState().requestBuilderState.request;
 
   // Remove the annotations [<optioal> <repeated>] from the request.
@@ -36,7 +36,7 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
     JSON.parse(redactedJsonInput);
   } catch (e) {
     dispatch(RequestBuilderActions.setCallRequestInProgress(false));
-    openErrorDialog('Error parsing request', 'Ensure that the request is valid JSON');
+    openDialog('Error parsing request', 'Ensure that the request is valid JSON');
   }
 
   const DEV_PATH_TO_POLYGLOT_BINARY = '/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar';
@@ -101,7 +101,7 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   });
 
   echo.on('exit', (code) => {
-    console.log(`echo exiting with code: ${code}\n`);
+    // console.log(`echo exiting with code: ${code}\n`);
     dispatch(NodeProcessActions.removeNodeProcessPid(echo.pid));
     if (code === 0) {
       polyglot.stdin.end();
@@ -121,19 +121,18 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   });
 
   polyglot.on('exit', (code) => {
-    console.log('polyglot exiting');
+    // console.log('polyglot exiting');
     dispatch(NodeProcessActions.removeNodeProcessPid(polyglot.pid));
     dispatch(RequestBuilderActions.setCallRequestInProgress(false));
     if (code !== 0) {
-      openErrorDialog('Error calling service', checkConsoleErrorMessage);
+      openDialog('Error calling service', checkConsoleErrorMessage);
     } else {
-      console.log(polyglotStdout);
       dispatch(ResponseViewerActions.setResponse(polyglotStdout));
     }
   });
 }
 
-function handleRunClick(openErrorDialog: (title: string, explanation: string) => void) {
+function handleRunClick(openDialog: (title: string, explanation: string) => void) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
     // Up until this point the endpoint did not need to be filled in.
     dispatch(SettingsUIActions.setEndpointRequired(true));
@@ -143,7 +142,7 @@ function handleRunClick(openErrorDialog: (title: string, explanation: string) =>
       dispatch(SettingsUIActions.setEndpointError(true));
     } else {
       dispatch(RequestBuilderActions.setCallRequestInProgress(true));
-      callService(dispatch, getState, openErrorDialog);
+      callService(dispatch, getState, openDialog);
     }
   };
 }
@@ -152,7 +151,6 @@ function handleCancelClick() {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
     console.warn('Cancelling request');
     for (const pid of getState().nodeProcessState.childProcessPids) {
-      console.log(pid);
       process.kill(pid);
       dispatch(NodeProcessActions.removeNodeProcessPid(pid));
     }
@@ -178,7 +176,7 @@ function mapStateToProps(state: AppState): RequestBuilderComponentState {
   */
 function mapDispatchToProps(dispatch: Dispatch<AppState>, ownProps: RequestBuilderProps): RequestBuilderComponentMethods {
   return {
-    handleRunClick: () => dispatch(handleRunClick(ownProps.openErrorDialog)),
+    handleRunClick: () => dispatch(handleRunClick(ownProps.openDialog)),
     handleRequestChange: (newRequest: string) => dispatch(RequestBuilderActions.setRequest(newRequest)),
     handleCancelClick: () => dispatch(handleCancelClick()),
   };

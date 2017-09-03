@@ -193,7 +193,7 @@ export default function settingsDataReducer(state: SettingsDataState = initialSe
   }
 
   if (isActionOfType(action, SettingsDataActions.setSettingsDataStateFromPolyglotConfig)) {
-    const stateToMutate = { ...state };
+    const stateToMutate = {... initialSettingsDataState};
     const config = action.payload;
 
     // TODO: All this null checking is horrific, swift style optional unwrapping is not yet implemented in TypeScript,

@@ -8,6 +8,7 @@ import { exec } from 'child_process';
 
 import RequestBuilder from '../containers/requestBuilder';
 import ResponseViewer from '../components/responseViewer';
+import ModalDialog from '../components/modalDialog';
 import ServiceList from '../containers/serviceList';
 import Settings from '../containers/settings';
 
@@ -25,7 +26,7 @@ class App extends React.Component<AppProps> {
   constructor(props: AppProps) {
     super(props);
     this.checkRuntimeJavaVersion();
-    this.showAnalyticsPermissionRequest();
+    this.handleAnalyticsConsent();
     this.sendAnalyticsEvent('Lifecycle', 'App Loaded', true);
   }
 
@@ -40,15 +41,14 @@ class App extends React.Component<AppProps> {
     });
   }
 
-  public closeErrorDialog = () => {
-    console.log('closing error dialog', this.props.appUIState.errorDialogQueue.length);
+  public closeDialog = () => {
     if (this.props.appUIState.errorDialogQueue.length <= 1) {
       this.props.dispatch(AppUIActions.setErrorDialogVisible(false));
     }
     this.props.dispatch(AppUIActions.dequeueErrorDialogState());
   }
 
-  public openErrorDialog = (title: string, explanation: string, cancelButtonAvailable?: boolean,
+  public openDialog = (title: string, explanation: string, cancelButtonAvailable?: boolean,
     onAccept?: () => void, onCancel?: () => void) => {
 
     const dialogState: ErrorDialogState = {
@@ -75,7 +75,7 @@ class App extends React.Component<AppProps> {
           desktopDrawerType='clipped'
           tabletDrawerType='clipped'
           drawerClassName='md-toolbar-relative'
-          drawerHeader={<ServiceList openErrorDialog={this.openErrorDialog} />}
+          drawerHeader={<ServiceList openDialog={this.openDialog} />}
           toolbarTitle='Dragoman'
           toolbarActions={
             <ReactMD.Button
@@ -86,8 +86,8 @@ class App extends React.Component<AppProps> {
           children={
             <div style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
               <RequestBuilder
-                closeErrorDialog={this.closeErrorDialog}
-                openErrorDialog={this.openErrorDialog}
+                closeDialog={this.closeDialog}
+                openDialog={this.openDialog}
               />
               <ResponseViewer
                 responseViewerState={this.props.responseViewerState}
@@ -102,38 +102,9 @@ class App extends React.Component<AppProps> {
           position='right'
           children={<Settings />}
         />
-        <ReactMD.DialogContainer
-          id='errorDialog'
-          visible={this.props.appUIState.errorDialogVisible}
-          modal={true}
-          title={this.props.appUIState.errorDialogQueue.length > 0 ?
-            this.props.appUIState.errorDialogQueue[0].errorDialogTitle : ''}
-          actions={
-            this.props.appUIState.errorDialogQueue.length > 0 &&
-              this.props.appUIState.errorDialogQueue[0].cancelButtonAvailable ?
-              [{
-                secondary: true,
-                label: 'Ok',
-                onClick: this.props.appUIState.errorDialogQueue.length > 0 &&
-                  this.props.appUIState.errorDialogQueue[0].onAccept ?
-                  this.props.appUIState.errorDialogQueue[0].onAccept : this.closeErrorDialog,
-              }, {
-                secondary: true,
-                label: 'Cancel',
-                onClick: this.props.appUIState.errorDialogQueue.length > 0 &&
-                  this.props.appUIState.errorDialogQueue[0].onCancel ?
-                  this.props.appUIState.errorDialogQueue[0].onCancel : this.closeErrorDialog,
-              }] :
-              [{
-                secondary: true,
-                label: 'Ok',
-                onClick: this.props.appUIState.errorDialogQueue.length > 0 &&
-                  this.props.appUIState.errorDialogQueue[0].onAccept ?
-                  this.props.appUIState.errorDialogQueue[0].onAccept : this.closeErrorDialog,
-              }]
-          }
-          children={this.props.appUIState.errorDialogQueue.length > 0 ?
-            this.props.appUIState.errorDialogQueue[0].errorDialogExplanation : ''}
+        <ModalDialog
+        appUIState={this.props.appUIState}
+        defaultCloseDialog={this.closeDialog}
         />
       </div>
     );
@@ -150,8 +121,8 @@ class App extends React.Component<AppProps> {
         if (match !== null) {
           const rawJavaVersion = match[1];
           const parsedJavaVersion = parseFloat(rawJavaVersion);
-          if (!isNaN(parsedJavaVersion) && parsedJavaVersion < 1.9) {
-            this.openErrorDialog('Java Runtime Version Error', 'Polyglot requires version >= 1.8');
+          if (!isNaN(parsedJavaVersion) && parsedJavaVersion < 1.8) {
+            this.openDialog('Java Runtime Version Error', 'Polyglot requires version >= 1.8');
             this.sendAnalyticsEvent('Error', 'Java Runtime Too Low', true, `Version ${parsedJavaVersion}`);
           }
         }
@@ -159,18 +130,27 @@ class App extends React.Component<AppProps> {
     });
   }
 
+  private handleAnalyticsConsent = () => {
+    const gaConsent = this.getCookie('_gaConsent');
+    if (gaConsent !== undefined && gaConsent === 'true') {
+     this.gotAnalyticsConsent();
+    } else {
+      this.showAnalyticsPermissionRequest();
+    }
+  }
+
   private showAnalyticsPermissionRequest = () => {
-    const explanation = 'Will you allow anonymous usage statistics to be collected? This will ' +
-      'be used to help development.';
-    this.openErrorDialog('Anonymous Usage Statistics', explanation, true, this.gotAnalyticsConsent);
+    const explanation = `Will you allow anonymous usage statistics to be collected?
+    This will be used to help development.`;
+    this.openDialog('Anonymous Usage Statistics', explanation, true, this.gotAnalyticsConsent);
   }
 
   private gotAnalyticsConsent = () => {
-    console.log('got analytics consent');
-    const gaId = this.getCookie('_ga');
     ReactGA.initialize('UA-105606228-1', { debug: true });
-    ReactGA.set({ clientId: gaId });
-    this.closeErrorDialog();
+    const d = new Date();
+    d.setTime(d.getTime() + (7 * 24 * 60 * 60 * 1000));
+    document.cookie = `_gaConsent=true; expires=${d.toUTCString()}; path=/`;
+    this.closeDialog();
   }
 
   private getCookie = (name: string) => {

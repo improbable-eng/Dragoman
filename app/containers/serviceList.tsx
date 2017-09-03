@@ -18,7 +18,7 @@ import ServiceList,
 import { checkConsoleErrorMessage } from './app';
 
 export interface ServiceListContainerProps {
-  openErrorDialog: (title: string, explanation: string, cancelButtonAvailable?: boolean,
+  openDialog: (title: string, explanation: string, cancelButtonAvailable?: boolean,
   onAccept?: () => void, onCancel?: () => void) => void;
 }
 
@@ -54,7 +54,7 @@ function handleMethodClick(serviceName: string, methodName: string) {
 }
 
 
-function listServices(openErrorDialog: (title: string, explanation: string, cancelButtonAvailable?: boolean,
+function listServices(openDialog: (title: string, explanation: string, cancelButtonAvailable?: boolean,
   onAccept?: () => void, onCancel?: () => void) => void) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
     dispatch(RequestBuilderActions.setFullMethod(''));
@@ -126,11 +126,11 @@ function listServices(openErrorDialog: (title: string, explanation: string, canc
           const parsedResponse = JSON.parse(polyglotStdout as string) as PolyglotService[];
           dispatch(ServiceListActions.importServices(parsedResponse));
         } catch (e) {
-          openErrorDialog('Error parsing list-services response:', checkConsoleErrorMessage);
+          openDialog('Error parsing list-services response:', checkConsoleErrorMessage);
         }
       } else {
         console.error('Error listing services');
-        openErrorDialog('Error listing services: ', checkConsoleErrorMessage);
+        openDialog('Error listing services: ', checkConsoleErrorMessage);
       }
     });
   };
@@ -155,7 +155,7 @@ function mapStateToProps(state: AppState): ServiceListComponentState {
 function mapDispatchToProps(dispatch: Dispatch<AppState>, ownProps: ServiceListContainerProps): ServiceListComponentMethods {
   return {
     handleMethodClick: (serviceName: string, methodName: string) => dispatch(handleMethodClick(serviceName, methodName)),
-    handleListServicesClick: () => dispatch(listServices(ownProps.openErrorDialog)),
+    handleListServicesClick: () => dispatch(listServices(ownProps.openDialog)),
   };
 }
 
