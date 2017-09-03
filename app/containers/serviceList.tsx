@@ -18,7 +18,8 @@ import ServiceList,
 import { checkConsoleErrorMessage } from './app';
 
 export interface ServiceListContainerProps {
-  openErrorDialog: (title: string, explanation: string) => void;
+  openErrorDialog: (title: string, explanation: string, cancelButtonAvailable?: boolean,
+  onAccept?: () => void, onCancel?: () => void) => void;
 }
 
 function handleMethodClick(serviceName: string, methodName: string) {
@@ -53,7 +54,8 @@ function handleMethodClick(serviceName: string, methodName: string) {
 }
 
 
-function listServices(openErrorDialog: (title: string, explanation: string) => void) {
+function listServices(openErrorDialog: (title: string, explanation: string, cancelButtonAvailable?: boolean,
+  onAccept?: () => void, onCancel?: () => void) => void) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
     dispatch(RequestBuilderActions.setFullMethod(''));
     dispatch(RequestBuilderActions.setRequest(''));

@@ -1,19 +1,25 @@
 import { isActionOfType, Action } from '../actions/actions';
 import * as AppUIActions from '../actions/appUI';
 
+export type ErrorDialogState = {
+    errorDialogTitle: string;
+    errorDialogExplanation: string;
+    onAccept?: () => void
+    cancelButtonAvailable?: boolean;
+    onCancel?: () => void;
+};
+
 export type AppUIState = Readonly<{
     settingsOpen: boolean;
     errorDialogVisible: boolean;
-    errorDialogTitle: string;
-    errorDialogExplanation: string;
     serverStreaming?: boolean;
+    errorDialogQueue: ErrorDialogState[];
 }>;
 
 const initialAppState: AppUIState = {
     settingsOpen: true,
     errorDialogVisible: false,
-    errorDialogTitle: '',
-    errorDialogExplanation: '',
+    errorDialogQueue: [],
     serverStreaming: undefined,
 };
 
@@ -33,17 +39,19 @@ export default function appReducer(state: AppUIState = initialAppState, action: 
         };
     }
 
-    if (isActionOfType(action, AppUIActions.setErrorDialogTitle)) {
+    if (isActionOfType(action, AppUIActions.enqueueErrorDialogState)) {
+
         return {
             ...state,
-            errorDialogTitle: action.payload,
+            errorDialogQueue: [...state.errorDialogQueue, action.payload],
         };
     }
 
-    if (isActionOfType(action, AppUIActions.setErrorDialogExplanation)) {
+    if (isActionOfType(action, AppUIActions.dequeueErrorDialogState)) {
+        state.errorDialogQueue.shift();
         return {
             ...state,
-            errorDialogExplanation: action.payload,
+            errorDialogQueue: state.errorDialogQueue,
         };
     }
 
