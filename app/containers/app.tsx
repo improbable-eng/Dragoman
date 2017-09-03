@@ -28,12 +28,12 @@ class App extends React.Component<AppProps> {
   }
 
   public sendAnalyticsEvent = (category: string, action: string, nonInteraction?: boolean, label?: string) => {
-    ReactGA.event({
-      category: category,
-      action: action,
-      nonInteraction: nonInteraction,
-      label: label,
-    });
+    // ReactGA.event({
+    //   category: category,
+    //   action: action,
+    //   nonInteraction: nonInteraction,
+    //   label: label,
+    // });
   }
 
   public closeErrorDialog = () => {

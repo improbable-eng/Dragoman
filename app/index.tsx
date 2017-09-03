@@ -4,11 +4,11 @@ import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import * as WebFontLoader from 'webfontloader';
 import { Provider } from 'react-redux';
-import * as ReactGA from 'react-ga';
+// import * as ReactGA from 'react-ga';
 
 // Setup cookies for google analytics
-const electronCookies = require('@exponent/electron-cookies');
-electronCookies.enable({origin: 'https://improbable.io.dragoman'});
+// const electronCookies = require('@exponent/electron-cookies');
+// electronCookies.enable({origin: 'https://improbable.io.dragoman'});
 
 import './app.global.scss';
 import configureStore from './store/configureStore';
@@ -26,7 +26,7 @@ import App from './containers/app';
 
 const store = configureStore();
 // const gaId = getCookie('_ga');
-ReactGA.initialize('UA-105606228-1', {debug: true});
+// ReactGA.initialize('UA-105606228-1', {debug: true});
 // ReactGA.set({clientId: gaId});
 
 // TODO: Don't want to load fonts from the web, they should be stored locally.

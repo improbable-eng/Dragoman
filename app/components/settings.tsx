@@ -47,18 +47,14 @@ export default function Settings({ settingsDataState, settingsUIState,
                 />
             </div>
             <ReactMD.Autocomplete
-            style={{padding: '0px 10px 0px 10px'}}
-             data={Array.from(settingsDataState.polyglotConfigs.keys())}
-             id='configName'
-             placeholder='development'
-             onAutocomplete={handleConfigAutoComplete}
-            />
-            <TextEntry
-                id={SETTINGS_IDS.CONFIG_NAME}
-                value={settingsDataState.configName}
-                handleChange={handleChange}
+                style={{ padding: '0px 10px 0px 10px' }}
+                data={Array.from(settingsDataState.polyglotConfigs.keys())}
                 label='Config Name'
                 placeholder='development'
+                /* belowAnchor={{x: 'left', y: 'top'}} */
+                value={settingsDataState.configName}
+                onChange={(newValue: string) => handleChange(newValue, SETTINGS_IDS.CONFIG_NAME)}
+                onAutocomplete={handleConfigAutoComplete}
             />
             <TextEntry
                 id={SETTINGS_IDS.ENDPOINT}
