@@ -18,11 +18,16 @@ $md-tertiary-color: $md-green-200;
   padding: 0px;
 }
 
-html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
-html > body > #root > div > div > #main-content {
+body {
+  margin: 0px;
   height: 100%;
 }
 
-body {
-  overflow: hidden;
-}
+// html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
+// html > body > #root > div > div > #main-content {
+//   height: 100%;
+// }
+
+// body {
+//   overflow: hidden;
+// }

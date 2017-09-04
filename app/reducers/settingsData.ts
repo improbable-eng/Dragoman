@@ -38,7 +38,7 @@ export type SettingsDataState = Readonly<{
   tlsCaCertPath: string;
   tlsClientCertPath: string;
   tlsClientOverrideAuthority: string;
-  polyglotConfigs: Map<string, polyglotConfig.Configuration>;
+  polyglotConfigs: Map<string, polyglotConfig.IConfiguration>;
 }>;
 
 export const initialSettingsDataState: SettingsDataState = {
@@ -58,7 +58,7 @@ export const initialSettingsDataState: SettingsDataState = {
   tlsClientKeyPath: '',
   tlsClientCertPath: '',
   tlsClientOverrideAuthority: '',
-  polyglotConfigs: new Map<string, polyglotConfig.Configuration>(),
+  polyglotConfigs: new Map<string, polyglotConfig.IConfiguration>(),
 };
 
 export default function settingsDataReducer(state: SettingsDataState = initialSettingsDataState, action: Action<any>): SettingsDataState {
@@ -187,13 +187,20 @@ export default function settingsDataReducer(state: SettingsDataState = initialSe
       ...state,
       polyglotConfigs: new Map(action.payload.configurations.map(
         (config: polyglotConfig.IConfiguration) => {
-          return [config.name, config] as [string, polyglotConfig.Configuration];
+          return [config.name, config] as [string, polyglotConfig.IConfiguration];
         })),
     };
   }
 
   if (isActionOfType(action, SettingsDataActions.setSettingsDataStateFromPolyglotConfig)) {
-    const stateToMutate = {... initialSettingsDataState};
+    // We only want to override certain settings with the imported config
+    const stateToMutate = {
+      ...initialSettingsDataState,
+      configName: state.configName,
+      configSetPath: state.configSetPath,
+      polyglotConfigs: state.polyglotConfigs,
+      endpoint: state.endpoint,
+    };
     const config = action.payload;
 
     // TODO: All this null checking is horrific, swift style optional unwrapping is not yet implemented in TypeScript,
@@ -254,42 +261,12 @@ export default function settingsDataReducer(state: SettingsDataState = initialSe
     }
   }
 
-
+  if (isActionOfType(action, SettingsDataActions.addPolyglotConfig)) {
+    state.polyglotConfigs.set(state.configName, action.payload);
+    return {
+      ...state,
+    };
+  }
 
   return state;
 }
-
-// TODO?: Move to internal state which matches the structure defined from polyglot's
-// config proto?
-
-// import { polyglot } from '../proto/config';
-
-// const initialPolyglotConfigState: polyglot.IConfiguration = {
-//   call_config: {
-//     oauth_config: {
-//       refresh_token_credentials: {
-//         client: {
-//           id: '',
-//           secret: '',
-//         },
-//         refresh_token_path: '',
-//       },
-//       access_token_credentials: {
-//         access_token_path: '',
-//       },
-//     },
-//     deadline_ms: -1,
-//     use_tls: false,
-//     tls_ca_cert_path: '',
-//     tls_client_key_path: '',
-//     tls_client_override_authority: '',
-//   },
-//   output_config: {
-//     destination: polyglot.OutputConfiguration.Destination.STDOUT,
-//     file_path: '',
-//   },
-//   proto_config: {
-//     proto_discovery_root: '',
-//     include_paths: [''],
-//   },
-// };

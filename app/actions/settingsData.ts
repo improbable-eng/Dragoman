@@ -18,6 +18,7 @@ const SET_TLS_CLIENT_KEY_PATH = 'SET_TLS_CLIENT_KEY_PATH';
 const SET_TLS_CLIENT_CERT_PATH = 'SET_TLS_CLIENT_CERT_PATH';
 const SET_TLS_CLIENT_OVERRRIDE_AUTHORITY = 'SET_TLS_CLIENT_OVERRRIDE_AUTHORITY';
 const IMPORT_POLYGLOT_CONFIGS = 'IMPORT_POLYGLOT_CONFIGS';
+const ADD_POLYGLOT_CONFIG = 'ADD_POLYGLOT_CONFIG';
 const SET_SETTINGS_DATA_STATE_FROM_POLYGLOT_CONFIG = 'SET_SETTINGS_DATA_STATE_FROM_POLYGLOT_CONFIG';
 
 export const setProtoDiscoveryRoot = actionHelpers.actionCreator<string>(SET_PROTO_DISCOVERY_ROOT);
@@ -37,4 +38,5 @@ export const setOauthClientSecret = actionHelpers.actionCreator<string>(SET_OAUT
 export const setOauthRefreshTokenPath = actionHelpers.actionCreator<string>(SET_OAUTH_REFRESH_TOKEN_PATH);
 export const setOauthAccessTokenPath = actionHelpers.actionCreator<string>(SET_OAUTH_ACCESS_TOKEN_PATH);
 export const importPolyglotConfigs = actionHelpers.actionCreator<polyglotConfig.ConfigurationSet>(IMPORT_POLYGLOT_CONFIGS);
-export const setSettingsDataStateFromPolyglotConfig = actionHelpers.actionCreator<polyglotConfig.Configuration>(SET_SETTINGS_DATA_STATE_FROM_POLYGLOT_CONFIG);
+export const addPolyglotConfig = actionHelpers.actionCreator<polyglotConfig.IConfiguration>(ADD_POLYGLOT_CONFIG);
+export const setSettingsDataStateFromPolyglotConfig = actionHelpers.actionCreator<polyglotConfig.IConfiguration>(SET_SETTINGS_DATA_STATE_FROM_POLYGLOT_CONFIG);

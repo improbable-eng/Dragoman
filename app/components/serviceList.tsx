@@ -17,7 +17,7 @@ export interface ServiceListComponentState {
 
 function serviceList({ serviceMap, handleMethodClick, handleListServicesClick }: ServiceListComponentProps) {
     return (
-        <div>
+        <div style={{height: '100%'}}>
             <ReactMD.Button
                 key='button'
                 secondary={true}

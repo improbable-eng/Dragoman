@@ -14,7 +14,7 @@ import { SETTINGS_IDS } from '../reducers/settingsData';
 import * as SettingsDataActions from '../actions/settingsData';
 import * as SettingsUIActions from '../actions/settingsUI';
 
-import * as polyglotConfig from '../proto/config';
+import { polyglot as polyglotConfig } from '../proto/config';
 
 function handleChangeAndError(newValue: string, stateId: string, dispatch: Dispatch<AppState>) {
   switch (stateId) {
@@ -187,9 +187,65 @@ function importConfig() {
     const rawFile = fs.readFileSync(pathList[0]);
     const decodedFile = new TextDecoder('utf-8').decode(rawFile);
     const parsedJson = JSON.parse(decodedFile);
-    const fromJson = polyglotConfig.polyglot.ConfigurationSet.fromObject(parsedJson);
+    const fromJson = polyglotConfig.ConfigurationSet.fromObject(parsedJson);
+    dispatch(SettingsDataActions.setConfigSetPath(pathList[0]));
     dispatch(SettingsDataActions.importPolyglotConfigs(fromJson));
     console.log(fromJson, fromJson.toJSON());
+  };
+}
+
+function saveConfig() {
+  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
+    console.log('saving config');
+    const state = getState().settingsState.settingsDataState;
+
+    const config: polyglotConfig.IConfiguration = {
+      name: state.configName,
+      call_config: {
+        deadline_ms: state.deadlineMs > 0 ? state.deadlineMs : undefined,
+        tls_ca_cert_path: state.tlsCaCertPath,
+        tls_client_cert_path: state.tlsClientCertPath,
+        tls_client_key_path: state.tlsClientKeyPath,
+        tls_client_override_authority: state.tlsClientOverrideAuthority,
+        use_tls: state.useTls,
+        oauth_config: {
+          access_token_credentials: {
+            access_token_path: state.oauthAccessTokenPath,
+          },
+          refresh_token_credentials: {
+            refresh_token_path: state.oauthRefreshTokenPath,
+            token_endpoint_url: state.oauthRefreshTokenEndpointUrl,
+            client: {
+              id: state.oauthClientId,
+              secret: state.oauthClientSecret,
+            },
+          },
+        },
+      },
+      proto_config: {
+        proto_discovery_root: state.protoDiscoveryRoot,
+        include_paths: state.addProtocIncludes.split(',').map((elem) => elem.trim()),
+      },
+    };
+
+    console.log(state, config);
+
+    dispatch(SettingsDataActions.addPolyglotConfig(config));
+
+    const pathList = remote.dialog.showSaveDialog({
+      message: 'Save polyglot config to file',
+    } as Electron.OpenDialogOptions);
+
+    console.log(pathList);
+    console.log('newstate', getState());
+    const output = JSON.stringify({
+      configurations: Array.from(getState().settingsState.settingsDataState.polyglotConfigs, ([key, val]) => {
+      return val;
+    })}, null, 2);
+    console.log(output);
+    fs.writeFileSync(getState().settingsState.settingsDataState.configSetPath, output, (error: NodeJS.ErrnoException) => {
+      console.log(error);
+    });
   };
 }
 
@@ -226,6 +282,7 @@ function mapDispatchToProps(dispatch: Dispatch<AppState>): SettingsComponentMeth
     handlePathDoubleClick: (id: string, macMessage?: string, multiSelection?: boolean) => showDirectoryDialog(id, macMessage, multiSelection, dispatch),
     handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => handleDrop(event, id, multiSelection, dispatch),
     importConfigFile: () => dispatch(importConfig()),
+    saveConfigFile: () => dispatch(saveConfig()),
     handleConfigAutoComplete: (suggestion: string, suggestionIndex: number) => dispatch(handleConfigAutoComplete(suggestion, suggestionIndex)),
   };
 }

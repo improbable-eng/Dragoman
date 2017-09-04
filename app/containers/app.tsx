@@ -82,7 +82,7 @@ class App extends React.Component<AppProps> {
               icon={true}
               onClick={this.handleSettingsClick}>
               settings
-          </ReactMD.Button>}
+            </ReactMD.Button>}
           children={
             <div style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
               <RequestBuilder
@@ -103,8 +103,8 @@ class App extends React.Component<AppProps> {
           children={<Settings />}
         />
         <ModalDialog
-        appUIState={this.props.appUIState}
-        defaultCloseDialog={this.closeDialog}
+          appUIState={this.props.appUIState}
+          defaultCloseDialog={this.closeDialog}
         />
       </div>
     );
@@ -133,7 +133,7 @@ class App extends React.Component<AppProps> {
   private handleAnalyticsConsent = () => {
     const gaConsent = this.getCookie('_gaConsent');
     if (gaConsent !== undefined && gaConsent === 'true') {
-     this.gotAnalyticsConsent();
+      this.gotAnalyticsConsent();
     } else {
       this.showAnalyticsPermissionRequest();
     }
