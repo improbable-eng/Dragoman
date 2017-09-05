@@ -11,8 +11,8 @@ export interface ITextEntryProps {
     error?: boolean;
     required?: boolean;
     type?: ReactMD.TextFieldTypes;
-    handleChange: (newValue: string | number, id: string) => void;
-    handleDoubleClick?: () => void;
+    handleChange: (newValue: string, id: string) => void;
+    handleDoubleClick?: (id: string, message?: string) => void;
     handleDrop?: (event: React.DragEvent<HTMLElement>, id: string) => void;
 }
 
@@ -29,8 +29,8 @@ function TextEntry({id, multiline = false, handleChange, handleDoubleClick, hand
                 type={type}
                 error={error}
                 errorText={errorText}
-                onChange={(newValue: string | number) => handleChange(newValue, id)}
-                onDoubleClick={handleDoubleClick}
+                onChange={(newValue: string) => handleChange(newValue, id)}
+                onDoubleClick={handleDoubleClick ? () => handleDoubleClick(id, `Select ${label}`) : undefined}
                 rows={multiline ? 1 : undefined}
                 maxRows={multiline ? -1 : undefined}
                 style={{ flex: '1', margin: '0px 8px 0px 8px' }}

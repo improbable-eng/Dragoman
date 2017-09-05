@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Autocomplete, Button } from 'react-md';
+import { Autocomplete, Button, List, Subheader, ListItemControl, Switch } from 'react-md';
 
 import TextEntry from './textEntry';
 
@@ -14,19 +14,19 @@ export interface SettingsComponentState {
 }
 
 export interface SettingsComponentMethods {
-    handleChange: (newValue: string | number, stateId: string) => void;
+    handleChange: (newValue: string | boolean, stateId: string) => void;
     handlePathDoubleClick: (settingsId: string, message: string, allowMultiSelect?: boolean) => void;
     handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => void;
     importConfigFile: () => void;
     saveConfigFile: () => void;
-    handleConfigAutoComplete: (suggestion: string | number, suggestionIndex: number) => void;
+    handleConfigAutoComplete: (suggestion: string | number) => void;
 }
 
 export default function Settings({ settingsDataState, settingsUIState,
     handlePathDoubleClick, handleChange, handleDrop, importConfigFile,
     saveConfigFile, handleConfigAutoComplete }: SettingsComponentProps) {
     return (
-        <div style={{height: '100%'}}>
+        <div style={{ height: '100%' }} id='settingsDrawer'>
             <div style={{ display: 'flex' }}>
                 <Button
                     key='loadConfig'
@@ -47,16 +47,19 @@ export default function Settings({ settingsDataState, settingsUIState,
                     style={{ width: '100%', height: 40, borderRadius: 0 }}
                 />
             </div>
-            <div className='md-list--drawer'>
+            <List className='md-list--drawer'>
                 <Autocomplete
                     style={{ padding: '0px 10px 0px 10px' }}
                     data={Array.from(settingsDataState.polyglotConfigs.keys())}
                     label='Config Name'
                     placeholder='development'
+                    id='configName'
                     /* belowAnchor={{x: 'left', y: 'top'}} */
                     value={settingsDataState.configName}
                     onChange={(newValue: string) => handleChange(newValue, SETTINGS_IDS.CONFIG_NAME)}
                     onAutocomplete={handleConfigAutoComplete}
+                    onBlur={() => handleConfigAutoComplete(settingsDataState.configName)}
+                    fixedTo={document.getElementById('settingsDrawer') || window}
                 />
                 <TextEntry
                     id={SETTINGS_IDS.ENDPOINT}
@@ -77,29 +80,6 @@ export default function Settings({ settingsDataState, settingsUIState,
                     errorText='Proto Root Path is invalid'
                     error={settingsUIState.protoDiscoveryRootError}
                     handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.PROTO_DISCOVERY_ROOT, 'Select Proto Discovery Root')}
-                    handleDrop={handleDrop}
-                />
-                <TextEntry
-                    id={SETTINGS_IDS.CONFIG_SET_PATH}
-                    value={settingsDataState.configSetPath}
-                    handleChange={handleChange}
-                    label='Config Path'
-                    placeholder='/path/to/config.pb.json'
-                    errorText='Config Path is invalid'
-                    handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.CONFIG_SET_PATH, 'Select Config Path')}
-                    error={settingsUIState.configSetPathError}
-                    handleDrop={handleDrop}
-                />
-                <TextEntry
-                    id={SETTINGS_IDS.TLS_CA_CERT_PATH}
-                    multiline={false}
-                    value={settingsDataState.tlsCaCertPath}
-                    handleChange={handleChange}
-                    label='TLS CA Certificate Path'
-                    placeholder='/path/to/tlsCaCertificate'
-                    errorText='TLS CA Certificate Path is invalid'
-                    error={settingsUIState.tlsCaCertPathError}
-                    handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.TLS_CA_CERT_PATH, 'Select TLS CA Certificate Path')}
                     handleDrop={handleDrop}
                 />
                 <TextEntry
@@ -129,6 +109,9 @@ export default function Settings({ settingsDataState, settingsUIState,
                             'Add Protoc Include Paths',
                             true)}
                     handleDrop={(event, id) => handleDrop(event, id, true)}
+                />
+                <Subheader
+                    primaryText='OAuth'
                 />
                 <TextEntry
                     id={SETTINGS_IDS.OAUTH_REFRESH_TOKEN_ENDPOINT_URL}
@@ -176,6 +159,62 @@ export default function Settings({ settingsDataState, settingsUIState,
                     handleDoubleClick={() => handlePathDoubleClick(SETTINGS_IDS.OAUTH_ACCESS_TOKEN_PATH, 'Add Oauth Access Token Path')}
                     handleDrop={handleDrop}
                 />
-            </div>
+                <Subheader
+                    primaryText='TLS'
+                />
+                <ListItemControl
+                    secondaryAction={
+                        <Switch
+                            id='toggle-use-tls'
+                            name='Use TLS'
+                            label='Use TLS'
+                            checked={settingsDataState.useTls}
+                            onChange={(checked: boolean) => handleChange(checked, SETTINGS_IDS.USE_TLS)}
+                            labelBefore
+                            defaultChecked
+                        />
+                    }
+                />
+                <TextEntry
+                    id={SETTINGS_IDS.TLS_CA_CERT_PATH}
+                    value={settingsDataState.tlsCaCertPath}
+                    handleChange={handleChange}
+                    label='TLS CA Certificate Path'
+                    placeholder='/path/to/tlsCaCertificate'
+                    errorText='TLS CA Certificate Path is invalid'
+                    error={settingsUIState.tlsCaCertPathError}
+                    handleDoubleClick={handlePathDoubleClick}
+                    handleDrop={handleDrop}
+                />
+                <TextEntry
+                    id={SETTINGS_IDS.TLS_CLIENT_CERT_PATH}
+                    value={settingsDataState.tlsClientCertPath}
+                    handleChange={handleChange}
+                    label='TLS Client Certificate Path'
+                    placeholder='/path/to/tlsClientCertificate'
+                    errorText='TLS Client Certificate Path is invalid'
+                    error={settingsUIState.tlsClientCertPathError}
+                    handleDoubleClick={handlePathDoubleClick}
+                    handleDrop={handleDrop}
+                />
+                <TextEntry
+                    id={SETTINGS_IDS.TLS_CLIENT_KEY_PATH}
+                    value={settingsDataState.tlsClientKeyPath}
+                    handleChange={handleChange}
+                    label='TLS Client Key Path'
+                    placeholder='/path/to/tlsClientKey'
+                    errorText='TLS Client Key Path is invalid'
+                    error={settingsUIState.tlsClientKeyPathError}
+                    handleDoubleClick={handlePathDoubleClick}
+                    handleDrop={handleDrop}
+                />
+                <TextEntry
+                    id={SETTINGS_IDS.TLS_CLIENT_OVERRIDE_AUTHORITY}
+                    value={settingsDataState.tlsClientOverrideAuthority}
+                    handleChange={handleChange}
+                    label='TLS Client Override Authority'
+                    placeholder='host'
+                />
+            </List>
         </div>);
 }

@@ -59,6 +59,11 @@ class App extends React.Component<AppProps> {
       onCancel: onCancel,
     };
 
+    const myNotifcation = new Notification('Title', {
+      body: 'Lorem Ipsum Dolor Sit Amet',
+    });
+    console.log(myNotifcation);
+
     this.props.dispatch(AppUIActions.enqueueErrorDialogState(dialogState));
     this.props.dispatch(AppUIActions.setErrorDialogVisible(true));
     this.sendAnalyticsEvent('Error', 'Error Dialog Shown', true);
@@ -101,6 +106,7 @@ class App extends React.Component<AppProps> {
           visible={this.props.appUIState.settingsOpen}
           position='right'
           children={<Settings />}
+          onVisibilityChange={() => {/**/}} // Suppress spurious react-md error
         />
         <ModalDialog
           appUIState={this.props.appUIState}

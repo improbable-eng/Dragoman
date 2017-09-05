@@ -6,11 +6,14 @@ export type SettingsUIState = Readonly<{
   endpointError: boolean;
   protoDiscoveryRootError: boolean;
   configSetPathError: boolean;
-  tlsCaCertPathError: boolean;
   addProtocIncludesErrors: boolean[];
   oauthRefreshTokenEndpointUrlError: boolean;
   oauthRefreshTokenPathError: boolean;
   oauthAccessTokenPathError: boolean;
+  tlsCaCertPathError: boolean;
+  tlsClientKeyPathError: boolean;
+  tlsClientCertPathError: boolean;
+  tlsClientOverrideAuthorityError: boolean;
 }>;
 
 const initialSettingsUIState: SettingsUIState = {
@@ -18,11 +21,14 @@ const initialSettingsUIState: SettingsUIState = {
   endpointError: false,
   protoDiscoveryRootError: false,
   configSetPathError: false,
-  tlsCaCertPathError: false,
   addProtocIncludesErrors: [],
   oauthRefreshTokenEndpointUrlError: false,
   oauthRefreshTokenPathError: false,
   oauthAccessTokenPathError: false,
+  tlsCaCertPathError: false,
+  tlsClientKeyPathError: false,
+  tlsClientCertPathError: false,
+  tlsClientOverrideAuthorityError: false,
 };
 
 export default function settingsUIReducer(state: SettingsUIState = initialSettingsUIState, action: Action<any>): SettingsUIState {
@@ -51,12 +57,6 @@ export default function settingsUIReducer(state: SettingsUIState = initialSettin
       configSetPathError: action.payload,
     };
   }
-  if (isActionOfType(action, SettingsUIActions.setTlsCaCertPathError)) {
-    return {
-      ...state,
-      tlsCaCertPathError: action.payload,
-    };
-  }
   if (isActionOfType(action, SettingsUIActions.setAddProtocIncludesError)) {
     return {
       ...state,
@@ -79,6 +79,24 @@ export default function settingsUIReducer(state: SettingsUIState = initialSettin
     return {
       ...state,
       oauthAccessTokenPathError: action.payload,
+    };
+  }
+  if (isActionOfType(action, SettingsUIActions.setTlsCaCertPathError)) {
+    return {
+      ...state,
+      tlsCaCertPathError: action.payload,
+    };
+  }
+  if (isActionOfType(action, SettingsUIActions.setTlsClientCertPathError)) {
+    return {
+      ...state,
+      tlsClientCertPathError: action.payload,
+    };
+  }
+  if (isActionOfType(action, SettingsUIActions.setTlsClientKeyPathError)) {
+    return {
+      ...state,
+      tlsClientKeyPathError: action.payload,
     };
   }
   return state;

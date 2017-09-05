@@ -23,6 +23,10 @@ body {
   height: 100%;
 }
 
+// Positioning of the autosuggestion popup
+.md-layover-child {
+  position: initial;
+}
 // html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
 // html > body > #root > div > div > #main-content {
 //   height: 100%;

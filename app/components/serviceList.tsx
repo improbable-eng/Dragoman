@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as ReactMD from 'react-md';
+import { Button, List} from 'react-md';
 
 import ServiceListItem from './serviceListItem';
 import { DragomanService } from '../reducers/serviceList';
@@ -18,7 +18,7 @@ export interface ServiceListComponentState {
 function serviceList({ serviceMap, handleMethodClick, handleListServicesClick }: ServiceListComponentProps) {
     return (
         <div style={{height: '100%'}}>
-            <ReactMD.Button
+            <Button
                 key='button'
                 secondary={true}
                 flat={true}
@@ -27,7 +27,7 @@ function serviceList({ serviceMap, handleMethodClick, handleListServicesClick }:
                 onClick={handleListServicesClick}
                 style={{ width: '100%', height: 40, borderRadius: 0, margin: 0 }}
             />
-            <ReactMD.List className='md-list--drawer'>
+            <List className='md-list--drawer'>
                 {
                     Array.from(serviceMap, ([key, val]) => {
                         return (
@@ -38,7 +38,7 @@ function serviceList({ serviceMap, handleMethodClick, handleListServicesClick }:
                             />);
                     })
                 }
-            </ReactMD.List>
+            </List>
         </div>
     );
 }

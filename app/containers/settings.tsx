@@ -16,41 +16,35 @@ import * as SettingsUIActions from '../actions/settingsUI';
 
 import { polyglot as polyglotConfig } from '../proto/config';
 
-function handleChangeAndError(newValue: string, stateId: string, dispatch: Dispatch<AppState>) {
+function handleChangeAndError(newValue: string | boolean, stateId: string, dispatch: Dispatch<AppState>) {
   switch (stateId) {
     case SETTINGS_IDS.ENDPOINT:
-      const endpoint = newValue;
+      const endpoint = newValue as string;
       const endpointError = (endpoint === '') ? false : !validateEndpoint(endpoint);
       dispatch(SettingsDataActions.setEndpoint(endpoint));
       dispatch(SettingsUIActions.setEndpointError(endpointError));
       break;
     case SETTINGS_IDS.PROTO_DISCOVERY_ROOT:
-      const protoDiscoveryRoot = newValue;
+      const protoDiscoveryRoot = newValue as string;
       const protoDiscoveryRootError = (protoDiscoveryRoot === '') ? false : !validatePath(protoDiscoveryRoot);
       dispatch(SettingsDataActions.setProtoDiscoveryRoot(protoDiscoveryRoot));
       dispatch(SettingsUIActions.setProtoDiscoveryRootError(protoDiscoveryRootError));
       break;
     case SETTINGS_IDS.CONFIG_SET_PATH:
-      const configSetPath = newValue;
+      const configSetPath = newValue as string;
       const configSetPathError = (configSetPath === '') ? false : !validatePath(configSetPath);
       dispatch(SettingsDataActions.setConfigSetPath(configSetPath));
       dispatch(SettingsUIActions.setConfigSetPathError(configSetPathError));
       break;
     case SETTINGS_IDS.ADD_PROTOC_INCLUDES:
-      const addProtocIncludes = (newValue);
+      const addProtocIncludes = newValue as string;
       const pathArray = addProtocIncludes.split(',').map(elem => elem.trim());
       const addProtocIncludesErrors = (addProtocIncludes === '') ? [] : validatePaths(pathArray).map(elem => !elem);
       dispatch(SettingsDataActions.setAddProtocIncludes(addProtocIncludes));
       dispatch(SettingsUIActions.setAddProtocIncludesError(addProtocIncludesErrors));
       break;
-    case SETTINGS_IDS.TLS_CA_CERT_PATH:
-      const tlsCaCertPath = newValue;
-      const tlsCaCertPathError = (tlsCaCertPath === '') ? false : !validatePath(tlsCaCertPath);
-      dispatch(SettingsDataActions.setTlsCaCertPath(tlsCaCertPath));
-      dispatch(SettingsUIActions.setTlsCaCertPathError(tlsCaCertPathError));
-      break;
     case SETTINGS_IDS.DEADLINE_MS:
-      const deadlineMs = newValue;
+      const deadlineMs = newValue as string;
       const parsedDeadline = parseInt(deadlineMs, 10);
       if (!isNaN(parsedDeadline)) {
         dispatch(SettingsDataActions.setDeadlineMs(parsedDeadline));
@@ -60,34 +54,62 @@ function handleChangeAndError(newValue: string, stateId: string, dispatch: Dispa
       }
       break;
     case SETTINGS_IDS.CONFIG_NAME:
-      const configName = newValue;
+      const configName = newValue as string;
       dispatch(SettingsDataActions.setConfigName(configName));
       break;
     case SETTINGS_IDS.OAUTH_REFRESH_TOKEN_ENDPOINT_URL:
-      const oauthRefreshTokenEndpointUrl = newValue;
+      const oauthRefreshTokenEndpointUrl = newValue as string;
       const oauthRefreshTokenEndpointUrlError = (oauthRefreshTokenEndpointUrl === '') ? false : !validateUri(oauthRefreshTokenEndpointUrl);
       dispatch(SettingsDataActions.setOauthRefreshTokenEndpointUrl(oauthRefreshTokenEndpointUrl));
       dispatch(SettingsUIActions.setOauthRefreshTokenEndpointUrlError(oauthRefreshTokenEndpointUrlError));
       break;
     case SETTINGS_IDS.OAUTH_CLIENT_ID:
-      const oauthClientId = newValue;
+      const oauthClientId = newValue as string;
       dispatch(SettingsDataActions.setOauthClientId(oauthClientId));
       break;
     case SETTINGS_IDS.OAUTH_CLIENT_SECRET:
-      const oauthClientSecret = newValue;
+      const oauthClientSecret = newValue as string;
       dispatch(SettingsDataActions.setOauthClientSecret(oauthClientSecret));
       break;
     case SETTINGS_IDS.OAUTH_REFRESH_TOKEN_PATH:
-      const oauthRefreshTokenPath = newValue;
+      const oauthRefreshTokenPath = newValue as string;
       const oauthRefreshTokenPathError = (oauthRefreshTokenPath === '') ? false : !validatePath(oauthRefreshTokenPath);
       dispatch(SettingsDataActions.setOauthRefreshTokenPath(oauthRefreshTokenPath));
       dispatch(SettingsUIActions.setOauthRefreshTokenPathError(oauthRefreshTokenPathError));
       break;
     case SETTINGS_IDS.OAUTH_ACCESS_TOKEN_PATH:
-      const oauthAccessTokenPath = newValue;
+      const oauthAccessTokenPath = newValue as string;
       const oauthAccessTokenPathError = (oauthAccessTokenPath === '') ? false : !validatePath(oauthAccessTokenPath);
       dispatch(SettingsDataActions.setOauthAccessTokenPath(oauthAccessTokenPath));
       dispatch(SettingsUIActions.setOauthAccessTokenPathError(oauthAccessTokenPathError));
+      break;
+    case SETTINGS_IDS.USE_TLS:
+      const useTls = newValue as boolean;
+      dispatch(SettingsDataActions.setUseTls(useTls));
+      break;
+    case SETTINGS_IDS.TLS_CA_CERT_PATH:
+      const tlsCaCertPath = newValue as string;
+      const tlsCaCertPathError = (tlsCaCertPath === '') ? false : !validatePath(tlsCaCertPath);
+      dispatch(SettingsDataActions.setTlsCaCertPath(tlsCaCertPath));
+      dispatch(SettingsUIActions.setTlsCaCertPathError(tlsCaCertPathError));
+      break;
+    // TODO: ADD CHANGE TLS cases
+    case SETTINGS_IDS.TLS_CLIENT_CERT_PATH:
+      const tlsClientCertPath = newValue as string;
+      const tlsClientCertPathError = (tlsClientCertPath === '') ? false : !validatePath(tlsClientCertPath);
+      dispatch(SettingsDataActions.setTlsClientCertPath(tlsClientCertPath));
+      dispatch(SettingsUIActions.setTlsClientCertPathError(tlsClientCertPathError));
+      break;
+    case SETTINGS_IDS.TLS_CLIENT_KEY_PATH:
+      const tlsClientKeyPath = newValue as string;
+      const tlsClientKeyPathError = (tlsClientKeyPath === '') ? false : !validatePath(tlsClientKeyPath);
+      dispatch(SettingsDataActions.setTlsClientKeyPath(tlsClientKeyPath));
+      dispatch(SettingsUIActions.setTlsClientKeyPathError(tlsClientKeyPathError));
+      break;
+    case SETTINGS_IDS.TLS_CLIENT_OVERRIDE_AUTHORITY:
+      // TODO?: Find out what format this is supposed to adhere to and validate the input.
+      const tlsClientOverrideAuthority = newValue as string;
+      dispatch(SettingsDataActions.setTlsClientOverrideAuthority(tlsClientOverrideAuthority));
       break;
     default:
       console.error(`Unknown settings state id ${stateId} passed to handlePathBlur`);
@@ -170,9 +192,7 @@ function handleDrop(event: React.DragEvent<HTMLElement>, id: string, multiSelect
   }
 }
 
-function importConfig() {
-  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
-    console.log(getState());
+function importConfig(dispatch: Dispatch<AppState>) {
     const customProperties = ['openFile', 'showHiddenFiles'];
 
     const pathList = remote.dialog.showOpenDialog({
@@ -190,7 +210,23 @@ function importConfig() {
     const fromJson = polyglotConfig.ConfigurationSet.fromObject(parsedJson);
     dispatch(SettingsDataActions.setConfigSetPath(pathList[0]));
     dispatch(SettingsDataActions.importPolyglotConfigs(fromJson));
-    console.log(fromJson, fromJson.toJSON());
+    console.log(fromJson.configurations.length, fromJson.configurations[0].name);
+    // By default should load the first configuration settings as polyglot does
+    if (fromJson.configurations.length > 0 && fromJson.configurations[0].name !== undefined) {
+      console.log('here');
+      dispatch(handleConfigAutoComplete(fromJson.configurations[0].name as string));
+    }
+}
+
+function handleConfigAutoComplete(suggestion: string) {
+  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
+    console.log('handling ');
+    dispatch(SettingsDataActions.setConfigName(suggestion));
+    const selectedConfig = getState().settingsState.settingsDataState.polyglotConfigs.get(suggestion);
+    console.log(selectedConfig);
+    if (selectedConfig != null) {
+      dispatch(SettingsDataActions.setSettingsDataStateFromPolyglotConfig(selectedConfig));
+    }
   };
 }
 
@@ -203,28 +239,28 @@ function saveConfig() {
       name: state.configName,
       call_config: {
         deadline_ms: state.deadlineMs > 0 ? state.deadlineMs : undefined,
-        tls_ca_cert_path: state.tlsCaCertPath,
-        tls_client_cert_path: state.tlsClientCertPath,
-        tls_client_key_path: state.tlsClientKeyPath,
-        tls_client_override_authority: state.tlsClientOverrideAuthority,
-        use_tls: state.useTls,
+        tls_ca_cert_path: state.tlsCaCertPath !== '' ? state.tlsCaCertPath : undefined,
+        tls_client_cert_path: state.tlsClientCertPath !== '' ? state.tlsClientCertPath : undefined,
+        tls_client_key_path: state.tlsClientKeyPath !== '' ? state.tlsClientKeyPath : undefined,
+        tls_client_override_authority: state.tlsClientOverrideAuthority !== '' ? state.tlsClientOverrideAuthority : undefined,
+        use_tls: state.useTls ? true : undefined,
         oauth_config: {
           access_token_credentials: {
-            access_token_path: state.oauthAccessTokenPath,
+            access_token_path: state.oauthAccessTokenPath !== '' ? state.oauthAccessTokenPath : undefined,
           },
           refresh_token_credentials: {
-            refresh_token_path: state.oauthRefreshTokenPath,
-            token_endpoint_url: state.oauthRefreshTokenEndpointUrl,
+            refresh_token_path: state.oauthRefreshTokenPath !== '' ? state.oauthRefreshTokenPath : undefined,
+            token_endpoint_url: state.oauthRefreshTokenEndpointUrl !== '' ? state.oauthRefreshTokenEndpointUrl : undefined,
             client: {
-              id: state.oauthClientId,
-              secret: state.oauthClientSecret,
+              id: state.oauthClientId !== '' ? state.oauthClientId : undefined,
+              secret: state.oauthClientSecret !== '' ? state.oauthClientSecret : undefined,
             },
           },
         },
       },
       proto_config: {
-        proto_discovery_root: state.protoDiscoveryRoot,
-        include_paths: state.addProtocIncludes.split(',').map((elem) => elem.trim()),
+        proto_discovery_root: state.protoDiscoveryRoot !== '' ? state.protoDiscoveryRoot : undefined,
+        include_paths: state.addProtocIncludes.length > 0 ? state.addProtocIncludes.split(',').map((elem) => elem.trim()) : undefined,
       },
     };
 
@@ -240,22 +276,13 @@ function saveConfig() {
     console.log('newstate', getState());
     const output = JSON.stringify({
       configurations: Array.from(getState().settingsState.settingsDataState.polyglotConfigs, ([key, val]) => {
-      return val;
-    })}, null, 2);
+        return val;
+      }),
+    }, null, 2);
     console.log(output);
     fs.writeFileSync(getState().settingsState.settingsDataState.configSetPath, output, (error: NodeJS.ErrnoException) => {
       console.log(error);
     });
-  };
-}
-
-function handleConfigAutoComplete(suggestion: string, suggestionIndex: number) {
-  return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
-    dispatch(SettingsDataActions.setConfigName(suggestion));
-    const selectedConfig = getState().settingsState.settingsDataState.polyglotConfigs.get(suggestion);
-    if (selectedConfig != null) {
-      dispatch(SettingsDataActions.setSettingsDataStateFromPolyglotConfig(selectedConfig));
-    }
   };
 }
 
@@ -281,9 +308,9 @@ function mapDispatchToProps(dispatch: Dispatch<AppState>): SettingsComponentMeth
     handleChange: (newEndpoint: string, stateId: string) => handleChangeAndError(newEndpoint, stateId, dispatch),
     handlePathDoubleClick: (id: string, macMessage?: string, multiSelection?: boolean) => showDirectoryDialog(id, macMessage, multiSelection, dispatch),
     handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => handleDrop(event, id, multiSelection, dispatch),
-    importConfigFile: () => dispatch(importConfig()),
+    importConfigFile: () => importConfig(dispatch),
     saveConfigFile: () => dispatch(saveConfig()),
-    handleConfigAutoComplete: (suggestion: string, suggestionIndex: number) => dispatch(handleConfigAutoComplete(suggestion, suggestionIndex)),
+    handleConfigAutoComplete: (suggestion: string) => dispatch(handleConfigAutoComplete(suggestion)),
   };
 }
 

@@ -62,7 +62,6 @@ function listServices(openDialog: (title: string, explanation: string, cancelBut
     dispatch(ServiceListActions.importServices([]));
     dispatch(ResponseViewerActions.setResponse(''));
 
-    // visitor.event('appContainer', 'interaction', 'listServicesRequest').send();
     const DEV_PATH_TO_POLYGLOT_BINARY = '/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar';
 
     let pathToPolyglotBinary;
@@ -86,23 +85,14 @@ function listServices(openDialog: (title: string, explanation: string, cancelBut
     if (getState().serviceListState.methodFilter !== '') {
       polyglotCommandLineArgs.push(`--method_filter=${getState().serviceListState.methodFilter}`);
     }
-    if (getState().settingsState.settingsDataState.configSetPath !== '') {
-      polyglotCommandLineArgs.push(`--config_set_path=${getState().settingsState.settingsDataState.configSetPath}`);
-    }
-    if (getState().settingsState.settingsDataState.configName !== '') {
-      polyglotCommandLineArgs.push(`--config_name=${getState().settingsState.settingsDataState.configName}`);
-    }
     if (getState().settingsState.settingsDataState.deadlineMs > 0) {
       polyglotCommandLineArgs.push(`--deadline_ms=${getState().settingsState.settingsDataState.deadlineMs}`);
-    }
-    if (getState().settingsState.settingsDataState.tlsCaCertPath !== '') {
-      polyglotCommandLineArgs.push(`--tls_ca_certificate=${getState().settingsState.settingsDataState.tlsCaCertPath}`);
     }
     if (getState().settingsState.settingsDataState.addProtocIncludes !== '') {
       polyglotCommandLineArgs.push(`--add_protoc_includes=${getState().settingsState.settingsDataState.addProtocIncludes.split(',').map((elem: string) => elem.trim()).join(',')}`);
     }
 
-    console.log(`Running polyglot command: ${polyglotCommand} Args: ${polyglotCommandLineArgs.join(' ')}`);
+    console.log(`Running polyglot command: ${polyglotCommand} Args:${polyglotCommandLineArgs.join(' ')}`);
 
     const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
     dispatch(NodeProcessActions.addNodeProcessPid(polyglot.pid));

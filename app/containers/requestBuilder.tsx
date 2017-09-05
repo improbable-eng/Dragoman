@@ -62,12 +62,6 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   if (polyglotSettings.protoDiscoveryRoot !== '') {
     polyglotCommandLineArgs.push(`--proto_discovery_root=${polyglotSettings.protoDiscoveryRoot}`);
   }
-  if (polyglotSettings.configSetPath !== '') {
-    polyglotCommandLineArgs.push(`--config_set_path=${polyglotSettings.configSetPath}`);
-  }
-  if (polyglotSettings.configName !== '') {
-    polyglotCommandLineArgs.push(`--config_name=${polyglotSettings.configName}`);
-  }
   if (polyglotSettings.deadlineMs > 0) {
     polyglotCommandLineArgs.push(`--deadline_ms=${polyglotSettings.deadlineMs}`);
   }
@@ -83,7 +77,33 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   if (polyglotSettings.addProtocIncludes !== '') {
     polyglotCommandLineArgs.push(`--add_protoc_includes=${polyglotSettings.addProtocIncludes.split(',').map(elem => elem.trim()).join(',')}`);
   }
-
+  if (polyglotSettings.oauthAccessTokenPath !== '') {
+    polyglotCommandLineArgs.push(`--oauth_access_token_path=${polyglotSettings.oauthAccessTokenPath}`);
+  }
+  if (polyglotSettings.oauthRefreshTokenPath !== '') {
+    polyglotCommandLineArgs.push(`--oauth_refresh_token_path=${polyglotSettings.oauthRefreshTokenPath}`);
+  }
+  if (polyglotSettings.oauthClientId !== '') {
+    polyglotCommandLineArgs.push(`--oauth_client_id=${polyglotSettings.oauthClientId}`);
+  }
+  if (polyglotSettings.oauthClientSecret !== '') {
+    polyglotCommandLineArgs.push(`--oauth_client_secret=${polyglotSettings.oauthClientSecret}`);
+  }
+  if (polyglotSettings.oauthRefreshTokenEndpointUrl !== '') {
+    polyglotCommandLineArgs.push(`--oauth_refresh_token_endpoint_url=${polyglotSettings.oauthRefreshTokenEndpointUrl}`);
+  }
+  if (polyglotSettings.useTls) {
+    polyglotCommandLineArgs.push(`--use_tls=${polyglotSettings.useTls}`);
+  }
+  if (polyglotSettings.tlsClientCertPath !== '') {
+    polyglotCommandLineArgs.push(`--tls_client_cert_path=${polyglotSettings.tlsClientCertPath}`);
+  }
+  if (polyglotSettings.tlsClientKeyPath !== '') {
+    polyglotCommandLineArgs.push(`--tls_client_key_path=${polyglotSettings.tlsClientKeyPath}`);
+  }
+  if (polyglotSettings.tlsClientOverrideAuthority !== '') {
+    polyglotCommandLineArgs.push(`--tls_client_override_authority=${polyglotSettings.tlsClientOverrideAuthority}`);
+  }
   console.log('Running command ', polyglotCommand, ' ', polyglotCommandLineArgs.join(' '));
 
   const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
@@ -101,7 +121,6 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   });
 
   echo.on('exit', (code) => {
-    // console.log(`echo exiting with code: ${code}\n`);
     dispatch(NodeProcessActions.removeNodeProcessPid(echo.pid));
     if (code === 0) {
       polyglot.stdin.end();
@@ -121,7 +140,6 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   });
 
   polyglot.on('exit', (code) => {
-    // console.log('polyglot exiting');
     dispatch(NodeProcessActions.removeNodeProcessPid(polyglot.pid));
     dispatch(RequestBuilderActions.setCallRequestInProgress(false));
     if (code !== 0) {
