@@ -18,12 +18,11 @@ import RequestBuilder,
 import { checkConsoleErrorMessage } from './app';
 
 export interface RequestBuilderProps {
-  openDialog: (title: string, explanation: string) => void;
-  closeDialog: () => void;
+  showNotification: (title: string, explanation: string) => void;
 }
 
 function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
-  openDialog: (title: string, explanation: string) => void) {
+  showNotification: (title: string, explanation: string) => void) {
   const requestJson = getState().requestBuilderState.request;
 
   // Remove the annotations [<optioal> <repeated>] from the request.
@@ -36,7 +35,7 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
     JSON.parse(redactedJsonInput);
   } catch (e) {
     dispatch(RequestBuilderActions.setCallRequestInProgress(false));
-    openDialog('Error parsing request', 'Ensure that the request is valid JSON');
+    showNotification('Error parsing request', 'Ensure that the request is valid JSON');
   }
 
   const DEV_PATH_TO_POLYGLOT_BINARY = '/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar';
@@ -142,15 +141,16 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   polyglot.on('exit', (code) => {
     dispatch(NodeProcessActions.removeNodeProcessPid(polyglot.pid));
     dispatch(RequestBuilderActions.setCallRequestInProgress(false));
+    console.log(`polyglot exiting with code ${code}`, showNotification);
     if (code !== 0) {
-      openDialog('Error calling service', checkConsoleErrorMessage);
+      showNotification('Error calling service', checkConsoleErrorMessage);
     } else {
       dispatch(ResponseViewerActions.setResponse(polyglotStdout));
     }
   });
 }
 
-function handleRunClick(openDialog: (title: string, explanation: string) => void) {
+function handleRunClick(showNotification: (title: string, explanation: string) => void) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
     // Up until this point the endpoint did not need to be filled in.
     dispatch(SettingsUIActions.setEndpointRequired(true));
@@ -160,7 +160,7 @@ function handleRunClick(openDialog: (title: string, explanation: string) => void
       dispatch(SettingsUIActions.setEndpointError(true));
     } else {
       dispatch(RequestBuilderActions.setCallRequestInProgress(true));
-      callService(dispatch, getState, openDialog);
+      callService(dispatch, getState, showNotification);
     }
   };
 }
@@ -194,7 +194,7 @@ function mapStateToProps(state: AppState): RequestBuilderComponentState {
   */
 function mapDispatchToProps(dispatch: Dispatch<AppState>, ownProps: RequestBuilderProps): RequestBuilderComponentMethods {
   return {
-    handleRunClick: () => dispatch(handleRunClick(ownProps.openDialog)),
+    handleRunClick: () => dispatch(handleRunClick(ownProps.showNotification)),
     handleRequestChange: (newRequest: string) => dispatch(RequestBuilderActions.setRequest(newRequest)),
     handleCancelClick: () => dispatch(handleCancelClick()),
   };

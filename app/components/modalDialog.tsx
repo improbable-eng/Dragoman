@@ -17,28 +17,19 @@ function ModalDialog({ appUIState, defaultCloseDialog }: IModalDialogProps) {
             title={appUIState.errorDialogQueue.length > 0 ?
                 appUIState.errorDialogQueue[0].errorDialogTitle : ''}
             actions={
-                appUIState.errorDialogQueue.length > 0 &&
-                    appUIState.errorDialogQueue[0].cancelButtonAvailable ?
-                    [{
-                        secondary: true,
-                        label: 'Ok',
-                        onClick: appUIState.errorDialogQueue.length > 0 &&
-                            appUIState.errorDialogQueue[0].onAccept ?
-                            appUIState.errorDialogQueue[0].onAccept : defaultCloseDialog,
-                    }, {
-                        secondary: true,
-                        label: 'Cancel',
-                        onClick: appUIState.errorDialogQueue.length > 0 &&
-                            appUIState.errorDialogQueue[0].onCancel ?
-                            appUIState.errorDialogQueue[0].onCancel : defaultCloseDialog,
-                    }] :
-                    [{
-                        secondary: true,
-                        label: 'Ok',
-                        onClick: appUIState.errorDialogQueue.length > 0 &&
-                            appUIState.errorDialogQueue[0].onAccept ?
-                            appUIState.errorDialogQueue[0].onAccept : defaultCloseDialog,
-                    }]
+                [{
+                    secondary: true,
+                    label: 'Ok',
+                    onClick: appUIState.errorDialogQueue.length > 0 &&
+                        appUIState.errorDialogQueue[0].onAccept ?
+                        appUIState.errorDialogQueue[0].onAccept : defaultCloseDialog,
+                }, {
+                    secondary: true,
+                    label: 'Cancel',
+                    onClick: appUIState.errorDialogQueue.length > 0 &&
+                        appUIState.errorDialogQueue[0].onCancel ?
+                        appUIState.errorDialogQueue[0].onCancel : defaultCloseDialog,
+                }]
             }
             children={appUIState.errorDialogQueue.length > 0 ?
                 appUIState.errorDialogQueue[0].errorDialogExplanation : ''}

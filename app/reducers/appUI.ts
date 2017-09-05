@@ -4,8 +4,7 @@ import * as AppUIActions from '../actions/appUI';
 export type ErrorDialogState = {
     errorDialogTitle: string;
     errorDialogExplanation: string;
-    onAccept?: () => void
-    cancelButtonAvailable?: boolean;
+    onAccept?: () => void;
     onCancel?: () => void;
 };
 
@@ -40,7 +39,6 @@ export default function appReducer(state: AppUIState = initialAppState, action: 
     }
 
     if (isActionOfType(action, AppUIActions.enqueueErrorDialogState)) {
-
         return {
             ...state,
             errorDialogQueue: [...state.errorDialogQueue, action.payload],

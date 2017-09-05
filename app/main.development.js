@@ -106,7 +106,6 @@ autoUpdater.on('update-not-available', (info) => {
 autoUpdater.on('error', (err) => {
     console.log('Error in auto-updater.', err);
     mainWindow.webContents.send('ga', '')
-    // visitor.event('main', 'autoUpdate', 'error').send();
 });
 
 autoUpdater.on('download-progress', (progressObj) => {
@@ -117,7 +116,6 @@ autoUpdater.on('download-progress', (progressObj) => {
 });
 
 autoUpdater.on('update-downloaded', (info) => {
-    // visitor.event('main', 'autoUpdate', 'updateDownloaded').send();
     console.log('Update downloaded');
     const myNotification = new Notification({
         title: 'Dragoman',
@@ -132,7 +130,6 @@ autoUpdater.on('update-downloaded', (info) => {
     myNotification.once('action', (event, index) => {
         console.log('Action clicked ', index)
         if (index === 0) { // Selected ok
-            // visitor.event('main', 'autoUpdate', 'updatedInstalled').send();
             autoUpdater.quitAndInstall();
         }
     });
