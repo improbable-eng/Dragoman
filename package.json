@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test node --trace-warnings ./test/runTests.js",
-    "test-all": "npm run test && npm run build && npm run test-e2e",
+    "test-all": "npm run test && npm run test-e2e",
     "test-watch": "npm test -- --watch",
     "test-e2e": "cross-env NODE_ENV=test node --trace-warnings ./test/runTests.js e2e",
     "hot-server": "cross-env NODE_ENV=development node --max_old_space_size=2096 server.js",
@@ -138,6 +138,7 @@
     "@types/text-encoding": "0.0.31",
     "@types/universal-analytics": "^0.4.1",
     "@types/valid-url": "^1.0.2",
+    "@types/webdriverio": "^4.8.4",
     "@types/webfontloader": "^1.6.28",
     "asar": "^0.13.0",
     "boiler-room-custodian": "^0.6.2",

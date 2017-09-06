@@ -1,102 +1,133 @@
-// import * as electronPath from "electron";
-// import * as path from "path";
+/* tslint:disable:no-console */
+import * as path from 'path';
 
-// const { Application } = require("spectron");  // tslint:disable-line
+import { Application } from 'spectron';
 
 // const delay = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
 
-// describe("main window", function spec() {
-//   let app: any;
-//   beforeAll(async () => {
-//     app = new Application({
-//       path: electronPath,
-//       args: [path.join(__dirname, "..", "..", "app")],
-//     });
-//     return app.start();
-//   });
+describe('main window', function spec() {
+    let app: Application;
+    beforeAll(() => {
+        let pathToBinary;
 
-//   afterAll(() => {
-//     if (app && app.isRunning()) {
-//       return app.stop();
-//     }
-//   });
+        switch (process.platform) {
+            case 'linux':
+                pathToBinary = path.join(__dirname, '../../release/linux-unpacked/dragoman');
+                break;
 
-//   const findCounter = () => app.client.element("[data-tid='counter']");
+            case 'darwin':
+                pathToBinary = path.join(__dirname, '../../release/mac/Dragoman.app/Contents/MacOS/Dragoman');
+                break;
 
-//   const findButtons = async () => {
-//     const { value } = await app.client.elements("[data-tclass='btn']");
-//     return value.map((btn: any) => btn.ELEMENT);
-//   };
+            case 'win32':
+                pathToBinary = path.join(__dirname, '../release/win-unpacked/Dragoman.exe');
+                break;
 
-//   it("should open window", async () => {
-//     const { client, browserWindow } = app;
+            default:
+                throw new Error('Path to the built binary needs to be defined for this platform in test/index.js');
+        }
 
-//     await client.waitUntilWindowLoaded();
-//     await delay(500);
-//     const title = await browserWindow.getTitle();
-//     expect(title).toBe("Dragoman");
-//   });
+        app = new Application({
+            path: pathToBinary,
+        });
+        return app.start();
+    });
 
-//   it("should navigate to Counter by "to Counter" link", async () => {
-//     const { client } = app;
+    afterAll(() => {
+        if (app && app.isRunning()) {
+            return app.stop();
+        } else {
+            return;
+        }
+    });
 
-//     await client.click("[data-tid="container"] > a");
-//     await delay(100);
-//     expect(await findCounter().getText()).toBe("0");
-//   });
+    //   const findCounter = () => app.client.element('[data-tid='counter']');
 
-//   it("should display updated count after increment button click", async () => {
-//     const { client } = app;
+    //   const findButtons = async () => {
+    //     const { value } = await app.client.elements('[data-tclass='btn']');
+    //     return value.map((btn: any) => btn.ELEMENT);
+    //   };
 
-//     const buttons = await findButtons();
-//     await client.elementIdClick(buttons[0]);  // +
-//     expect(await findCounter().getText()).toBe("1");
-//   });
+    it('should open window', () => {
+        // delay(1000);
+        const { client, browserWindow } = app;
 
-//   it("should display updated count after descrement button click", async () => {
-//     const { client } = app;
+        return client.waitUntilWindowLoaded()
+        .then(() => { return browserWindow.webContents.isDevToolsOpened(); })
+        .then((isDevToolsOpen) => {
+            expect(isDevToolsOpen).toBe(false);
+        });
+    });
 
-//     const buttons = await findButtons();
-//     await client.elementIdClick(buttons[1]);  // -
-//     expect(await findCounter().getText()).toBe("0");
-//   });
+    it('should have a title', async () => {
+        const { client, browserWindow } = app;
 
-//   it("shouldn\"t change if even and if odd button clicked", async () => {
-//     const { client } = app;
+        await client.waitUntilWindowLoaded();
+        const title = await browserWindow.getTitle();
+        console.error(title);
+        expect(title).toBe('Dragoman');
+    });
 
-//     const buttons = await findButtons();
-//     await client.elementIdClick(buttons[2]);  // odd
-//     expect(await findCounter().getText()).toBe("0");
-//   });
+    //   it('should navigate to Counter by 'to Counter' link', async () => {
+    //     const { client } = app;
 
-//   it("should change if odd and if odd button clicked", async () => {
-//     const { client } = app;
+    //     await client.click('[data-tid='container'] > a');
+    //     await delay(100);
+    //     expect(await findCounter().getText()).toBe('0');
+    //   });
 
-//     const buttons = await findButtons();
-//     await client.elementIdClick(buttons[0]);  // +
-//     await client.elementIdClick(buttons[2]);  // odd
-//     expect(await findCounter().getText()).toBe("2");
-//   });
+    //   it('should display updated count after increment button click', async () => {
+    //     const { client } = app;
 
-//   it("should change if async button clicked and a second later", async () => {
-//     const { client } = app;
+    //     const buttons = await findButtons();
+    //     await client.elementIdClick(buttons[0]);  // +
+    //     expect(await findCounter().getText()).toBe('1');
+    //   });
 
-//     const buttons = await findButtons();
-//     await client.elementIdClick(buttons[3]);  // async
-//     expect(await findCounter().getText()).toBe("2");
-//     await delay(1000);
-//     expect(await findCounter().getText()).toBe("3");
-//   });
+    //   it('should display updated count after descrement button click', async () => {
+    //     const { client } = app;
 
-//   it("should navigate to home using back button", async () => {
-//     const { client } = app;
-//     await client.element(
-//       "[data-tid="backButton"] > a"
-//     ).click();
-//     await delay(100);
+    //     const buttons = await findButtons();
+    //     await client.elementIdClick(buttons[1]);  // -
+    //     expect(await findCounter().getText()).toBe('0');
+    //   });
 
-//     expect(
-//       await client.isExisting("[data-tid="container"]")
-//     ).toBe(true);
-//   });
-// });
+    //   it('shouldn\'t change if even and if odd button clicked', async () => {
+    //     const { client } = app;
+
+    //     const buttons = await findButtons();
+    //     await client.elementIdClick(buttons[2]);  // odd
+    //     expect(await findCounter().getText()).toBe('0');
+    //   });
+
+    //   it('should change if odd and if odd button clicked', async () => {
+    //     const { client } = app;
+
+    //     const buttons = await findButtons();
+    //     await client.elementIdClick(buttons[0]);  // +
+    //     await client.elementIdClick(buttons[2]);  // odd
+    //     expect(await findCounter().getText()).toBe('2');
+    //   });
+
+    //   it('should change if async button clicked and a second later', async () => {
+    //     const { client } = app;
+
+    //     const buttons = await findButtons();
+    //     await client.elementIdClick(buttons[3]);  // async
+    //     expect(await findCounter().getText()).toBe('2');
+    //     await delay(1000);
+    //     expect(await findCounter().getText()).toBe('3');
+    //   });
+
+    //   it('should navigate to home using back button', async () => {
+    //     const { client } = app;
+    //     await client.element(
+    //       '[data-tid='backButton'] > a'
+    //     ).click();
+    //     await delay(100);
+
+    //     expect(
+    //       await client.isExisting('[data-tid='container']')
+    //     ).toBe(true);
+    //   });
+});

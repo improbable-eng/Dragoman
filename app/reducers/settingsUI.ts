@@ -16,7 +16,7 @@ export type SettingsUIState = Readonly<{
   tlsClientOverrideAuthorityError: boolean;
 }>;
 
-const initialSettingsUIState: SettingsUIState = {
+export const initialSettingsUIState: SettingsUIState = {
   endpointRequired: false,
   endpointError: false,
   protoDiscoveryRootError: false,
