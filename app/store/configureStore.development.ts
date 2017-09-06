@@ -9,6 +9,7 @@ import * as appUIActions from '../actions/appUI';
 import * as requestBuilderActions from '../actions/requestBuilder';
 import * as responseViewerActions from '../actions/responseViewer';
 import * as listServicesActions from '../actions/serviceList';
+import * as nodeProcessActions from '../actions/nodeProcess';
 
 declare const window: Window & {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?(a: any): void;
@@ -19,8 +20,8 @@ declare const module: NodeModule & {
   },
 };
 
-const actionCreators = Object.assign({}, settingsUIActions, settingsDataActions,
-  appUIActions, requestBuilderActions, responseViewerActions, listServicesActions);
+const actionCreators = { settingsUIActions, settingsDataActions, appUIActions,
+  requestBuilderActions, responseViewerActions, listServicesActions, nodeProcessActions };
 
 const logger = (createLogger)({
   level: 'info',

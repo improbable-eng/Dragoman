@@ -4,6 +4,9 @@ package polyglot;
 
 option java_outer_classname = "ConfigProto";
 
+// NOTE: This if the config.proto definition defined from the polyglot project. 
+// See https://github.com/grpc-ecosystem/polyglot/blob/master/src/main/proto/config.proto 
+
 // Holds multiple named configurations. By default, the first configuration is
 // used, but a command line flag can have Polyglot use a specific config.
 message ConfigurationSet {

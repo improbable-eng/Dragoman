@@ -1,7 +1,7 @@
 {
   "name": "dragoman",
   "productName": "Dragoman",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Dragoman, a GUI for polyglot",
   "main": "main.js",
   "scripts": {
@@ -17,11 +17,12 @@
     "start-hot": "cross-env HOT=1 NODE_ENV=development electron ./app/main.development",
     "postinstall": "npm run copy && npm run build",
     "dev": "npm run hot-server -- --start-hot",
-    "copy": "cp ./react-md-tooltipped.d.ts ./node_modules/react-md/lib/Tooltips/Tooltipped.d.ts && cp ./react-md-textField.d.ts ./node_modules/react-md/lib/TextFields/TextField.d.ts && cp ./react-md-textField.index.d.ts ./node_modules/react-md/lib/TextFields/index.d.ts && cp ./react-md.index.d.ts ./node_modules/react-md/index.d.ts && cp ./react-md-lib.index.d.ts ./node_modules/react-md/lib/index.d.ts",
+    "copy": "cp ./react-md-tooltipped.d.ts ./node_modules/react-md/lib/Tooltips/Tooltipped.d.ts && cp ./react-md-textField.d.ts ./node_modules/react-md/lib/TextFields/TextField.d.ts && cp ./react-md-textField.index.d.ts ./node_modules/react-md/lib/TextFields/index.d.ts && cp ./react-md.index.d.ts ./node_modules/react-md/index.d.ts && cp ./react-md-lib.index.d.ts ./node_modules/react-md/lib/index.d.ts && cp ./react-md-selectionControl.d.ts ./node_modules/react-md/lib/SelectionControls/SelectionControl.d.ts",
     "package": "npm run copy && npm run build && build --publish never",
     "package-win": "npm run copy && npm run build && build --win --x64",
     "package-linux": "npm run copy && npm run build && build --linux --publish onTagOrDraft",
-    "package-mac": "npm run copy && npm run build && build --mac --publish onTagOrDraft"
+    "package-mac": "npm run copy && npm run build && build --mac --publish onTagOrDraft",
+    "package-all": "npm run copy && npm run build && build -mwl --publish onTagOrDraft"
   },
   "jest": {
     "moduleNameMapper": {
@@ -197,6 +198,7 @@
     "react-ace": "^5.1.2",
     "react-dom": "^15.4.1",
     "react-ga": "^2.2.0",
+    "react-lazylog": "^1.2.0",
     "react-md": "^1.1.0-alpha-9",
     "react-redux": "^5.0.1",
     "redux": "^3.6.0",

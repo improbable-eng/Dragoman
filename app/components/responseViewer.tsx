@@ -1,50 +1,80 @@
 import * as React from 'react';
-import * as ReactMD from 'react-md';
+import { Button, Card, CardActions, CardText, CardTitle } from 'react-md';
 
 // import MonacoEditor from 'react-monaco-editor';
 import MonacoEditor from './reactMonacoEditor';
 import { ResponseViewerState } from '../reducers/responseViewer';
 
-export interface IResponseViewerProps {
+export interface ResponseViewerComponentState {
     responseViewerState: ResponseViewerState;
     fullMethod: string;
 }
 
-export default function ResponseViewer({ responseViewerState, fullMethod }: IResponseViewerProps) {
+export interface ResponseViewerComponentMethods {
+    clearLogs: () => void;
+}
+
+export type ResponseViewerComponentProps = ResponseViewerComponentState & ResponseViewerComponentMethods;
+
+
+export default function ResponseViewer({ responseViewerState, fullMethod, clearLogs }: ResponseViewerComponentProps) {
     return (
-        <ReactMD.Card style={{ width: '50%', padding: '20px' }}>
+        <Card style={{ width: '50%', padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-                <ReactMD.CardTitle
+                <CardTitle
                     title='Response Viewer'
                     subtitle={fullMethod}
                     style={{ padding: 24 }}
                 />
-                <ReactMD.Button
-                        icon={true}
-                        tooltipLabel={responseViewerState.serverStreamingResponse !== undefined ?
-                            (responseViewerState.serverStreamingResponse ? 'streaming response' : 'unary response')
-                            : ''}
-                        tooltipPosition='right'
-                    >
-                        {responseViewerState.serverStreamingResponse !== undefined ?
-                            (responseViewerState.serverStreamingResponse ? 'more_horiz' : 'lens')
-                            : ''}
-                </ReactMD.Button>
+                <Button
+                    icon={true}
+                    tooltipLabel={responseViewerState.serverStreamingResponse !== undefined ?
+                        (responseViewerState.serverStreamingResponse ? 'streaming response' : 'unary response')
+                        : ''}
+                    tooltipPosition='right'
+                >
+                    {responseViewerState.serverStreamingResponse !== undefined ?
+                        (responseViewerState.serverStreamingResponse ? 'more_horiz' : 'lens')
+                        : ''}
+                </Button>
             </div>
-            <div style={{height: 3}}/>
-            <ReactMD.Card className='md-block-centered'>
+            <div style={{ height: 3 }} />
+            <Card className='md-block-centered'>
                 <MonacoEditor
                     language='json'
                     theme='vs'
                     height='500'
                     value={responseViewerState.responseBody}
                     options={{ wordWrap: true, readOnly: true }}
-                    requireConfig={{url: (process.env.NODE_ENV === 'production') ?
-                        `./dist/monaco-editor/min/vs/loader.js` :
-                        './dist/monaco-editor/dev/vs/loader.js',
-                        }}
+                    requireConfig={{
+                        url: (process.env.NODE_ENV === 'production') ?
+                            `./dist/monaco-editor/min/vs/loader.js` :
+                            './dist/monaco-editor/dev/vs/loader.js',
+                    }}
                 />
-            </ReactMD.Card>
-        </ReactMD.Card>
+            </Card>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <CardActions
+                >
+                        <Button
+                            icon={true}
+                            secondary={true}
+                            swapTheming={true}
+                            onClick={clearLogs}
+                            tooltipLabel='Clear Logs'
+                            tooltipPosition='bottom'
+                            children='clear_all'
+                        />
+                </CardActions>
+                <CardTitle
+                    title='Logs'
+                />
+            </div>
+            <CardText
+                children={<div>{responseViewerState.logs.split('\n').map((log, index) => {
+                    return <p key={index}>{log}</p>;
+                })}</div>}
+            />
+        </Card>
     );
 }

@@ -27,11 +27,21 @@ body {
 .md-layover-child {
   position: initial;
 }
-// html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
-// html > body > #root > div > div > #main-content {
-//   height: 100%;
+
+// .md-tile-text--primary {
+//   overflow-x: scroll;
+//   text-overflow: initial;
 // }
 
-// body {
-//   overflow: hidden;
-// }
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
+html > body > #root > div > div > #main-content {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}

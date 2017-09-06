@@ -5,6 +5,7 @@ import { Dispatch, connect } from 'react-redux';
 import { exec } from 'child_process';
 
 import * as AppUIActions from '../actions/appUI';
+import * as ResponseViewerActions from '../actions/responseViewer';
 
 import { AppState } from '../reducers/index';
 import { ErrorDialogState } from '../reducers/appUI';
@@ -14,6 +15,8 @@ import AppComponent,
 
 export const checkConsoleErrorMessage = 'Check console for full log (Console can be reached from View' +
   ' -> Toggle Developer Tools -> Console)';
+
+export const DEV_PATH_TO_POLYGLOT_BINARY = `${process.cwd()}/app/polyglot_deploy.jar`;
 
 function sendAnalyticsEvent(category: string, action: string, nonInteraction?: boolean, label?: string) {
   // ReactGA is only initialized after consent has been given for analytics to be gathered. If ReactGA has not
@@ -53,7 +56,6 @@ function openDialog(title: string, explanation: string,
 }
 
 function showNotification(title: string, body: string) {
-  console.log('showNotificaiton');
   const notify = new Notification(title, {
     body: body,
   });
@@ -143,6 +145,7 @@ function mapDispatchToProps(dispatch: Dispatch<AppState>): AppComponentMethods {
     sendAnalyticsEvent: (category: string, action: string, nonInteraction?: boolean, label?: string) => sendAnalyticsEvent(category, action, nonInteraction, label),
     checkRuntimeJavaVersion: () => dispatch(checkRuntimeJavaVersion()),
     showNotification: (title: string, body: string) => showNotification(title, body),
+    clearLogs: () => dispatch(ResponseViewerActions.clearLogs()),
   };
 }
 

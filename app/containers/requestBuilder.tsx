@@ -15,7 +15,7 @@ import { AppState } from '../reducers/index';
 import RequestBuilder,
 { RequestBuilderComponentMethods, RequestBuilderComponentState } from '../components/requestBuilder';
 
-import { checkConsoleErrorMessage } from './app';
+import { checkConsoleErrorMessage, DEV_PATH_TO_POLYGLOT_BINARY } from './app';
 
 export interface RequestBuilderProps {
   showNotification: (title: string, explanation: string) => void;
@@ -23,6 +23,7 @@ export interface RequestBuilderProps {
 
 function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   showNotification: (title: string, explanation: string) => void) {
+  dispatch(ResponseViewerActions.clearLogs());
   const requestJson = getState().requestBuilderState.request;
 
   // Remove the annotations [<optioal> <repeated>] from the request.
@@ -34,11 +35,8 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   try {
     JSON.parse(redactedJsonInput);
   } catch (e) {
-    dispatch(RequestBuilderActions.setCallRequestInProgress(false));
-    showNotification('Error parsing request', 'Ensure that the request is valid JSON');
+    showNotification('Error parsing request', 'Request is not valid JSON, this may cause polyglot to fail.');
   }
-
-  const DEV_PATH_TO_POLYGLOT_BINARY = '/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar';
 
   let pathToPolyglotBinary;
 
@@ -130,7 +128,9 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   let polyglotStdout = '';
 
   polyglot.stderr.on('data', (data) => {
-    console.warn(new TextDecoder('utf-8').decode(data as Buffer));
+    const log = new TextDecoder('utf-8').decode(data as Buffer);
+    console.warn(log);
+    dispatch(ResponseViewerActions.appendLogs(`${log}\n`));
     polyglotStderr += data;
   });
 
@@ -141,7 +141,7 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   polyglot.on('exit', (code) => {
     dispatch(NodeProcessActions.removeNodeProcessPid(polyglot.pid));
     dispatch(RequestBuilderActions.setCallRequestInProgress(false));
-    console.log(`polyglot exiting with code ${code}`, showNotification);
+    // console.log(`polyglot exiting with code ${code}`, showNotification);
     if (code !== 0) {
       showNotification('Error calling service', checkConsoleErrorMessage);
     } else {

@@ -26,7 +26,7 @@ export default function Settings({ settingsDataState, settingsUIState,
     handlePathDoubleClick, handleChange, handleDrop, importConfigFile,
     saveConfigFile, handleConfigAutoComplete }: SettingsComponentProps) {
     return (
-        <div style={{ height: '100%' }} id='settingsDrawer'>
+        <div style={{ height: '95%' }} id='settingsDrawer'>
             <div style={{ display: 'flex' }}>
                 <Button
                     key='loadConfig'
@@ -49,17 +49,14 @@ export default function Settings({ settingsDataState, settingsUIState,
             </div>
             <List className='md-list--drawer'>
                 <Autocomplete
-                    style={{ padding: '0px 10px 0px 10px' }}
+                    style={{ padding: '0px 20px 0px 20px' }}
                     data={Array.from(settingsDataState.polyglotConfigs.keys())}
                     label='Config Name'
                     placeholder='development'
                     id='configName'
-                    /* belowAnchor={{x: 'left', y: 'top'}} */
                     value={settingsDataState.configName}
                     onChange={(newValue: string) => handleChange(newValue, SETTINGS_IDS.CONFIG_NAME)}
                     onAutocomplete={handleConfigAutoComplete}
-                    onBlur={() => handleConfigAutoComplete(settingsDataState.configName)}
-                    fixedTo={document.getElementById('settingsDrawer') || window}
                 />
                 <TextEntry
                     id={SETTINGS_IDS.ENDPOINT}

@@ -220,7 +220,6 @@ function importConfig(dispatch: Dispatch<AppState>) {
 
 function handleConfigAutoComplete(suggestion: string) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
-    console.log('handling ');
     dispatch(SettingsDataActions.setConfigName(suggestion));
     const selectedConfig = getState().settingsState.settingsDataState.polyglotConfigs.get(suggestion);
     console.log(selectedConfig);

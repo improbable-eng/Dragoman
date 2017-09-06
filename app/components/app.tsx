@@ -19,6 +19,7 @@ export interface AppComponentMethods {
     openDialog: (title: string, explanation: string, onAccept?: () => void, onCancel?: () => void) => void;
     handleSettingsClick: () => void;
     showNotification: (title: string, body: string) => void;
+    clearLogs: () => void;
 }
 
 export interface AppComponentState {
@@ -59,6 +60,7 @@ class App extends React.Component<AppComponentProps> {
                   <ResponseViewer
                     responseViewerState={this.props.appState.responseViewerState}
                     fullMethod={this.props.appState.requestBuilderState.fullMethod}
+                    clearLogs={this.props.clearLogs}
                   />
                 </div>}
             />

@@ -73,7 +73,7 @@
         "new-parens": true, // require parentheses when invoking constructors
         "no-duplicate-super": true, // enforce only a single super() in constructors
         "prefer-const": true, // require const if possible
-        "prefer-spread": true, // prefer spread operator over Object.assign()
+        "prefer-object-spread": true, // prefer spread operator over Object.assign()
         "prefer-template": true, // prefer templates over string literal concatenation
         "comment-format": [
             true,

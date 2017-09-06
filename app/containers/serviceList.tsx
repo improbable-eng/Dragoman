@@ -15,7 +15,7 @@ import { PolyglotService } from '../reducers/serviceList';
 import ServiceList,
 { ServiceListComponentMethods, ServiceListComponentState } from '../components/serviceList';
 
-import { checkConsoleErrorMessage } from './app';
+import { checkConsoleErrorMessage, DEV_PATH_TO_POLYGLOT_BINARY } from './app';
 
 export interface ServiceListContainerProps {
   showNotification: (title: string, explanation: string) => void;
@@ -55,12 +55,12 @@ function handleMethodClick(serviceName: string, methodName: string) {
 
 function listServices(showNotification: (title: string, explanation: string) => void) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
+    // Resetting state
+    dispatch(ResponseViewerActions.clearLogs());
     dispatch(RequestBuilderActions.setFullMethod(''));
     dispatch(RequestBuilderActions.setRequest(''));
     dispatch(ServiceListActions.importServices([]));
     dispatch(ResponseViewerActions.setResponse(''));
-
-    const DEV_PATH_TO_POLYGLOT_BINARY = '/Users/peteboothroyd/Projects/polyglotGUI/GUI/dragoman/app/polyglot_deploy.jar';
 
     let pathToPolyglotBinary;
 
@@ -99,8 +99,10 @@ function listServices(showNotification: (title: string, explanation: string) => 
     let polyglotStdout = '';
 
     polyglot.stderr.on('data', (data) => {
-      polyglotStderr += data;
-      console.warn(new TextDecoder('utf-8').decode(data as Buffer));
+      const log = new TextDecoder('utf-8').decode(data as Buffer);
+      polyglotStderr += log;
+      console.warn(log);
+      dispatch(ResponseViewerActions.appendLogs(log));
     });
 
     polyglot.stdout.on('data', (data) => {
