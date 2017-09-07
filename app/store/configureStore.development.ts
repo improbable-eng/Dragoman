@@ -14,6 +14,7 @@ import * as nodeProcessActions from '../actions/nodeProcess';
 declare const window: Window & {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?(a: any): void;
 };
+
 declare const module: NodeModule & {
   hot?: {
     accept(...args: any[]): any;

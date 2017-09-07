@@ -20,7 +20,7 @@ abstract class Service {
 }
 
 // Polyglot exports a list of services, we want a map from service name to service
-// for easy look up
+// for efficient look up
 export class PolyglotService extends Service {
     public methods: Method[];
 
@@ -31,7 +31,7 @@ export class PolyglotService extends Service {
 }
 
 // Polyglot exports a list of methods, we want a map from method name to method
-// for easy look up
+// for efficient look up
 export class DragomanService extends Service {
     public methodMap: Map<string, Method> = new Map();
 

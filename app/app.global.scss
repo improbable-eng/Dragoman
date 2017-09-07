@@ -1,7 +1,7 @@
 // Can't use the nice '~react-md/src/scss/react-md' since this isn't being bundled with webpack
 @import '~react-md/src/scss/react-md';
 
-// Variable overrides
+// Color themes for the app 
 $md-primary-color: $md-grey-900;
 $md-secondary-color: $md-blue-a-200;
 $md-background--primary: $md-grey-200;
@@ -28,19 +28,15 @@ body {
   position: initial;
 }
 
-// .md-tile-text--primary {
-//   overflow-x: scroll;
-//   text-overflow: initial;
-// }
-
+//Hide annoying scrollbars
 ::-webkit-scrollbar {
   width: 0px;
 }
 
-html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
-html > body > #root > div > div > #main-content {
-  height: 100%;
-}
+// html, html > body, html > body > #root, html > body > #root > div, html > body > #root > div > div,
+// html > body > #root > div > div > #main-content {
+//   height: 100%;
+// }
 
 body {
   overflow: hidden;

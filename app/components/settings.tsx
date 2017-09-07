@@ -14,9 +14,9 @@ export interface SettingsComponentState {
 }
 
 export interface SettingsComponentMethods {
-    handleChange: (newValue: string | boolean, stateId: string) => void;
-    handlePathDoubleClick: (settingsId: string, message: string, allowMultiSelect?: boolean) => void;
-    handleDrop: (event: React.DragEvent<HTMLElement>, id: string, multiSelection?: boolean) => void;
+    handleChange: (newValue: string | boolean, settingsId: SETTINGS_IDS) => void;
+    handlePathDoubleClick: (settingsId: SETTINGS_IDS, message: string, allowMultiSelect?: boolean) => void;
+    handleDrop: (event: React.DragEvent<HTMLElement>, settingsId: SETTINGS_IDS, multiSelection?: boolean) => void;
     importConfigFile: () => void;
     saveConfigFile: () => void;
     handleConfigAutoComplete: (suggestion: string | number) => void;
@@ -53,7 +53,9 @@ export default function Settings({ settingsDataState, settingsUIState,
                     data={Array.from(settingsDataState.polyglotConfigs.keys())}
                     label='Config Name'
                     placeholder='development'
-                    id='configName'
+                    closeOnOutsideClick={true}
+                    onMenuOpen={() => { console.log('menu open'); }}// tslint:disable-line
+                    id={SETTINGS_IDS.CONFIG_NAME}
                     value={settingsDataState.configName}
                     onChange={(newValue: string) => handleChange(newValue, SETTINGS_IDS.CONFIG_NAME)}
                     onAutocomplete={handleConfigAutoComplete}

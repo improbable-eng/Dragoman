@@ -1,8 +1,10 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
+import { SETTINGS_IDS } from '../reducers/settingsData';
+
 export interface ITextEntryProps {
-    id: string;
+    id: SETTINGS_IDS;
     multiline?: boolean;
     value?: string | number;
     label?: string;
@@ -11,9 +13,9 @@ export interface ITextEntryProps {
     error?: boolean;
     required?: boolean;
     type?: ReactMD.TextFieldTypes;
-    handleChange: (newValue: string, id: string) => void;
-    handleDoubleClick?: (id: string, message?: string) => void;
-    handleDrop?: (event: React.DragEvent<HTMLElement>, id: string) => void;
+    handleChange: (newValue: string, settingdId: SETTINGS_IDS) => void;
+    handleDoubleClick?: (settingsId: SETTINGS_IDS, message?: string) => void;
+    handleDrop?: (event: React.DragEvent<HTMLElement>, settingsId: SETTINGS_IDS) => void;
 }
 
 function TextEntry({id, multiline = false, handleChange, handleDoubleClick, handleDrop,  label, value,

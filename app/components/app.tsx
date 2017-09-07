@@ -49,9 +49,8 @@ class App extends React.Component<AppComponentProps> {
               toolbarActions={
                 <Button
                   icon={true}
-                  onClick={this.props.handleSettingsClick}>
-                  settings
-                </Button>}
+                  onClick={this.props.handleSettingsClick}
+                  children='settings'/>}
               children={
                 <div style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
                   <RequestBuilder

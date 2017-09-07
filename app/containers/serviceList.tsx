@@ -21,6 +21,11 @@ export interface ServiceListContainerProps {
   showNotification: (title: string, explanation: string) => void;
 }
 
+/** Handles the event of a method click firing. Returns a redux-thunk which must be dispatched.
+ * @param {string} serviceName - The name of the service which the clicked method belongs to.
+ *  * @param {string} serviceName - The clicked method name.
+ * @returns {(dispatch: Dispatch<AppState>, getState: () => AppState) => void} - The function to be run by redux-thunk.
+  */
 function handleMethodClick(serviceName: string, methodName: string) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
     try {
@@ -52,7 +57,11 @@ function handleMethodClick(serviceName: string, methodName: string) {
   };
 }
 
-
+/** Lists the available services and methods for the given polyglot settings. Returns a redux-thunk which
+ * must be dispatched.
+ * @param {(title: string, explanation: string) => void} showNotification - A function to notify users
+ * @returns {(dispatch: Dispatch<AppState>, getState: () => AppState) => void} - The function to be run by redux-thunk.
+  */
 function listServices(showNotification: (title: string, explanation: string) => void) {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
     // Resetting state
@@ -90,15 +99,14 @@ function listServices(showNotification: (title: string, explanation: string) => 
       polyglotCommandLineArgs.push(`--add_protoc_includes=${getState().settingsState.settingsDataState.addProtocIncludes.split(',').map((elem: string) => elem.trim()).join(',')}`);
     }
 
+    // Running polyglot command
     const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
     dispatch(NodeProcessActions.addNodeProcessPid(polyglot.pid));
 
-    let polyglotStderr = '';
     let polyglotStdout = '';
 
     polyglot.stderr.on('data', (data) => {
       const log = new TextDecoder('utf-8').decode(data as Buffer);
-      polyglotStderr += log;
       dispatch(ResponseViewerActions.appendLog(log));
     });
 

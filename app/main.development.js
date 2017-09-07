@@ -18,6 +18,61 @@ if (process.env.NODE_ENV === 'development') {
     require('module').globalPaths.push(p);
 }
 
+app.on('ready', () => {
+    installExtensions()
+        .then(createWindow(), () => {
+            console.log("Error installing extensions");
+        })
+        .then(() => {
+            if (process.env.NODE_ENV !== 'development') {
+                autoUpdater.checkForUpdates()
+            }
+        });
+});
+
+// Quit when all windows are closed.
+app.on('window-all-closed', function () {
+    // On OS X it is common for applications and their menu bar
+    // to stay active until the user quits explicitly with Cmd + Q
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+app.on('activate', function () {
+    // On OS X it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (mainWindow === null) {
+        createWindow();
+    }
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    console.log(log_message);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded');
+    const myNotification = new Notification({
+        title: 'Dragoman',
+        subtitle: 'Auto Update',
+        body: 'Updated downloaded, quit and install? ',
+        icon: '../resources/dragoman-logo.png',
+        actions: [{ text: 'Ok', type: 'button' }]
+    });
+
+    myNotification.show();
+
+    myNotification.once('action', (event, index) => {
+        console.log('Action clicked ', index)
+        if (index === 0) { // Selected ok
+            autoUpdater.quitAndInstall();
+        }
+    });
+});
+
 const installExtensions = () => {
     if (process.env.NODE_ENV === 'development') {
         const installer = require('electron-devtools-installer');
@@ -61,79 +116,6 @@ const createWindow = () => {
 
     setupElectronMenu()
 }
-
-app.on('ready', () => {
-    installExtensions()
-        .then(createWindow(), () => {
-            console.log("Error installing extensions");
-        })
-        .then(() => {
-            if (process.env.NODE_ENV !== 'development') {
-                autoUpdater.checkForUpdates()
-            }
-        });
-});
-
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
-
-app.on('activate', function () {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (mainWindow === null) {
-        createWindow();
-    }
-});
-
-autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for update');
-});
-
-autoUpdater.on('update-available', (info) => {
-    console.log('Update available.');
-});
-
-autoUpdater.on('update-not-available', (info) => {
-    console.log('Update not available.');
-});
-
-autoUpdater.on('error', (err) => {
-    console.log('Error in auto-updater.', err);
-    mainWindow.webContents.send('ga', '')
-});
-
-autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-    console.log(log_message);
-});
-
-autoUpdater.on('update-downloaded', (info) => {
-    console.log('Update downloaded');
-    const myNotification = new Notification({
-        title: 'Dragoman',
-        subtitle: 'Auto Update',
-        body: 'Updated downloaded, quit and install? ',
-        icon: '../resources/dragoman-logo.png',
-        actions: [{ text: 'Ok', type: 'button' }]
-    });
-
-    myNotification.show();
-
-    myNotification.once('action', (event, index) => {
-        console.log('Action clicked ', index)
-        if (index === 0) { // Selected ok
-            autoUpdater.quitAndInstall();
-        }
-    });
-});
 
 const setupElectronMenu = () => {
     const template = [
