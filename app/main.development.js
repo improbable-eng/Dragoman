@@ -35,7 +35,7 @@ const installExtensions = () => {
 
 const createWindow = () => {
     mainWindow = new BrowserWindow({
-        show: false,
+        show: true,
         width: 2000,
         height: 1400
     });

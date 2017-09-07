@@ -3,7 +3,6 @@ import { polyglot as polyglotConfig } from '../proto/config';
 
 const SET_PROTO_DISCOVERY_ROOT = 'SET_PROTO_DISCOVERY_ROOT';
 const SET_ENDPOINT = 'SET_ENDPOINT';
-const SET_CONFIG_SET_PATH = 'SET_CONFIG_SET_PATH';
 const SET_CONFIG_NAME = 'SET_CONFIG_NAME';
 const SET_DEADLINE_MS = 'SET_DEADLINE_MS';
 const SET_ADD_PROTOC_INCLUDES = 'SET_ADD_PROTOC_INCLUDES';
@@ -18,12 +17,11 @@ const SET_TLS_CLIENT_KEY_PATH = 'SET_TLS_CLIENT_KEY_PATH';
 const SET_TLS_CLIENT_CERT_PATH = 'SET_TLS_CLIENT_CERT_PATH';
 const SET_TLS_CLIENT_OVERRRIDE_AUTHORITY = 'SET_TLS_CLIENT_OVERRRIDE_AUTHORITY';
 const IMPORT_POLYGLOT_CONFIGS = 'IMPORT_POLYGLOT_CONFIGS';
-const ADD_POLYGLOT_CONFIG = 'ADD_POLYGLOT_CONFIG';
+const ADD_POLYGLOT_CONFIG_FROM_CURRENT_FIELDS = 'ADD_POLYGLOT_CONFIG_FROM_CURRENT_FIELDS';
 const SET_SETTINGS_DATA_STATE_FROM_POLYGLOT_CONFIG = 'SET_SETTINGS_DATA_STATE_FROM_POLYGLOT_CONFIG';
 
 export const setProtoDiscoveryRoot = actionHelpers.actionCreator<string>(SET_PROTO_DISCOVERY_ROOT);
 export const setEndpoint = actionHelpers.actionCreator<string>(SET_ENDPOINT);
-export const setConfigSetPath = actionHelpers.actionCreator<string>(SET_CONFIG_SET_PATH);
 export const setConfigName = actionHelpers.actionCreator<string>(SET_CONFIG_NAME);
 export const setDeadlineMs = actionHelpers.actionCreator<number>(SET_DEADLINE_MS);
 export const setAddProtocIncludes = actionHelpers.actionCreator<string>(SET_ADD_PROTOC_INCLUDES);
@@ -38,5 +36,5 @@ export const setOauthClientSecret = actionHelpers.actionCreator<string>(SET_OAUT
 export const setOauthRefreshTokenPath = actionHelpers.actionCreator<string>(SET_OAUTH_REFRESH_TOKEN_PATH);
 export const setOauthAccessTokenPath = actionHelpers.actionCreator<string>(SET_OAUTH_ACCESS_TOKEN_PATH);
 export const importPolyglotConfigs = actionHelpers.actionCreator<polyglotConfig.ConfigurationSet>(IMPORT_POLYGLOT_CONFIGS);
-export const addPolyglotConfig = actionHelpers.actionCreator<polyglotConfig.IConfiguration>(ADD_POLYGLOT_CONFIG);
+export const addPolyglotConfigFromCurrentFields = actionHelpers.emptyActionCreator(ADD_POLYGLOT_CONFIG_FROM_CURRENT_FIELDS);
 export const setSettingsDataStateFromPolyglotConfig = actionHelpers.actionCreator<polyglotConfig.IConfiguration>(SET_SETTINGS_DATA_STATE_FROM_POLYGLOT_CONFIG);

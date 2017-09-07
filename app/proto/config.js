@@ -1,20 +1,22 @@
 /*eslint-disable block-scoped-var, no-redeclare, no-control-regex, no-prototype-builtins*/
-import * as $protobuf from "protobufjs/minimal";
+"use strict";
+
+var $protobuf = require("protobufjs/minimal");
 
 // Common aliases
-const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
+var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 
 // Exported root namespace
-const $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-export const polyglot = $root.polyglot = (() => {
+$root.polyglot = (function() {
 
     /**
      * Namespace polyglot.
      * @exports polyglot
      * @namespace
      */
-    const polyglot = {};
+    var polyglot = {};
 
     polyglot.ConfigurationSet = (function() {
 
@@ -35,7 +37,7 @@ export const polyglot = $root.polyglot = (() => {
         function ConfigurationSet(properties) {
             this.configurations = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -73,7 +75,7 @@ export const polyglot = $root.polyglot = (() => {
             if (!writer)
                 writer = $Writer.create();
             if (message.configurations != null && message.configurations.length)
-                for (let i = 0; i < message.configurations.length; ++i)
+                for (var i = 0; i < message.configurations.length; ++i)
                     $root.polyglot.Configuration.encode(message.configurations[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
             return writer;
         };
@@ -105,9 +107,9 @@ export const polyglot = $root.polyglot = (() => {
         ConfigurationSet.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.ConfigurationSet();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.ConfigurationSet();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     if (!(message.configurations && message.configurations.length))
@@ -152,8 +154,8 @@ export const polyglot = $root.polyglot = (() => {
             if (message.configurations != null && message.hasOwnProperty("configurations")) {
                 if (!Array.isArray(message.configurations))
                     return "configurations: array expected";
-                for (let i = 0; i < message.configurations.length; ++i) {
-                    let error = $root.polyglot.Configuration.verify(message.configurations[i]);
+                for (var i = 0; i < message.configurations.length; ++i) {
+                    var error = $root.polyglot.Configuration.verify(message.configurations[i]);
                     if (error)
                         return "configurations." + error;
                 }
@@ -172,12 +174,12 @@ export const polyglot = $root.polyglot = (() => {
         ConfigurationSet.fromObject = function fromObject(object) {
             if (object instanceof $root.polyglot.ConfigurationSet)
                 return object;
-            let message = new $root.polyglot.ConfigurationSet();
+            var message = new $root.polyglot.ConfigurationSet();
             if (object.configurations) {
                 if (!Array.isArray(object.configurations))
                     throw TypeError(".polyglot.ConfigurationSet.configurations: array expected");
                 message.configurations = [];
-                for (let i = 0; i < object.configurations.length; ++i) {
+                for (var i = 0; i < object.configurations.length; ++i) {
                     if (typeof object.configurations[i] !== "object")
                         throw TypeError(".polyglot.ConfigurationSet.configurations: object expected");
                     message.configurations[i] = $root.polyglot.Configuration.fromObject(object.configurations[i]);
@@ -198,12 +200,12 @@ export const polyglot = $root.polyglot = (() => {
         ConfigurationSet.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults)
                 object.configurations = [];
             if (message.configurations && message.configurations.length) {
                 object.configurations = [];
-                for (let j = 0; j < message.configurations.length; ++j)
+                for (var j = 0; j < message.configurations.length; ++j)
                     object.configurations[j] = $root.polyglot.Configuration.toObject(message.configurations[j], options);
             }
             return object;
@@ -244,7 +246,7 @@ export const polyglot = $root.polyglot = (() => {
          */
         function Configuration(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -343,9 +345,9 @@ export const polyglot = $root.polyglot = (() => {
         Configuration.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.Configuration();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.Configuration();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.name = reader.string();
@@ -398,7 +400,7 @@ export const polyglot = $root.polyglot = (() => {
                 if (!$util.isString(message.name))
                     return "name: string expected";
             if (message.call_config != null && message.hasOwnProperty("call_config")) {
-                let error = $root.polyglot.CallConfiguration.verify(message.call_config);
+                var error = $root.polyglot.CallConfiguration.verify(message.call_config);
                 if (error)
                     return "call_config." + error;
             }
@@ -426,7 +428,7 @@ export const polyglot = $root.polyglot = (() => {
         Configuration.fromObject = function fromObject(object) {
             if (object instanceof $root.polyglot.Configuration)
                 return object;
-            let message = new $root.polyglot.Configuration();
+            var message = new $root.polyglot.Configuration();
             if (object.name != null)
                 message.name = String(object.name);
             if (object.call_config != null) {
@@ -459,7 +461,7 @@ export const polyglot = $root.polyglot = (() => {
         Configuration.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.defaults) {
                 object.name = "";
                 object.call_config = null;
@@ -515,7 +517,7 @@ export const polyglot = $root.polyglot = (() => {
          */
         function CallConfiguration(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -644,9 +646,9 @@ export const polyglot = $root.polyglot = (() => {
         CallConfiguration.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.CallConfiguration();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.CallConfiguration();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.deadline_ms = reader.uint32();
@@ -711,7 +713,7 @@ export const polyglot = $root.polyglot = (() => {
                 if (typeof message.use_tls !== "boolean")
                     return "use_tls: boolean expected";
             if (message.oauth_config != null && message.hasOwnProperty("oauth_config")) {
-                let error = $root.polyglot.OauthConfiguration.verify(message.oauth_config);
+                var error = $root.polyglot.OauthConfiguration.verify(message.oauth_config);
                 if (error)
                     return "oauth_config." + error;
             }
@@ -741,7 +743,7 @@ export const polyglot = $root.polyglot = (() => {
         CallConfiguration.fromObject = function fromObject(object) {
             if (object instanceof $root.polyglot.CallConfiguration)
                 return object;
-            let message = new $root.polyglot.CallConfiguration();
+            var message = new $root.polyglot.CallConfiguration();
             if (object.deadline_ms != null)
                 message.deadline_ms = object.deadline_ms >>> 0;
             if (object.use_tls != null)
@@ -774,7 +776,7 @@ export const polyglot = $root.polyglot = (() => {
         CallConfiguration.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.defaults) {
                 object.deadline_ms = 0;
                 object.use_tls = false;
@@ -834,7 +836,7 @@ export const polyglot = $root.polyglot = (() => {
          */
         function OauthConfiguration(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -856,7 +858,7 @@ export const polyglot = $root.polyglot = (() => {
         OauthConfiguration.prototype.access_token_credentials = null;
 
         // OneOf field names bound to virtual getters and setters
-        let $oneOfFields;
+        var $oneOfFields;
 
         /**
          * OauthConfiguration credentials.
@@ -927,9 +929,9 @@ export const polyglot = $root.polyglot = (() => {
         OauthConfiguration.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.refresh_token_credentials = $root.polyglot.OauthConfiguration.RefreshTokenCredentials.decode(reader, reader.uint32());
@@ -972,10 +974,10 @@ export const polyglot = $root.polyglot = (() => {
         OauthConfiguration.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
-            let properties = {};
+            var properties = {};
             if (message.refresh_token_credentials != null && message.hasOwnProperty("refresh_token_credentials")) {
                 properties.credentials = 1;
-                let error = $root.polyglot.OauthConfiguration.RefreshTokenCredentials.verify(message.refresh_token_credentials);
+                var error = $root.polyglot.OauthConfiguration.RefreshTokenCredentials.verify(message.refresh_token_credentials);
                 if (error)
                     return "refresh_token_credentials." + error;
             }
@@ -1001,7 +1003,7 @@ export const polyglot = $root.polyglot = (() => {
         OauthConfiguration.fromObject = function fromObject(object) {
             if (object instanceof $root.polyglot.OauthConfiguration)
                 return object;
-            let message = new $root.polyglot.OauthConfiguration();
+            var message = new $root.polyglot.OauthConfiguration();
             if (object.refresh_token_credentials != null) {
                 if (typeof object.refresh_token_credentials !== "object")
                     throw TypeError(".polyglot.OauthConfiguration.refresh_token_credentials: object expected");
@@ -1027,7 +1029,7 @@ export const polyglot = $root.polyglot = (() => {
         OauthConfiguration.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (message.refresh_token_credentials != null && message.hasOwnProperty("refresh_token_credentials")) {
                 object.refresh_token_credentials = $root.polyglot.OauthConfiguration.RefreshTokenCredentials.toObject(message.refresh_token_credentials, options);
                 if (options.oneofs)
@@ -1072,7 +1074,7 @@ export const polyglot = $root.polyglot = (() => {
              */
             function RefreshTokenCredentials(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -1161,9 +1163,9 @@ export const polyglot = $root.polyglot = (() => {
             RefreshTokenCredentials.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration.RefreshTokenCredentials();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration.RefreshTokenCredentials();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1:
                         message.token_endpoint_url = reader.string();
@@ -1213,7 +1215,7 @@ export const polyglot = $root.polyglot = (() => {
                     if (!$util.isString(message.token_endpoint_url))
                         return "token_endpoint_url: string expected";
                 if (message.client != null && message.hasOwnProperty("client")) {
-                    let error = $root.polyglot.OauthConfiguration.OauthClient.verify(message.client);
+                    var error = $root.polyglot.OauthConfiguration.OauthClient.verify(message.client);
                     if (error)
                         return "client." + error;
                 }
@@ -1234,7 +1236,7 @@ export const polyglot = $root.polyglot = (() => {
             RefreshTokenCredentials.fromObject = function fromObject(object) {
                 if (object instanceof $root.polyglot.OauthConfiguration.RefreshTokenCredentials)
                     return object;
-                let message = new $root.polyglot.OauthConfiguration.RefreshTokenCredentials();
+                var message = new $root.polyglot.OauthConfiguration.RefreshTokenCredentials();
                 if (object.token_endpoint_url != null)
                     message.token_endpoint_url = String(object.token_endpoint_url);
                 if (object.client != null) {
@@ -1259,7 +1261,7 @@ export const polyglot = $root.polyglot = (() => {
             RefreshTokenCredentials.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults) {
                     object.token_endpoint_url = "";
                     object.client = null;
@@ -1306,7 +1308,7 @@ export const polyglot = $root.polyglot = (() => {
              */
             function AccessTokenCredentials(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -1375,9 +1377,9 @@ export const polyglot = $root.polyglot = (() => {
             AccessTokenCredentials.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration.AccessTokenCredentials();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration.AccessTokenCredentials();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1:
                         message.access_token_path = reader.string();
@@ -1434,7 +1436,7 @@ export const polyglot = $root.polyglot = (() => {
             AccessTokenCredentials.fromObject = function fromObject(object) {
                 if (object instanceof $root.polyglot.OauthConfiguration.AccessTokenCredentials)
                     return object;
-                let message = new $root.polyglot.OauthConfiguration.AccessTokenCredentials();
+                var message = new $root.polyglot.OauthConfiguration.AccessTokenCredentials();
                 if (object.access_token_path != null)
                     message.access_token_path = String(object.access_token_path);
                 return message;
@@ -1452,7 +1454,7 @@ export const polyglot = $root.polyglot = (() => {
             AccessTokenCredentials.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults)
                     object.access_token_path = "";
                 if (message.access_token_path != null && message.hasOwnProperty("access_token_path"))
@@ -1493,7 +1495,7 @@ export const polyglot = $root.polyglot = (() => {
              */
             function OauthClient(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -1572,9 +1574,9 @@ export const polyglot = $root.polyglot = (() => {
             OauthClient.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration.OauthClient();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OauthConfiguration.OauthClient();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1:
                         message.id = reader.string();
@@ -1637,7 +1639,7 @@ export const polyglot = $root.polyglot = (() => {
             OauthClient.fromObject = function fromObject(object) {
                 if (object instanceof $root.polyglot.OauthConfiguration.OauthClient)
                     return object;
-                let message = new $root.polyglot.OauthConfiguration.OauthClient();
+                var message = new $root.polyglot.OauthConfiguration.OauthClient();
                 if (object.id != null)
                     message.id = String(object.id);
                 if (object.secret != null)
@@ -1657,7 +1659,7 @@ export const polyglot = $root.polyglot = (() => {
             OauthClient.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults) {
                     object.id = "";
                     object.secret = "";
@@ -1705,7 +1707,7 @@ export const polyglot = $root.polyglot = (() => {
          */
         function OutputConfiguration(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1784,9 +1786,9 @@ export const polyglot = $root.polyglot = (() => {
         OutputConfiguration.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OutputConfiguration();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.OutputConfiguration();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.destination = reader.int32();
@@ -1855,7 +1857,7 @@ export const polyglot = $root.polyglot = (() => {
         OutputConfiguration.fromObject = function fromObject(object) {
             if (object instanceof $root.polyglot.OutputConfiguration)
                 return object;
-            let message = new $root.polyglot.OutputConfiguration();
+            var message = new $root.polyglot.OutputConfiguration();
             switch (object.destination) {
             case "STDOUT":
             case 0:
@@ -1887,7 +1889,7 @@ export const polyglot = $root.polyglot = (() => {
         OutputConfiguration.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.defaults) {
                 object.destination = options.enums === String ? "STDOUT" : 0;
                 object.file_path = "";
@@ -1918,7 +1920,7 @@ export const polyglot = $root.polyglot = (() => {
          * @property {number} FILE=2 FILE value
          */
         OutputConfiguration.Destination = (function() {
-            const valuesById = {}, values = Object.create(valuesById);
+            var valuesById = {}, values = Object.create(valuesById);
             values[valuesById[0] = "STDOUT"] = 0;
             values[valuesById[1] = "LOG"] = 1;
             values[valuesById[2] = "FILE"] = 2;
@@ -1948,7 +1950,7 @@ export const polyglot = $root.polyglot = (() => {
         function ProtoConfiguration(properties) {
             this.include_paths = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1996,7 +1998,7 @@ export const polyglot = $root.polyglot = (() => {
             if (message.proto_discovery_root != null && message.hasOwnProperty("proto_discovery_root"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.proto_discovery_root);
             if (message.include_paths != null && message.include_paths.length)
-                for (let i = 0; i < message.include_paths.length; ++i)
+                for (var i = 0; i < message.include_paths.length; ++i)
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.include_paths[i]);
             return writer;
         };
@@ -2028,9 +2030,9 @@ export const polyglot = $root.polyglot = (() => {
         ProtoConfiguration.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.ProtoConfiguration();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.polyglot.ProtoConfiguration();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.proto_discovery_root = reader.string();
@@ -2081,7 +2083,7 @@ export const polyglot = $root.polyglot = (() => {
             if (message.include_paths != null && message.hasOwnProperty("include_paths")) {
                 if (!Array.isArray(message.include_paths))
                     return "include_paths: array expected";
-                for (let i = 0; i < message.include_paths.length; ++i)
+                for (var i = 0; i < message.include_paths.length; ++i)
                     if (!$util.isString(message.include_paths[i]))
                         return "include_paths: string[] expected";
             }
@@ -2099,14 +2101,14 @@ export const polyglot = $root.polyglot = (() => {
         ProtoConfiguration.fromObject = function fromObject(object) {
             if (object instanceof $root.polyglot.ProtoConfiguration)
                 return object;
-            let message = new $root.polyglot.ProtoConfiguration();
+            var message = new $root.polyglot.ProtoConfiguration();
             if (object.proto_discovery_root != null)
                 message.proto_discovery_root = String(object.proto_discovery_root);
             if (object.include_paths) {
                 if (!Array.isArray(object.include_paths))
                     throw TypeError(".polyglot.ProtoConfiguration.include_paths: array expected");
                 message.include_paths = [];
-                for (let i = 0; i < object.include_paths.length; ++i)
+                for (var i = 0; i < object.include_paths.length; ++i)
                     message.include_paths[i] = String(object.include_paths[i]);
             }
             return message;
@@ -2124,7 +2126,7 @@ export const polyglot = $root.polyglot = (() => {
         ProtoConfiguration.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults)
                 object.include_paths = [];
             if (options.defaults)
@@ -2133,7 +2135,7 @@ export const polyglot = $root.polyglot = (() => {
                 object.proto_discovery_root = message.proto_discovery_root;
             if (message.include_paths && message.include_paths.length) {
                 object.include_paths = [];
-                for (let j = 0; j < message.include_paths.length; ++j)
+                for (var j = 0; j < message.include_paths.length; ++j)
                     object.include_paths[j] = message.include_paths[j];
             }
             return object;
@@ -2156,4 +2158,4 @@ export const polyglot = $root.polyglot = (() => {
     return polyglot;
 })();
 
-export { $root as default };
+module.exports = $root;

@@ -1,9 +1,32 @@
 /* tslint:disable:no-console */
+import { Application } from 'spectron';
 import * as path from 'path';
 
-import { Application } from 'spectron';
+// const app = new Application({
+//     path: `${__dirname}/../../release/mac/Dragoman.app/Contents/MacOS/Dragoman`,
+// });
 
-// const delay = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+// describe('application launch', () => {
+//     it('shows an initial window', () => {
+//         return app.start().then(() => {
+//             // Check if the window is visible
+//             return app.browserWindow.isVisible();
+//         }).then((isVisible) => {
+//             // Verify the window is visible
+//             console.error(isVisible);
+//             assert.equal(isVisible, true);
+//         }).then(() => {
+//             // Get the window's title
+//             return app.client.getTitle();
+//         }).then((title) => {
+//             // Verify the window's title
+//             assert.equal(title, 'My App');
+//         }).then(() => {
+//             // Stop the application
+//             return app.stop();
+//         });
+//     });
+// });
 
 describe('main window', function spec() {
     let app: Application;
@@ -41,16 +64,10 @@ describe('main window', function spec() {
         }
     });
 
-    //   const findCounter = () => app.client.element('[data-tid='counter']');
-
-    //   const findButtons = async () => {
-    //     const { value } = await app.client.elements('[data-tclass='btn']');
-    //     return value.map((btn: any) => btn.ELEMENT);
-    //   };
-
-    it('should open window', () => {
+    it('should open a window', () => {
         // delay(1000);
         const { client, browserWindow } = app;
+        // console.error('openwindow', app.isRunning());
 
         return client.waitUntilWindowLoaded()
         .then(() => { return browserWindow.webContents.isDevToolsOpened(); })
@@ -67,67 +84,4 @@ describe('main window', function spec() {
         console.error(title);
         expect(title).toBe('Dragoman');
     });
-
-    //   it('should navigate to Counter by 'to Counter' link', async () => {
-    //     const { client } = app;
-
-    //     await client.click('[data-tid='container'] > a');
-    //     await delay(100);
-    //     expect(await findCounter().getText()).toBe('0');
-    //   });
-
-    //   it('should display updated count after increment button click', async () => {
-    //     const { client } = app;
-
-    //     const buttons = await findButtons();
-    //     await client.elementIdClick(buttons[0]);  // +
-    //     expect(await findCounter().getText()).toBe('1');
-    //   });
-
-    //   it('should display updated count after descrement button click', async () => {
-    //     const { client } = app;
-
-    //     const buttons = await findButtons();
-    //     await client.elementIdClick(buttons[1]);  // -
-    //     expect(await findCounter().getText()).toBe('0');
-    //   });
-
-    //   it('shouldn\'t change if even and if odd button clicked', async () => {
-    //     const { client } = app;
-
-    //     const buttons = await findButtons();
-    //     await client.elementIdClick(buttons[2]);  // odd
-    //     expect(await findCounter().getText()).toBe('0');
-    //   });
-
-    //   it('should change if odd and if odd button clicked', async () => {
-    //     const { client } = app;
-
-    //     const buttons = await findButtons();
-    //     await client.elementIdClick(buttons[0]);  // +
-    //     await client.elementIdClick(buttons[2]);  // odd
-    //     expect(await findCounter().getText()).toBe('2');
-    //   });
-
-    //   it('should change if async button clicked and a second later', async () => {
-    //     const { client } = app;
-
-    //     const buttons = await findButtons();
-    //     await client.elementIdClick(buttons[3]);  // async
-    //     expect(await findCounter().getText()).toBe('2');
-    //     await delay(1000);
-    //     expect(await findCounter().getText()).toBe('3');
-    //   });
-
-    //   it('should navigate to home using back button', async () => {
-    //     const { client } = app;
-    //     await client.element(
-    //       '[data-tid='backButton'] > a'
-    //     ).click();
-    //     await delay(100);
-
-    //     expect(
-    //       await client.isExisting('[data-tid='container']')
-    //     ).toBe(true);
-    //   });
 });

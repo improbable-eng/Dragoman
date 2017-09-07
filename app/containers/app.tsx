@@ -13,8 +13,7 @@ import { ErrorDialogState } from '../reducers/appUI';
 import AppComponent,
 { AppComponentMethods, AppComponentState } from '../components/app';
 
-export const checkConsoleErrorMessage = 'Check console for full log (Console can be reached from View' +
-  ' -> Toggle Developer Tools -> Console)';
+export const checkConsoleErrorMessage = 'Check the logs.';
 
 export const DEV_PATH_TO_POLYGLOT_BINARY = `${process.cwd()}/app/polyglot_deploy.jar`;
 

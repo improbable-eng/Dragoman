@@ -90,8 +90,6 @@ function listServices(showNotification: (title: string, explanation: string) => 
       polyglotCommandLineArgs.push(`--add_protoc_includes=${getState().settingsState.settingsDataState.addProtocIncludes.split(',').map((elem: string) => elem.trim()).join(',')}`);
     }
 
-    console.log(`Running polyglot command: ${polyglotCommand} Args:${polyglotCommandLineArgs.join(' ')}`);
-
     const polyglot = spawn(polyglotCommand, polyglotCommandLineArgs);
     dispatch(NodeProcessActions.addNodeProcessPid(polyglot.pid));
 
@@ -101,8 +99,7 @@ function listServices(showNotification: (title: string, explanation: string) => 
     polyglot.stderr.on('data', (data) => {
       const log = new TextDecoder('utf-8').decode(data as Buffer);
       polyglotStderr += log;
-      console.warn(log);
-      dispatch(ResponseViewerActions.appendLogs(log));
+      dispatch(ResponseViewerActions.appendLog(log));
     });
 
     polyglot.stdout.on('data', (data) => {
@@ -119,7 +116,6 @@ function listServices(showNotification: (title: string, explanation: string) => 
           showNotification('Error parsing list-services response:', checkConsoleErrorMessage);
         }
       } else {
-        console.error('Error listing services');
         showNotification('Error listing services: ', checkConsoleErrorMessage);
       }
     });

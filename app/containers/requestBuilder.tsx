@@ -113,15 +113,14 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
   });
 
   echo.stderr.on('data', (data) => {
-    console.error(`echoStdErr: ${new TextDecoder('utf-8').decode(data as Buffer)}`);
-    echoStdErr += data;
+    const error = new TextDecoder('utf-8').decode(data as Buffer);
+    dispatch(ResponseViewerActions.appendLog(error));
+    echoStdErr += error;
   });
 
   echo.on('exit', (code) => {
     dispatch(NodeProcessActions.removeNodeProcessPid(echo.pid));
-    if (code === 0) {
-      polyglot.stdin.end();
-    }
+    polyglot.stdin.end();
   });
 
   let polyglotStderr = '';
@@ -129,8 +128,7 @@ function callService(dispatch: Dispatch<AppState>, getState: () => AppState,
 
   polyglot.stderr.on('data', (data) => {
     const log = new TextDecoder('utf-8').decode(data as Buffer);
-    console.warn(log);
-    dispatch(ResponseViewerActions.appendLogs(`${log}\n`));
+    dispatch(ResponseViewerActions.appendLog(`${log}`));
     polyglotStderr += data;
   });
 
@@ -167,7 +165,6 @@ function handleRunClick(showNotification: (title: string, explanation: string) =
 
 function handleCancelClick() {
   return (dispatch: Dispatch<AppState>, getState: () => AppState) => {
-    console.warn('Cancelling request');
     for (const pid of getState().nodeProcessState.childProcessPids) {
       process.kill(pid);
       dispatch(NodeProcessActions.removeNodeProcessPid(pid));

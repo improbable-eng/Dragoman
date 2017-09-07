@@ -1,0 +1,48 @@
+{
+    "configurations": [
+      {
+        "name": "example1",
+        "call_config": {
+          "use_tls": true,
+          "deadline_ms": 50,
+          "oauth_config": {
+            "refresh_token_credentials": {
+              "refresh_token_path": "/path/to/refresh_token",
+              "token_endpoint_url": "https://www.example.com",
+              "client": {
+                "id": "oauth_id",
+                "secret": "oauth_secret"
+              }
+            },
+            "access_token_credentials": {
+              "access_token_path": "/path/to/access_token"
+            }
+          }
+        },
+        "proto_config": {
+          "proto_discovery_root": "/path/to/proto_discovery_root",
+          "include_paths": [
+            "/path/to/proto_include_1",
+            "/path/to/proto_include_2"
+          ]
+        }
+      },
+      {
+        "name": "example2",
+        "call_config": {
+            "use_tls": false,
+            "tls_ca_cert_path": "/path/to/tls_ca_cert",
+            "tls_client_cert_path": "/path/to/tls_client_cert", 
+            "tls_client_key_path": "/path/to/tls_client_key", 
+            "tls_client_override_authority": "tls_override_authority"
+          },
+          "proto_config": {
+            "proto_discovery_root": "/path/to/proto_discovery_root",
+            "include_paths": [
+              "/path/to/proto_include_1",
+              "/path/to/proto_include_2"
+            ]
+          }
+      } 
+    ]
+  }

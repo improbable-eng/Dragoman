@@ -4,13 +4,13 @@ import * as ResponseViewerActions from '../actions/responseViewer';
 export type ResponseViewerState = Readonly<{
     responseBody: string;
     serverStreamingResponse?: boolean;
-    logs: string;
+    logs: string[];
 }>;
 
 const initialResponseViewerState: ResponseViewerState = {
    responseBody: '',
    serverStreamingResponse: undefined,
-   logs: '',
+   logs: [],
 };
 
 export default function responseViewerReducer(state: ResponseViewerState = initialResponseViewerState, action: Action<any>): ResponseViewerState {
@@ -29,10 +29,10 @@ export default function responseViewerReducer(state: ResponseViewerState = initi
         };
     }
 
-    if (isActionOfType(action, ResponseViewerActions.appendLogs)) {
+    if (isActionOfType(action, ResponseViewerActions.appendLog)) {
         return {
             ...state,
-            logs: state.logs + action.payload,
+            logs: [...state.logs, action.payload],
         };
     }
 

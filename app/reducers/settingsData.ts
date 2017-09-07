@@ -5,7 +5,6 @@ import { polyglot as polyglotConfig } from '../proto/config';
 export const SETTINGS_IDS = {
   PROTO_DISCOVERY_ROOT: 'PROTO_DISCOVERY_ROOT',
   ENDPOINT: 'ENDPOINT',
-  CONFIG_SET_PATH: 'CONFIG_SET_PATH',
   ADD_PROTOC_INCLUDES: 'ADD_PROTOC_INCLUDES',
   CONFIG_NAME: 'CONFIG_NAME',
   USE_TLS: 'USE_TLS',
@@ -24,7 +23,6 @@ export const SETTINGS_IDS = {
 export type SettingsDataState = Readonly<{
   protoDiscoveryRoot: string;
   endpoint: string;
-  configSetPath: string;
   addProtocIncludes: string;
   configName: string;
   deadlineMs: number;
@@ -44,7 +42,6 @@ export type SettingsDataState = Readonly<{
 export const initialSettingsDataState: SettingsDataState = {
   protoDiscoveryRoot: '',
   endpoint: '',
-  configSetPath: '',
   addProtocIncludes: '',
   configName: '',
   tlsCaCertPath: '',
@@ -74,13 +71,6 @@ export default function settingsDataReducer(state: SettingsDataState = initialSe
     return {
       ...state,
       endpoint: action.payload,
-    };
-  }
-
-  if (isActionOfType(action, SettingsDataActions.setConfigSetPath)) {
-    return {
-      ...state,
-      configSetPath: action.payload,
     };
   }
 
@@ -196,8 +186,6 @@ export default function settingsDataReducer(state: SettingsDataState = initialSe
     // We only want to override certain settings with the imported config
     const stateToMutate = {
       ...initialSettingsDataState,
-      configName: state.configName,
-      configSetPath: state.configSetPath,
       polyglotConfigs: state.polyglotConfigs,
       endpoint: state.endpoint,
     };
@@ -206,6 +194,9 @@ export default function settingsDataReducer(state: SettingsDataState = initialSe
     // TODO: All this null checking is horrific, swift style optional unwrapping is not yet implemented in TypeScript,
     // see https://github.com/Microsoft/TypeScript/issues/16 for progress.
     if (config != null) {
+      if (config.name != null) {
+        stateToMutate.configName = config.name;
+      }
       if (config.call_config != null) {
         if (config.call_config.deadline_ms != null) {
           stateToMutate.deadlineMs = config.call_config.deadline_ms;
@@ -261,8 +252,37 @@ export default function settingsDataReducer(state: SettingsDataState = initialSe
     }
   }
 
-  if (isActionOfType(action, SettingsDataActions.addPolyglotConfig)) {
-    state.polyglotConfigs.set(state.configName, action.payload);
+  if (isActionOfType(action, SettingsDataActions.addPolyglotConfigFromCurrentFields)) {
+    const config: polyglotConfig.IConfiguration = {
+      name: state.configName,
+      call_config: {
+        deadline_ms: state.deadlineMs > 0 ? state.deadlineMs : undefined,
+        tls_ca_cert_path: state.tlsCaCertPath !== '' ? state.tlsCaCertPath : undefined,
+        tls_client_cert_path: state.tlsClientCertPath !== '' ? state.tlsClientCertPath : undefined,
+        tls_client_key_path: state.tlsClientKeyPath !== '' ? state.tlsClientKeyPath : undefined,
+        tls_client_override_authority: state.tlsClientOverrideAuthority !== '' ? state.tlsClientOverrideAuthority : undefined,
+        use_tls: state.useTls ? true : undefined,
+        oauth_config: {
+          access_token_credentials: {
+            access_token_path: state.oauthAccessTokenPath !== '' ? state.oauthAccessTokenPath : undefined,
+          },
+          refresh_token_credentials: {
+            refresh_token_path: state.oauthRefreshTokenPath !== '' ? state.oauthRefreshTokenPath : undefined,
+            token_endpoint_url: state.oauthRefreshTokenEndpointUrl !== '' ? state.oauthRefreshTokenEndpointUrl : undefined,
+            client: {
+              id: state.oauthClientId !== '' ? state.oauthClientId : undefined,
+              secret: state.oauthClientSecret !== '' ? state.oauthClientSecret : undefined,
+            },
+          },
+        },
+      },
+      proto_config: {
+        proto_discovery_root: state.protoDiscoveryRoot !== '' ? state.protoDiscoveryRoot : undefined,
+        include_paths: state.addProtocIncludes.length > 0 ? state.addProtocIncludes.split(',').map((elem) => elem.trim()) : undefined,
+      },
+    };
+
+    state.polyglotConfigs.set(state.configName, config);
     return {
       ...state,
     };
