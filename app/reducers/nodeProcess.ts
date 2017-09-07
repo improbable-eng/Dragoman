@@ -5,11 +5,11 @@ export type NodeProcessState = Readonly<{
     childProcessPids: Set<number>;
 }>;
 
-const initialNodeProcessState: NodeProcessState = {
+export const initialNodeProcessState: NodeProcessState = {
     childProcessPids: new Set<number>(),
 };
 
-export default function appReducer(state: NodeProcessState = initialNodeProcessState, action: Action<any>): NodeProcessState {
+export default function nodeProcessReducer(state: NodeProcessState = initialNodeProcessState, action: Action<any>): NodeProcessState {
 
     if (isActionOfType(action, NodeProcessActions.addNodeProcessPid)) {
         return {

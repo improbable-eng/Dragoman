@@ -8,7 +8,7 @@ export type RequestBuilderState = Readonly<{
     clientStreaming?: boolean;
 }>;
 
-const initialRequestBuilderState: RequestBuilderState = {
+export const initialRequestBuilderState: RequestBuilderState = {
     request: '',
     fullMethod: '',
     callRequestInProgress: false,

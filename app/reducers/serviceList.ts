@@ -47,13 +47,13 @@ export type ServiceListState = Readonly<{
     serviceMap: Map<string, DragomanService>;
 }>;
 
-const initialServiceListState: ServiceListState = {
+export const initialServiceListState: ServiceListState = {
     serviceFilter: '',
     methodFilter: '',
     serviceMap: new Map<string, DragomanService>(),
 };
 
-export default function listServicesReducer(state: ServiceListState = initialServiceListState, action: Action<any>): ServiceListState {
+export default function serviceListReducer(state: ServiceListState = initialServiceListState, action: Action<any>): ServiceListState {
 
     if (isActionOfType(action, ServiceListActions.changeServiceFilter)) {
         return {

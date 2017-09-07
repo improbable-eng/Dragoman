@@ -15,14 +15,14 @@ export type AppUIState = Readonly<{
     errorDialogQueue: ErrorDialogState[];
 }>;
 
-const initialAppState: AppUIState = {
+export const initialAppUIState: AppUIState = {
     settingsOpen: true,
     errorDialogVisible: false,
     errorDialogQueue: [],
     serverStreaming: undefined,
 };
 
-export default function appReducer(state: AppUIState = initialAppState, action: Action<any>): AppUIState {
+export default function appReducer(state: AppUIState = initialAppUIState, action: Action<any>): AppUIState {
 
     if (isActionOfType(action, AppUIActions.setSettingsOpen)) {
         return {

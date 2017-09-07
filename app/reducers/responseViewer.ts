@@ -2,13 +2,13 @@ import { isActionOfType, Action } from '../actions/actions';
 import * as ResponseViewerActions from '../actions/responseViewer';
 
 export type ResponseViewerState = Readonly<{
-    responseBody: string;
+    response: string;
     serverStreamingResponse?: boolean;
     logs: string[];
 }>;
 
-const initialResponseViewerState: ResponseViewerState = {
-   responseBody: '',
+export const initialResponseViewerState: ResponseViewerState = {
+   response: '',
    serverStreamingResponse: undefined,
    logs: [],
 };
@@ -18,7 +18,7 @@ export default function responseViewerReducer(state: ResponseViewerState = initi
     if (isActionOfType(action, ResponseViewerActions.setResponse)) {
         return {
             ...state,
-            responseBody: action.payload,
+            response: action.payload,
         };
     }
 

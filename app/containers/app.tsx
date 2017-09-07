@@ -128,7 +128,7 @@ function handleAnalyticsConsent() {
     } else {
       const explanation = `Will you allow anonymous usage statistics to be collected?
       This will be used to help development.`;
-      dispatch(openDialog('Anonymous Usage Statistics', explanation, () => dispatch(gotAnalyticsConsent()));
+      dispatch(openDialog('Anonymous Usage Statistics', explanation, () => dispatch(gotAnalyticsConsent())));
     }
   };
 }

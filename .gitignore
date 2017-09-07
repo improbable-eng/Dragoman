@@ -3,9 +3,6 @@
 # dependencies
 /node_modules
 
-# testing
-/coverage
-
 # production
 /build
 /app/dist
@@ -22,7 +19,5 @@ yarn-error.log*
 .idea
 /app/main.js
 /app/main.js.map
-/vs
-/app/vs
 /release
-monaco-editor/
+/monaco-editor
