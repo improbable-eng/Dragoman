@@ -1,3 +1,4 @@
+# TODO: Set up appveyor build properly
 version: 0.1.{build}
 
 platform:

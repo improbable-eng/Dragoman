@@ -44,7 +44,7 @@ export default function ResponseViewer({ responseViewerState, fullMethod, clearL
                     language='json'
                     theme='vs'
                     height='500'
-                    value={responseViewerState.responseBody}
+                    value={responseViewerState.response}
                     options={{ wordWrap: true, readOnly: true }}
                     requireConfig={{
                         url: (process.env.NODE_ENV === 'production') ?
