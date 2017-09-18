@@ -129,7 +129,7 @@ describe('settings UI reducer', () => {
     });
 
     it('should handle SET_OAUTH_REFRESH_TOKEN_ENDPOINT_URL', () => {
-        expect(settingsData(undefined, settingsDataActions.setOauthRefreshTokenEndpointUrl('https://improbable.io')).oauthRefreshTokenEndpointUrl).toEqual('https://improbable.io');
+        expect(settingsData(undefined, settingsDataActions.setOauthRefreshTokenEndpointUrl('https://example.com')).oauthRefreshTokenEndpointUrl).toEqual('https://example.com');
     });
 
     it('should handle SET_OAUTH_CLIENT_ID', () => {

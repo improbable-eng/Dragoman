@@ -46,7 +46,7 @@
   },
   "build": {
     "productName": "Dragoman",
-    "appId": "io.improbable.dragoman",
+    "appId": "com.peteboothroyd.dragoman",
     "asarUnpack": [
       "polyglot_deploy.jar"
     ],

@@ -6,7 +6,7 @@ import * as WebFontLoader from 'webfontloader';
 import { Provider } from 'react-redux';
 
 const electronCookies = require('@exponent/electron-cookies');
-electronCookies.enable({origin: 'https://improbable.io.dragoman'});
+electronCookies.enable({origin: 'https://dragoman'});
 
 import './app.global.scss';
 import configureStore from './store/configureStore';
