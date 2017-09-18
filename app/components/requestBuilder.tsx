@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
-import MonacoEditor from './reactMonacoEditor';
+const MonacoEditor = require('./monacoEditor').default;
 import { RequestBuilderState } from '../reducers/requestBuilder';
 
 export type RequestBuilderComponentProps = RequestBuilderComponentState & RequestBuilderComponentMethods;
