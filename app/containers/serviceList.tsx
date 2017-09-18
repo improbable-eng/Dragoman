@@ -1,7 +1,6 @@
 /* tslint:disable:no-console */
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import * as path from 'path';
 import { spawn } from 'child_process';
 
 import * as RequestBuilderActions from '../actions/requestBuilder';
@@ -15,7 +14,7 @@ import { PolyglotService } from '../reducers/serviceList';
 import ServiceList,
 { ServiceListComponentMethods, ServiceListComponentState } from '../components/serviceList';
 
-import { checkConsoleErrorMessage, DEV_PATH_TO_POLYGLOT_BINARY } from './app';
+import { checkConsoleErrorMessage, DEV_PATH_TO_POLYGLOT_BINARY, PROD_PATH_TO_POLYGLOT_BINARY } from './app';
 
 export interface ServiceListContainerProps {
   showNotification: (title: string, explanation: string) => void;
@@ -76,7 +75,7 @@ function listServices(showNotification: (title: string, explanation: string) => 
     if (process.env.NODE_ENV === 'development') {
       pathToPolyglotBinary = DEV_PATH_TO_POLYGLOT_BINARY;
     } else {
-      pathToPolyglotBinary = path.join(__dirname, 'polyglot_deploy.jar').replace('app.asar', 'app.asar.unpacked');
+      pathToPolyglotBinary = PROD_PATH_TO_POLYGLOT_BINARY;
     }
 
     // Build polyglot command
@@ -138,6 +137,8 @@ function listServices(showNotification: (title: string, explanation: string) => 
 function mapStateToProps(state: AppState): ServiceListComponentState {
   return {
     serviceMap: state.serviceListState.serviceMap,
+    serviceFilter: state.serviceListState.serviceFilter,
+    methodFilter: state.serviceListState.methodFilter,
   };
 }
 
@@ -150,6 +151,8 @@ function mapDispatchToProps(dispatch: Dispatch<AppState>, ownProps: ServiceListC
   return {
     handleMethodClick: (serviceName: string, methodName: string) => dispatch(handleMethodClick(serviceName, methodName)),
     handleListServicesClick: () => dispatch(listServices(ownProps.showNotification)),
+    handleMethodFilterChange: (newMethodFilter: string) => dispatch(ServiceListActions.changeMethodFilter(newMethodFilter)),
+    handleServiceFilterChange: (newServiceFilter: string) => dispatch(ServiceListActions.changeServiceFilter(newServiceFilter)),
   };
 }
 

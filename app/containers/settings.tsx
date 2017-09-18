@@ -118,12 +118,12 @@ function handleChangeAndError(newValue: string | boolean, settingsID: SETTINGS_I
   };
 }
 
-/** Compile time checking that the switch is exhaustive.
+/** Compile time checking that a switch is exhaustive.
  * @param {never} x - The switch variable to check
  * @returns {never}
   */
 function assertUnreachable(x: never): never {
-  throw new Error(`Didn't expect to get here`);
+  throw new Error('Should never reach this.');
 }
 
 /** Validates a URI
@@ -281,9 +281,7 @@ function saveConfig() {
       }),
     });
 
-    fs.writeFileSync(pathList, JSON.stringify(polyglotConfigSet.toJSON()), (error: NodeJS.ErrnoException) => {
-      console.error(error);
-    });
+    fs.writeFileSync(pathList, JSON.stringify(polyglotConfigSet.toJSON()));
   };
 }
 

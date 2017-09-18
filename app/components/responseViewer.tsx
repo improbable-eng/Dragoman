@@ -71,7 +71,7 @@ export default function ResponseViewer({ responseViewerState, fullMethod, clearL
                 />
             </div>
             <CardText
-                children={<div style={{overflowY: 'scroll'}}>{responseViewerState.logs.map((log, index) => {
+                children={<div style={{overflowY: 'scroll', height: 200}}>{responseViewerState.logs.map((log, index) => {
                     return <p key={index}>{log}</p>;
                 })}</div>}
             />

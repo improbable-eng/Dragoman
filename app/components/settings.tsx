@@ -33,7 +33,7 @@ export default function Settings({ settingsDataState, settingsUIState,
                     secondary={true}
                     flat={true}
                     swapTheming={true}
-                    children='Load Config'
+                    children='Load'
                     onClick={importConfigFile}
                     style={{ width: '100%', height: 40, borderRadius: 0 }}
                 />
@@ -42,7 +42,7 @@ export default function Settings({ settingsDataState, settingsUIState,
                     secondary={true}
                     flat={true}
                     swapTheming={true}
-                    children='Save Config'
+                    children='Save'
                     onClick={saveConfigFile}
                     style={{ width: '100%', height: 40, borderRadius: 0 }}
                 />

@@ -13,8 +13,6 @@ export type AppComponentProps = AppComponentState & AppComponentMethods;
 
 export interface AppComponentMethods {
     checkRuntimeJavaVersion: () => void;
-    handleAnalyticsConsent: () => void;
-    sendAnalyticsEvent: (category: string, action: string, nonInteraction?: boolean, label?: string) => void;
     closeDialog: () => void;
     openDialog: (title: string, explanation: string, onAccept?: () => void, onCancel?: () => void) => void;
     handleSettingsClick: () => void;
@@ -30,8 +28,6 @@ class App extends React.Component<AppComponentProps> {
     constructor(props: AppComponentProps) {
         super(props);
         this.props.checkRuntimeJavaVersion();
-        this.props.handleAnalyticsConsent();
-        this.props.sendAnalyticsEvent('Lifecycle', 'App Loaded', true);
       }
 
       public render() {

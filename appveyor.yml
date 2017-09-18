@@ -4,17 +4,11 @@ version: 0.1.{build}
 platform:
   - x64
 
-cache:
-  - node_modules
-  - app\node_modules
-  - '%APPDATA%\npm-cache'
-  - '%USERPROFILE%\.electron'
-
 init:
   - git config --global core.autocrlf input
 
 install:
-  - ps: Install-Product node 6 x64
+  - ps: Install-Product node 8 x64
   - git reset --hard HEAD
   - npm install npm -g
   - npm install
@@ -23,6 +17,6 @@ install:
 build_script:
   - node --version
   - npm --version
-  - npm run package-all
+  - npm run package-windows
 
 test: off

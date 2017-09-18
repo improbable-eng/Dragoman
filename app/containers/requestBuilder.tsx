@@ -2,7 +2,6 @@
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { spawn } from 'child_process';
-import * as path from 'path';
 
 import * as RequestBuilderActions from '../actions/requestBuilder';
 import * as ResponseViewerActions from '../actions/responseViewer';
@@ -15,7 +14,7 @@ import { AppState } from '../reducers/index';
 import RequestBuilder,
 { RequestBuilderComponentMethods, RequestBuilderComponentState } from '../components/requestBuilder';
 
-import { checkConsoleErrorMessage, DEV_PATH_TO_POLYGLOT_BINARY } from './app';
+import { checkConsoleErrorMessage, DEV_PATH_TO_POLYGLOT_BINARY, PROD_PATH_TO_POLYGLOT_BINARY } from './app';
 
 export interface RequestBuilderProps {
   showNotification: (title: string, explanation: string) => void;
@@ -46,7 +45,7 @@ function callService(showNotification: (title: string, explanation: string) => v
     if (process.env.NODE_ENV === 'development') {
       pathToPolyglotBinary = DEV_PATH_TO_POLYGLOT_BINARY;
     } else {
-      pathToPolyglotBinary = path.join(__dirname, 'polyglot_deploy.jar').replace('app.asar', 'app.asar.unpacked');
+      pathToPolyglotBinary = PROD_PATH_TO_POLYGLOT_BINARY;
     }
 
     const echoCommandLineArgs = [redactedJsonInput];

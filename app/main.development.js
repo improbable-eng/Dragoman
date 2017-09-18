@@ -24,7 +24,7 @@ app.on('ready', () => {
             console.log("Error installing extensions");
         })
         .then(() => {
-            if (process.env.NODE_ENV !== 'development') {
+            if (process.env.NODE_ENV === 'production') {
                 autoUpdater.checkForUpdates()
             }
         });

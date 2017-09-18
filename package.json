@@ -1,28 +1,27 @@
 {
   "name": "dragoman",
   "productName": "Dragoman",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Dragoman, a GUI for polyglot",
   "main": "main.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test node --trace-warnings ./test/runTests.js",
+    "test": "cross-env env=test NODE_ENV=test node --trace-warnings ./test/runTests.js",
     "test-all": "npm run test && npm run test-e2e",
     "test-watch": "npm test -- --watch",
-    "test-e2e": "cross-env NODE_ENV=test node --trace-warnings ./test/runTests.js e2e",
+    "test-e2e": "NODE_ENV=test node --trace-warnings ./test/runTests.js e2e",
     "hot-server": "cross-env NODE_ENV=development node --max_old_space_size=2096 server.js",
     "build-main": "cross-env NODE_ENV=production node ./node_modules/webpack/bin/webpack --config webpack.config.electron.js --progress --profile --colors",
     "build-renderer": "cross-env NODE_ENV=production node ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
     "build": "npm run build-main && npm run build-renderer",
     "start": "cross-env NODE_ENV=production electron ./app/",
     "start-hot": "cross-env HOT=1 NODE_ENV=development electron ./app/main.development",
-    "postinstall": "npm run copy && npm run build",
+    "postinstall": "npm run build",
     "dev": "npm run hot-server -- --start-hot",
-    "copy": "cp ./react-md-tooltipped.d.ts ./node_modules/react-md/lib/Tooltips/Tooltipped.d.ts && cp ./react-md-textField.d.ts ./node_modules/react-md/lib/TextFields/TextField.d.ts && cp ./react-md-textField.index.d.ts ./node_modules/react-md/lib/TextFields/index.d.ts && cp ./react-md.index.d.ts ./node_modules/react-md/index.d.ts && cp ./react-md-lib.index.d.ts ./node_modules/react-md/lib/index.d.ts && cp ./react-md-selectionControl.d.ts ./node_modules/react-md/lib/SelectionControls/SelectionControl.d.ts",
-    "package": "npm run copy && npm run build && build --publish never",
-    "package-win": "npm run copy && npm run build && build --win --x64",
-    "package-linux": "npm run copy && npm run build && build --linux --publish onTagOrDraft",
-    "package-mac": "npm run copy && npm run build && build --mac --publish onTagOrDraft",
-    "package-all": "npm run copy && npm run build && build -mwl --publish onTagOrDraft"
+    "package": "npm run build && build --publish never",
+    "package-win": "npm run build && build --win --x64",
+    "package-linux": "npm run build && build --linux --publish onTagOrDraft",
+    "package-mac": "npm run build && build --mac --publish onTag",
+    "package-all": "npm run build && build -mwl --publish onTagOrDraft"
   },
   "jest": {
     "moduleNameMapper": {
@@ -130,7 +129,6 @@
     "@types/node": "^8.0.22",
     "@types/react": "^15.0.37",
     "@types/react-dom": "^15.5.1",
-    "@types/react-ga": "^2.1.1",
     "@types/react-hot-loader": "^3.0.1",
     "@types/react-redux": "^4.4.35",
     "@types/redux-logger": "^3.0.0",
@@ -148,8 +146,9 @@
     "devtron": "^1.4.0",
     "electron": "^1.7.6",
     "electron-builder": "^19.27.7",
-    "electron-builder-http": "^19.15.0",
+    "electron-builder-http": "^19.27.5",
     "electron-chromedriver": "^1.7.1",
+    "electron-debug": "^1.1.0",
     "electron-devtools-installer": "^2.2.0",
     "enzyme": "^2.7.0",
     "express": "^4.14.0",
@@ -183,17 +182,13 @@
   "dependencies": {
     "@exponent/electron-cookies": "^2.0.0",
     "amdrequire": "0.0.3",
-    "electron-cookies": "^1.1.0",
-    "electron-debug": "^1.1.0",
     "electron-updater": "^2.8.7",
     "lodash": "^4.17.4",
     "monaco-editor": "^0.10.0",
-    "node-notifier": "^5.1.2",
     "protobufjs": "^6.8.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-ga": "^2.2.0",
-    "react-md": "^1.1.0-alpha-9",
+    "react-md": "^1.1.3",
     "react-redux": "^5.0.1",
     "redux": "^3.6.0",
     "redux-thunk": "^2.1.0",
@@ -204,7 +199,7 @@
     "webfontloader": "^1.6.28"
   },
   "devEngines": {
-    "node": ">=6.x",
+    "node": ">=8.x",
     "npm": ">=3.x"
   }
 }
