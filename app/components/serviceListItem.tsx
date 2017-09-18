@@ -8,7 +8,7 @@ export interface IServiceListProps {
 }
 
 
-function ServiceListItem({ serviceName, filteredMethodNames, onMethodClick }: IServiceListProps) {
+export default function ServiceListItem({ serviceName, filteredMethodNames, onMethodClick }: IServiceListProps) {
     const methodList: JSX.Element[] = filteredMethodNames
         .map(methodName => {
             return (
@@ -27,5 +27,3 @@ function ServiceListItem({ serviceName, filteredMethodNames, onMethodClick }: IS
         />
     );
 }
-
-export default ServiceListItem;

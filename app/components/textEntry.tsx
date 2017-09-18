@@ -18,7 +18,7 @@ export interface ITextEntryProps {
     handleDrop?: (event: React.DragEvent<HTMLElement>, settingsId: SETTINGS_IDS) => void;
 }
 
-function TextEntry({id, multiline = false, handleChange, handleDoubleClick, handleDrop,  label, value,
+export default function TextEntry({id, multiline = false, handleChange, handleDoubleClick, handleDrop,  label, value,
     placeholder = '', errorText, error = false, required = false, type = 'text'}: ITextEntryProps) {
     return (
         <div style={{ display: 'flex', padding: '0px 10px 0px 10px' }}>
@@ -43,5 +43,3 @@ function TextEntry({id, multiline = false, handleChange, handleDoubleClick, hand
         </div>
     );
 }
-
-export default TextEntry;

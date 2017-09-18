@@ -8,7 +8,7 @@ export interface IModalDialogProps {
     defaultCloseDialog: () => void;
 }
 
-function ModalDialog({ appUIState, defaultCloseDialog }: IModalDialogProps) {
+export default function ModalDialog({ appUIState, defaultCloseDialog }: IModalDialogProps) {
     return (
         <ReactMD.DialogContainer
             id='errorDialog'
@@ -36,5 +36,3 @@ function ModalDialog({ appUIState, defaultCloseDialog }: IModalDialogProps) {
         />
     );
 }
-
-export default ModalDialog;

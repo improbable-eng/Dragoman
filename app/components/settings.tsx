@@ -95,7 +95,6 @@ export default function Settings({ settingsDataState, settingsUIState,
                     handleChange={handleChange}
                     label='Add Protoc Includes'
                     placeholder='<path1>, <path2>'
-                    // TODO: Move this logic out of the presentational component??
                     // Searches the array of booleans, if any of the booleans are false then the overall
                     // status of the field should be an error. If none are found the index=-1 < 0
                     error={settingsUIState.addProtocIncludesErrors.indexOf(true) >= 0}

@@ -66,6 +66,8 @@ class App extends React.Component<AppComponentProps> {
               position='right'
               children={<Settings />}
               onVisibilityChange={() => {/**/}} // Suppress spurious react-md error
+              overlay={false}
+              clickableDesktopOverlay={true}
             />
             <ModalDialog
               appUIState={this.props.appState.appUIState}

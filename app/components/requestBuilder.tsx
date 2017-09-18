@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactMD from 'react-md';
 
-const MonacoEditor = require('./monacoEditor').default;
+import MonacoEditor from './reactMonacoEditor';
 import { RequestBuilderState } from '../reducers/requestBuilder';
 
 export type RequestBuilderComponentProps = RequestBuilderComponentState & RequestBuilderComponentMethods;
@@ -72,7 +72,7 @@ export default function RequestBuilder({ requestBuilderState, handleRunClick,
                     height='500'
                     onChange={(val: string) => handleRequestChange(val)}
                     value={requestBuilderState.request}
-                    options={{ wordWrap: true }}
+                    options={{ wordWrap: 'on', automaticLayout: true }}
                     requireConfig={{
                         url: (process.env.NODE_ENV === 'production') ?
                             `./dist/monaco-editor/min/vs/loader.js` :

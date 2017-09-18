@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Button, Card, CardActions, CardText, CardTitle } from 'react-md';
 
-// import MonacoEditor from 'react-monaco-editor';
 import MonacoEditor from './reactMonacoEditor';
 import { ResponseViewerState } from '../reducers/responseViewer';
 
@@ -45,7 +44,7 @@ export default function ResponseViewer({ responseViewerState, fullMethod, clearL
                     theme='vs'
                     height='500'
                     value={responseViewerState.response}
-                    options={{ wordWrap: true, readOnly: true }}
+                    options={{ wordWrap: 'on', readOnly: true, automaticLayout: true }}
                     requireConfig={{
                         url: (process.env.NODE_ENV === 'production') ?
                             `./dist/monaco-editor/min/vs/loader.js` :

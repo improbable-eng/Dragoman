@@ -19,7 +19,7 @@ export interface ServiceListComponentState {
     methodFilter: string;
 }
 
-function serviceList({ serviceMap, serviceFilter, methodFilter,
+export default function serviceList({ serviceMap, serviceFilter, methodFilter,
     handleMethodClick, handleListServicesClick, handleMethodFilterChange, handleServiceFilterChange }: ServiceListComponentProps) {
     return (
         <div style={{ height: '100%' }}>
@@ -66,5 +66,3 @@ function serviceList({ serviceMap, serviceFilter, methodFilter,
         </div>
     );
 }
-
-export default serviceList;
