@@ -1,3 +1,6 @@
+// This is a modified version of react-monaco-editor found here: https://github.com/superRaytin/react-monaco-editor
+// TODO: Move back to using the npm module. Blocked by adding support for the electron environment.
+
 import * as React from 'react';
 
 export interface ReactMonacoEditorProps {
@@ -207,12 +210,6 @@ export default class MonacoEditor extends React.Component<ReactMonacoEditorProps
 
   render() {
     const { width = '100%', height = '100%' } = this.props;
-    console.log('rendering'); // tslint:disable-line
-    if (this.state != null && this.state.editor !== undefined) {
-      console.log(this.state.editor.layout); // tslint:disable-line
-      this.state.editor.layout();
-    }
-
     const fixedWidth = width.toString().indexOf('%') !== -1 ? width : `${width}px`;
     const fixedHeight = height.toString().indexOf('%') !== -1 ? height : `${height}px`;
     const style = {

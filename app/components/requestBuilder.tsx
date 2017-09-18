@@ -72,6 +72,9 @@ export default function RequestBuilder({ requestBuilderState, handleRunClick,
                     height='500'
                     onChange={(val: string) => handleRequestChange(val)}
                     value={requestBuilderState.request}
+                    // TODO: Remove automaticLayout option. This is not great for performance. Every 100ms
+                    // the monaco-editor component will update itself. This is necessary as currently without
+                    // this option the editor does not update when it's container resizes.
                     options={{ wordWrap: 'on', automaticLayout: true }}
                     requireConfig={{
                         url: (process.env.NODE_ENV === 'production') ?

@@ -44,6 +44,9 @@ export default function ResponseViewer({ responseViewerState, fullMethod, clearL
                     theme='vs'
                     height='500'
                     value={responseViewerState.response}
+                    // TODO: Remove automaticLayout option. This is not great for performance. Every 100ms
+                    // the monaco-editor component will update itself. This is necessary as currently without
+                    // this option the editor does not update when it's container resizes.
                     options={{ wordWrap: 'on', readOnly: true, automaticLayout: true }}
                     requireConfig={{
                         url: (process.env.NODE_ENV === 'production') ?
