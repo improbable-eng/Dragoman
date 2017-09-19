@@ -7,6 +7,8 @@ import ModalDialog from '../components/modalDialog';
 import ServiceList from '../containers/serviceList';
 import Settings from '../containers/settings';
 
+const styles = require('./app.css');
+
 import { AppState } from '../reducers/index';
 
 export type AppComponentProps = AppComponentState & AppComponentMethods;
@@ -48,7 +50,7 @@ class App extends React.Component<AppComponentProps> {
                   onClick={this.props.handleSettingsClick}
                   children='settings'/>}
               children={
-                <div style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
+                <div className={styles['main-content']}>
                   <RequestBuilder
                     showNotification={this.props.showNotification}
                   />

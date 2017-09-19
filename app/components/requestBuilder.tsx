@@ -4,6 +4,9 @@ import * as ReactMD from 'react-md';
 import MonacoEditor from './reactMonacoEditor';
 import { RequestBuilderState } from '../reducers/requestBuilder';
 
+const styles = require('./requestBuilder.css');
+const sharedStyles = require('./sharedRequestResponse.css');
+
 export type RequestBuilderComponentProps = RequestBuilderComponentState & RequestBuilderComponentMethods;
 
 export interface RequestBuilderComponentState {
@@ -19,8 +22,8 @@ export interface RequestBuilderComponentMethods {
 export default function RequestBuilder({ requestBuilderState, handleRunClick,
     handleRequestChange, handleCancelClick }: RequestBuilderComponentProps) {
     return (
-        <ReactMD.Card style={{ width: '50%', padding: '20px', marginLeft: -8 }} >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+        <ReactMD.Card className={sharedStyles.card} >
+            <div className={sharedStyles['card-title-container']}>
                 <ReactMD.CardActions
                 >
                     {!requestBuilderState.callRequestInProgress ?
@@ -29,7 +32,6 @@ export default function RequestBuilder({ requestBuilderState, handleRunClick,
                             secondary={true}
                             swapTheming={true}
                             onClick={handleRunClick}
-                            style={{ marginRight: 'auto' }}
                             tooltipLabel='Send Request'
                             tooltipPosition='bottom'
                             children='play_arrow'
@@ -38,7 +40,7 @@ export default function RequestBuilder({ requestBuilderState, handleRunClick,
                         <ReactMD.Button
                             icon={true}
                             onClick={handleCancelClick}
-                            style={{ marginRight: 'auto', backgroundColor: '#EF9A9A' }}
+                            className={styles['cancel-card-button']}
                             tooltipLabel='Cancel Request'
                             tooltipPosition='bottom'
                             children='clear'
@@ -48,7 +50,7 @@ export default function RequestBuilder({ requestBuilderState, handleRunClick,
                 <ReactMD.CardTitle
                     title='Request Builder'
                     subtitle={requestBuilderState.fullMethod}
-                    style={{ padding: 24 }}
+                    className={sharedStyles['card-title']}
                 />
                 <ReactMD.Button
                     icon={true}
@@ -63,8 +65,8 @@ export default function RequestBuilder({ requestBuilderState, handleRunClick,
                 </ReactMD.Button>
             </div>
             {requestBuilderState.callRequestInProgress ?
-                <ReactMD.LinearProgress id='callRequestProgress' style={{ margin: 0 }} /> :
-                <div style={{ height: 3 }} />}
+                <ReactMD.LinearProgress id='callRequestProgress' className={styles['linear-progress']}/> :
+                <div className={sharedStyles['div-spacer']} />}
             <ReactMD.Card className='md-block-centered'>
                 <MonacoEditor
                     language='json'

@@ -37,14 +37,13 @@ export default class MonacoEditor extends React.Component<ReactMonacoEditorProps
   }
 
   componentDidUpdate(prevProps: ReactMonacoEditorProps) {
-    // const context = this.props.context || window;
     if (this.props.value !== this.state.currentValue) {
       // Always refer to the latest value
       this.setState({ currentValue: this.props.value });
       // Consider the situation of rendering 1+ times before the editor mounted
       if (this.state.editor) {
         this.setState({ preventTriggerChangeEvent: true });
-        this.state.editor.setValue(this.props.value ? this.props.value : '');
+        this.state.editor.setValue(this.props.value || '');
         this.setState({ preventTriggerChangeEvent: false });
       }
     }

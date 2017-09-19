@@ -6,6 +6,8 @@ import TextEntry from './textEntry';
 import { SettingsDataState, SETTINGS_IDS } from '../reducers/settingsData';
 import { SettingsUIState } from '../reducers/settingsUI';
 
+const styles = require('./settings.css');
+
 export type SettingsComponentProps = SettingsComponentState & SettingsComponentMethods;
 
 export interface SettingsComponentState {
@@ -26,8 +28,8 @@ export default function Settings({ settingsDataState, settingsUIState,
     handlePathDoubleClick, handleChange, handleDrop, importConfigFile,
     saveConfigFile, handleConfigAutoComplete }: SettingsComponentProps) {
     return (
-        <div style={{ height: '95%' }} id='settingsDrawer'>
-            <div style={{ display: 'flex' }}>
+        <div className={styles.drawer} id='settingsDrawer'>
+            <div className={styles['buttons-container']}>
                 <Button
                     key='loadConfig'
                     secondary={true}
@@ -35,7 +37,7 @@ export default function Settings({ settingsDataState, settingsUIState,
                     swapTheming={true}
                     children='Load'
                     onClick={importConfigFile}
-                    style={{ width: '100%', height: 40, borderRadius: 0 }}
+                    className={styles.button}
                 />
                 <Button
                     key='saveConfig'
@@ -44,12 +46,12 @@ export default function Settings({ settingsDataState, settingsUIState,
                     swapTheming={true}
                     children='Save'
                     onClick={saveConfigFile}
-                    style={{ width: '100%', height: 40, borderRadius: 0 }}
+                    className={styles.button}
                 />
             </div>
             <List className='md-list--drawer'>
                 <Autocomplete
-                    style={{ padding: '0px 20px 0px 20px' }}
+                    className={styles['auto-complete']}
                     data={Array.from(settingsDataState.polyglotConfigs.keys())}
                     label='Config Name'
                     placeholder='development'
