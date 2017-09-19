@@ -1,7 +1,6 @@
 osx_image: xcode8.3
 
 os:
-  - linux
   - osx
 
 language: node_js
@@ -10,9 +9,8 @@ node_js:
   - 8
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then npm run package-linux; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then npm run package-all; fi
   - npm run test
+  - npm run package-all
 
 cache:
   directories:

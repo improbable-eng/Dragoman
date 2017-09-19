@@ -20,7 +20,7 @@
     "package-win": "npm run build && build --win --x64 --publish never",
     "package-linux": "npm run build && build --linux --publish never",
     "package-mac": "npm run build && build --mac --publish never",
-    "package-all": "npm run build && build -mwl --publish onTagOrDraft"
+    "package-all": "npm run build && build -mwl --publish never"
   },
   "jest": {
     "moduleNameMapper": {
