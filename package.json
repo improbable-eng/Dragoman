@@ -102,17 +102,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/peteboothroyd/Dragoman"
+    "url": "git+https://github.com/improbable-eng/Dragoman"
   },
-  "author": {
-    "name": "Peter Boothroyd",
-    "email": "petereboothroyd@gmail.com",
-    "url": "https://github.com/peteboothroyd"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/peteboothroyd/issues"
-  },
+  "author": "Improbable",
+  "license": "Apache-2.0",
   "keywords": [
     "electron",
     "react",
@@ -120,7 +113,6 @@
     "react-hot",
     "polyglot"
   ],
-  "homepage": "https://github.com/peteboothroyd/dragoman#readme",
   "devDependencies": {
     "@types/enzyme": "^2.8.6",
     "@types/jest": "^20.0.8",
