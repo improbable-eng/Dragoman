@@ -1,5 +1,3 @@
-// Copyright (c) Improbable Worlds Ltd, All Right Reserved
-
 import * as _ from 'lodash';
 
 // Action represents a Redux Action Object which is typically dispatched from a
