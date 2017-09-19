@@ -34,11 +34,13 @@ export default function serviceList({ serviceMap, serviceFilter, methodFilter,
             />
             <div style={{ padding: 10 }}>
                 <TextField
+                    id='Service Filter'
                     placeholder='Service Filter'
                     value={serviceFilter}
                     onChange={handleServiceFilterChange}
                 />
                 <TextField
+                    id='Method Filter'
                     placeholder='Method Filter'
                     value={methodFilter}
                     onChange={handleMethodFilterChange}
