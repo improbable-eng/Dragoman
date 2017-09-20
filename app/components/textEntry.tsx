@@ -3,7 +3,7 @@ import * as ReactMD from 'react-md';
 
 import { SETTINGS_IDS } from '../reducers/settingsData';
 
-const styles = require('./textEntry.css');
+const styles = require('./textEntry.scss');
 
 export interface ITextEntryProps {
     id: SETTINGS_IDS;

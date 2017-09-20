@@ -4,7 +4,7 @@ import { Button, List, TextField } from 'react-md';
 import ServiceListItem from './serviceListItem';
 import { DragomanService } from '../reducers/serviceList';
 
-const styles = require('./serviceList.css');
+const styles = require('./serviceList.scss');
 
 export type ServiceListComponentProps = ServiceListComponentMethods & ServiceListComponentState;
 

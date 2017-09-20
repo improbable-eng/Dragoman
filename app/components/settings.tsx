@@ -6,7 +6,7 @@ import TextEntry from './textEntry';
 import { SettingsDataState, SETTINGS_IDS } from '../reducers/settingsData';
 import { SettingsUIState } from '../reducers/settingsUI';
 
-const styles = require('./settings.css');
+const styles = require('./settings.scss');
 
 export type SettingsComponentProps = SettingsComponentState & SettingsComponentMethods;
 

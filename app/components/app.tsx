@@ -7,7 +7,7 @@ import ModalDialog from '../components/modalDialog';
 import ServiceList from '../containers/serviceList';
 import Settings from '../containers/settings';
 
-const styles = require('./app.css');
+const styles = require('./app.scss');
 
 import { AppState } from '../reducers/index';
 

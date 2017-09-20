@@ -4,8 +4,8 @@ import * as ReactMD from 'react-md';
 import MonacoEditor from './reactMonacoEditor';
 import { RequestBuilderState } from '../reducers/requestBuilder';
 
-const styles = require('./requestBuilder.css');
-const sharedStyles = require('./sharedRequestResponse.css');
+const styles = require('./requestBuilder.scss');
+const sharedStyles = require('./sharedRequestResponse.scss');
 
 export type RequestBuilderComponentProps = RequestBuilderComponentState & RequestBuilderComponentMethods;
 

@@ -4,8 +4,8 @@ import { Button, Card, CardActions, CardText, CardTitle } from 'react-md';
 import MonacoEditor from './reactMonacoEditor';
 import { ResponseViewerState } from '../reducers/responseViewer';
 
-const sharedStyles = require('./sharedRequestResponse.css');
-const styles = require('./responseViewer.css');
+const sharedStyles = require('./sharedRequestResponse.scss');
+const styles = require('./responseViewer.scss');
 
 export interface ResponseViewerComponentState {
     responseViewerState: ResponseViewerState;
