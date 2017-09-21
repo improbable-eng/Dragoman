@@ -4,6 +4,8 @@ import { Button, List, TextField } from 'react-md';
 import ServiceListItem from './serviceListItem';
 import { DragomanService } from '../reducers/serviceList';
 
+const styles = require('./serviceList.scss');
+
 export type ServiceListComponentProps = ServiceListComponentMethods & ServiceListComponentState;
 
 export interface ServiceListComponentMethods {
@@ -22,7 +24,7 @@ export interface ServiceListComponentState {
 export default function serviceList({ serviceMap, serviceFilter, methodFilter,
     handleMethodClick, handleListServicesClick, handleMethodFilterChange, handleServiceFilterChange }: ServiceListComponentProps) {
     return (
-        <div style={{ height: '100%' }}>
+        <div className={styles.container}>
             <Button
                 key='button'
                 secondary={true}
@@ -30,15 +32,17 @@ export default function serviceList({ serviceMap, serviceFilter, methodFilter,
                 swapTheming={true}
                 children='List Services'
                 onClick={handleListServicesClick}
-                style={{ width: '100%', height: 40, borderRadius: 0, margin: 0 }}
+                className={styles.button}
             />
-            <div style={{ padding: 10 }}>
+            <div className={styles['text-field']}>
                 <TextField
+                    id='Service Filter'
                     placeholder='Service Filter'
                     value={serviceFilter}
                     onChange={handleServiceFilterChange}
                 />
                 <TextField
+                    id='Method Filter'
                     placeholder='Method Filter'
                     value={methodFilter}
                     onChange={handleMethodFilterChange}

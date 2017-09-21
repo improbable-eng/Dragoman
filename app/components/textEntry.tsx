@@ -3,6 +3,8 @@ import * as ReactMD from 'react-md';
 
 import { SETTINGS_IDS } from '../reducers/settingsData';
 
+const styles = require('./textEntry.scss');
+
 export interface ITextEntryProps {
     id: SETTINGS_IDS;
     multiline?: boolean;
@@ -21,7 +23,7 @@ export interface ITextEntryProps {
 export default function TextEntry({id, multiline = false, handleChange, handleDoubleClick, handleDrop,  label, value,
     placeholder = '', errorText, error = false, required = false, type = 'text'}: ITextEntryProps) {
     return (
-        <div style={{ display: 'flex', padding: '0px 10px 0px 10px' }}>
+        <div className={styles.container}>
             <ReactMD.TextField
                 id={id}
                 label={label}
