@@ -4,6 +4,9 @@ import { Button, Card, CardActions, CardText, CardTitle } from 'react-md';
 import MonacoEditor from './reactMonacoEditor';
 import { ResponseViewerState } from '../reducers/responseViewer';
 
+const sharedStyles = require('./sharedRequestResponse.scss');
+const styles = require('./responseViewer.scss');
+
 export interface ResponseViewerComponentState {
     responseViewerState: ResponseViewerState;
     fullMethod: string;
@@ -18,12 +21,12 @@ export type ResponseViewerComponentProps = ResponseViewerComponentState & Respon
 
 export default function ResponseViewer({ responseViewerState, fullMethod, clearLogs }: ResponseViewerComponentProps) {
     return (
-        <Card style={{ width: '50%', padding: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Card className={sharedStyles.card}>
+            <div className={sharedStyles['card-title-container']}>
                 <CardTitle
                     title='Response Viewer'
                     subtitle={fullMethod}
-                    style={{ padding: 24 }}
+                    className={sharedStyles['card-title']}
                 />
                 <Button
                     icon={true}
@@ -37,7 +40,7 @@ export default function ResponseViewer({ responseViewerState, fullMethod, clearL
                         : ''}
                 </Button>
             </div>
-            <div style={{ height: 3 }} />
+            <div className={sharedStyles['div-spacer']} />
             <Card className='md-block-centered'>
                 <MonacoEditor
                     language='json'
@@ -55,7 +58,7 @@ export default function ResponseViewer({ responseViewerState, fullMethod, clearL
                     }}
                 />
             </Card>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className={sharedStyles['card-title-container']}>
                 <CardActions
                 >
                         <Button
@@ -73,7 +76,7 @@ export default function ResponseViewer({ responseViewerState, fullMethod, clearL
                 />
             </div>
             <CardText
-                children={<div style={{overflowY: 'scroll', height: 200}}>{responseViewerState.logs.map((log, index) => {
+                children={<div className={styles['log-viewer']}>{responseViewerState.logs.map((log, index) => {
                     return <p key={index}>{log}</p>;
                 })}</div>}
             />
