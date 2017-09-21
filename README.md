@@ -34,9 +34,9 @@ Download the latest version from the [releases](https://github.com/peteboothroyd
                 "use_tls": "true",
                 "oauth_config": {
                     "refresh_token_credentials": {
-                        "token_endpoint_url": "https://auth.improbable.io/auth/v1/token",
+                        "token_endpoint_url": "https://my.auth.server/auth/v1/token",
                         "client": {
-                            "id": "improbable_cli_client_go",
+                            "id": "my_client_id",
                             "secret": "{{INSERT CLIENT SECRET HERE}}"
                         },
                         "refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
@@ -44,9 +44,8 @@ Download the latest version from the [releases](https://github.com/peteboothroyd
                 }
             },
             "proto_config": {
-                "proto_discovery_root": "/Users/peteboothroyd/Projects/platform/proto",
+                "proto_discovery_root": "/path/to/protos",
                 "include_paths": [
-                    "/Users/peteboothroyd/Projects/platform/go/src",
                     "/Users/peteboothroyd/Projects/platform/go/src/github.com/gogo/protobuf/protobuf",
                     "/Users/peteboothroyd/Projects/platform/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
                 ]
@@ -67,7 +66,7 @@ Download the latest version from the [releases](https://github.com/peteboothroyd
 ## Development
 To get start clone the repo:
 ```bash
-git clone https://github.com/peteboothroyd/Dragoman.git your-project-name
+git clone https://github.com/improbable-eng/Dragoman.git your-project-name
 ```
 And then install dependencies.
 ```bash
