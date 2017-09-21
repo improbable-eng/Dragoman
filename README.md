@@ -1,70 +1,61 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-logo.png" height="64">
+<img src="https://raw.githubusercontent.com/improbable-eng/Dragoman/master/resources/dragoman-logo.png" height="64">
 <h3 align="center">Dragoman</h3>
 <p align="center">An open source GUI for polyglot, a universal gRPC client<p>
-<p align="center"><a href="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master"><img src="https://travis-ci.org/peteboothroyd/Dragoman.svg?branch=master" alt="Build Status"></a></p>
+<p align="center"><a href="https://travis-ci.org/improbable-eng/Dragoman.svg?branch=master"><img src="https://travis-ci.org/improbable-eng/Dragoman.svg?branch=master" alt="Build Status"></a></p>
 </p>
 
 ## Dragoman 
-This is an open source project to allow easy debugging of gRPC services, and leverages [polyglot](https://github.com/grpc-ecosystem/polyglot). It is powered by [Electron](https://electron.atom.io/), [react](https://facebook.github.io/react/) and [redux](http://redux.js.org/).
+This is an open source project to allow easy debugging of gRPC services, and leverages [polyglot](https://github.com/grpc-ecosystem/polyglot). It is powered by [Electron](https://electron.atom.io/), [react](https://facebook.github.io/react/), [redux](http://redux.js.org/), [webpack](https://webpack.js.org/)
 
 ## Getting Started
 ### Prerequisites
-Polyglot requires java runtime 1.8.
-If on mac use 
-```bash
-brew update
-brew cask install java
-```
-Or [download](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) from oracle.
+- Polyglot requires java runtime 1.8.
+- node >= 8.x
+- npm >= 3.x
 
 ### Installing
-Download the latest version from the [releases](https://github.com/peteboothroyd/Dragoman/releases) tab.
+- Download the latest version from the [releases](https://github.com/improbable-eng/Dragoman/releases) tab.
+- Alternatively clone this repo, run ```npm run start```
 - If you have no polyglot experience/setup consider reading through this [readme](https://github.com/grpc-ecosystem/polyglot).
-- Polyglot by default looks to ~/.polyglot/config.pb.json for its configuration. Define settings here or override them in the UI.
-- Note not all settings can be defined in the UI currently.
-- Logs can be viewed from View/Toggle Developer Tools/Console. 
-- An example config might be (remember to insert the OAuth secret, path to refresh token, and update the proto discovery paths as appropriate): 
+- If you have used polyglot before you likely used a configuration file to persist settings, by default polylgot looks to ~/.polyglot/config.json.
+- An example config might be (remember to insert the OAuth secret, path to refresh token, and update the proto discovery path and protoc include paths as appropriate): 
 ```json
 {
-    "configurations": [
-        {
-            "name": "production",
-            "call_config": {
-                "use_tls": "true",
-                "oauth_config": {
-                    "refresh_token_credentials": {
-                        "token_endpoint_url": "https://my.auth.server/auth/v1/token",
-                        "client": {
-                            "id": "my_client_id",
-                            "secret": "{{INSERT CLIENT SECRET HERE}}"
-                        },
-                        "refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
-                    }
-                }
+  "configurations": [
+    {
+      "name": "production",
+      "call_config": {
+        "use_tls": "true",
+        "oauth_config": {
+          "refresh_token_credentials": {
+            "token_endpoint_url": "https://my.auth.server/auth/v1/token",
+            "client": {
+              "id": "my_client_id",
+              "secret": "{{INSERT CLIENT SECRET HERE}}"
             },
-            "proto_config": {
-                "proto_discovery_root": "/path/to/protos",
-                "include_paths": [
-                    "/Users/peteboothroyd/Projects/platform/go/src/github.com/gogo/protobuf/protobuf",
-                    "/Users/peteboothroyd/Projects/platform/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
-                ]
-            }
+            "refresh_token_path": "{{INSERT PATH TO REFRESH TOKEN HERE}}"
+          }
         }
-    ]
+      },
+      "proto_config": {
+        "proto_discovery_root": "/path/to/protos",
+        "include_paths": [
+          "path/to/protoc/include/1",
+          "path/to/protoc/include/2"
+        ]
+      }
+    }
+  ]
 }
 ```
 
 ## Known Issues
 - Polyglot is known to hang if authentication fails, causing the request to hang indefinitely. Cancel the request, get a new refresh token and try again.
-- Text editors do not automatically resize. Reload the page (View -> Reload).
-- No option to define whether to use TLS in UI
-- No filtering of services/methods in UI
 - Difficult to read service/method name
-- Configuration setup is awkward and error prone
 
 ## Development
-To get start clone the repo:
+To get started clone the repo:
 ```bash
 git clone https://github.com/improbable-eng/Dragoman.git your-project-name
 ```
@@ -75,11 +66,16 @@ $ cd your-project-name && npm install
 
 ## Run
 
-Run these two commands __simultaneously__ in different console tabs.
+Run these two commands __simultaneously__ in different console tabs for hot module replacement.
 
 ```bash
 $ npm run hot-server
 $ npm run start-hot
+```
+
+To simply get going run: 
+```bash
+$ npm run start
 ```
 
 ## DevTools
@@ -139,8 +135,7 @@ $ npm run package -- --[option]
 To run the application without packaging run
 
 ```bash
-$ npm run build
-$ npm start
+$ npm run start
 ```
 
 To run End-to-End Test
