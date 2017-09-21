@@ -13,7 +13,7 @@
     "build-main": "cross-env NODE_ENV=production node ./node_modules/webpack/bin/webpack --config webpack.config.electron.js --progress --profile --colors",
     "build-renderer": "cross-env NODE_ENV=production node ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
     "build": "npm run build-main && npm run build-renderer",
-    "start": "cross-env NODE_ENV=production electron ./app/",
+    "start": "npm run build && cross-env NODE_ENV=production electron ./app/",
     "start-hot": "cross-env HOT=1 NODE_ENV=development electron ./app/main.development",
     "postinstall": "npm run build",
     "dev": "npm run hot-server -- --start-hot",
