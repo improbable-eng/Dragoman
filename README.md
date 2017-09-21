@@ -64,9 +64,6 @@ Download the latest version from the [releases](https://github.com/peteboothroyd
 - Difficult to read service/method name
 - Configuration setup is awkward and error prone
 
-## Screenshot
-![Dragoman Demo](https://raw.githubusercontent.com/peteboothroyd/Dragoman/master/resources/dragoman-demo.gif)
-
 ## Development
 To get start clone the repo:
 ```bash
