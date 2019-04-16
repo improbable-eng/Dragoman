@@ -135,7 +135,7 @@
     "css-loader": "^0.28.4",
     "css-modules-require-hook": "^4.1.0",
     "devtron": "^1.4.0",
-    "electron": "^1.7.6",
+    "electron": "^4.1.4",
     "electron-builder": "^19.27.5",
     "electron-builder-http": "^19.27.5",
     "electron-chromedriver": "^1.7.1",
