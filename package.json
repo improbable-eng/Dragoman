@@ -125,7 +125,7 @@
     "@types/redux-logger": "^3.0.0",
     "@types/text-encoding": "0.0.31",
     "@types/valid-url": "^1.0.2",
-    "@types/webdriverio": "^4.8.4",
+    "@types/webdriverio": "^5.0.0",
     "@types/webfontloader": "^1.6.28",
     "asar": "^0.13.0",
     "boiler-room-custodian": "^0.6.2",
