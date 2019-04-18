@@ -121,7 +121,7 @@
     "@types/react": "^15.0.37",
     "@types/react-dom": "^15.5.1",
     "@types/react-hot-loader": "^3.0.1",
-    "@types/react-redux": "^4.4.35",
+    "@types/react-redux": "^7.0.7",
     "@types/redux-logger": "^3.0.0",
     "@types/text-encoding": "0.0.31",
     "@types/valid-url": "^1.0.2",
