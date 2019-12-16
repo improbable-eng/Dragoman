@@ -127,7 +127,7 @@
     "@types/valid-url": "^1.0.2",
     "@types/webdriverio": "^4.8.4",
     "@types/webfontloader": "^1.6.28",
-    "asar": "^0.13.0",
+    "asar": "^2.0.3",
     "boiler-room-custodian": "^0.6.2",
     "concurrently": "^3.1.0",
     "copy-webpack-plugin": "^4.0.1",
